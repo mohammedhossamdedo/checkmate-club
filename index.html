@@ -45,6 +45,14 @@
             --sq-dark: #B58863;
             --board-frame: #4A2511;
         }
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+        html, body {
+            max-width: 100vw;
+            overflow-x: hidden;
+            min-height: 100dvh;
+        }
         body {
             font-family: 'Inter', 'Cairo', sans-serif;
             background-color: #FAF7F2;
@@ -60,16 +68,20 @@
         }
         .chess-board-frame {
             background: var(--board-frame);
-            padding: 12px;
+            padding: clamp(6px, 2vw, 12px);
             border-radius: 16px;
             border: 3px solid #C59B27;
             box-shadow: 0 14px 30px rgba(44, 22, 8, 0.22);
             transition: background 0.25s ease;
+            width: min(88vw, 390px);
+            margin-left: auto;
+            margin-right: auto;
         }
         .board-grid {
             display: grid;
             grid-template-columns: repeat(8, minmax(0, 1fr));
             aspect-ratio: 1 / 1;
+            width: 100%;
             border: 2px solid #2C1608;
         }
         .sq-light {
@@ -93,6 +105,7 @@
             filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.28));
             line-height: 1;
             user-select: none;
+            font-size: clamp(1.25rem, 5.2vw, 1.85rem);
         }
         .piece-white {
             color: #FFFFFF;
@@ -170,66 +183,61 @@
         </div>
 
         <!-- Auth Center Container -->
-        <div class="flex-grow flex items-center justify-center p-4 sm:p-8">
-            <div class="max-w-4xl w-full bg-white border-2 border-chess-gold rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12">
+        <div class="flex-grow flex items-center justify-center p-3 sm:p-6 md:p-8">
+            <div class="max-w-4xl w-full bg-white border-2 border-chess-gold rounded-2xl sm:rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12">
                 <!-- Left 5 Cols: Classic Chessboard Decorative Welcome Panel -->
-                <div class="lg:col-span-5 wood-banner text-white p-6 sm:p-8 flex flex-col justify-between relative overflow-hidden">
+                <div class="lg:col-span-5 wood-banner text-white p-5 sm:p-8 flex flex-col justify-between relative overflow-hidden">
                     <div class="space-y-4 relative z-10">
                         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-chess-gold text-white text-xs font-black uppercase tracking-wider shadow">
                             <i class="fa-solid fa-chess-knight"></i> Checkmate Club
                         </div>
-                        <h1 class="text-2xl sm:text-3xl font-black leading-tight" data-i18n="auth_welcome_title">
+                        <h1 class="text-xl sm:text-3xl font-black leading-tight" data-i18n="auth_welcome_title">
                             Welcome to Brilliant Chess
                         </h1>
                         <p class="text-xs sm:text-sm text-chess-light leading-relaxed" data-i18n="auth_welcome_desc">
-                            Official platform for Checkmate Club (STEM Suez). Sign in to access the Live Chess.com & Lichess.org Rating Sync, Challonge Tournaments, 12 Famous Openings, 7-Module Academy, Achievements, and Digital QR IDs.
+                            Official platform for Checkmate Club (STEM Suez). Sign in with your club credentials or create a new member account to access Live Chess.com & Lichess.org Rating Sync, Challonge Tournaments, 12 Famous Openings, 7-Module Academy, Achievements, and Digital QR IDs.
                         </p>
                     </div>
 
-                    <!-- Quick Lead Admin Sign-In Card for Mohammed Hossam -->
-                    <div class="mt-6 bg-chess-espresso/90 border-2 border-chess-gold rounded-2xl p-4 space-y-2.5 relative z-10">
+                    <!-- Club Security & Features Highlights (No Auto-Login Shortcuts) -->
+                    <div class="mt-6 bg-chess-espresso/90 border-2 border-chess-gold/80 rounded-2xl p-4 space-y-2.5 relative z-10">
                         <div class="flex items-center justify-between">
-                            <span class="text-[11px] font-black uppercase text-chess-gold" data-i18n="auth_quick_admin_lbl">
-                                <i class="fa-solid fa-crown mr-1"></i> Lead Admin Account Ready
+                            <span class="text-[11px] font-black uppercase text-chess-gold">
+                                <i class="fa-solid fa-user-lock mr-1"></i> Mandatory Club Authentication
                             </span>
-                            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">Verified</span>
+                            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 text-[10px] font-bold">Protected</span>
                         </div>
-                        <div class="text-xs text-chess-light">
-                            <strong class="text-white block">Mohammed Hossam (dedo_stark)</strong>
-                            <span class="font-mono text-[11px] text-chess-light/80">mohammed.hossam.dedo@gmail.com</span>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2 pt-1">
-                            <button type="button" onclick="quickLoginLeadAdmin()" class="col-span-2 py-2.5 px-3 rounded-xl bg-chess-gold hover:bg-amber-500 text-white font-black text-xs shadow transition flex items-center justify-center gap-1.5">
-                                <i class="fa-solid fa-bolt"></i>
-                                <span data-i18n="btn_quick_dedo">1-Click Sign In as Mohammed Hossam (dedo_stark)</span>
-                            </button>
-                        </div>
+                        <ul class="text-xs text-chess-light space-y-1.5">
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-chess-gold"></i> <span>Sign in with your registered Username or Email</span></li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-chess-gold"></i> <span>New student? Switch to <strong>Join Checkmate Club</strong></span></li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-chess-gold"></i> <span>Enable <strong>Remember Me</strong> to stay signed in on your device</span></li>
+                        </ul>
                     </div>
 
-                    <div class="pt-4 border-t border-white/15 text-[11px] text-chess-light/80 flex items-center justify-between relative z-10">
+                    <div class="pt-4 mt-4 border-t border-white/15 text-[11px] text-chess-light/80 flex items-center justify-between relative z-10">
                         <span><i class="fa-solid fa-lock text-chess-gold mr-1"></i> SQLi & XSS Protected</span>
                         <span>STEM Suez</span>
                     </div>
                 </div>
 
                 <!-- Right 7 Cols: Sign In & Register Forms -->
-                <div class="lg:col-span-7 p-6 sm:p-8 bg-white space-y-5">
+                <div class="lg:col-span-7 p-5 sm:p-8 bg-white space-y-5">
                     <!-- Mode Switcher Tabs -->
                     <div class="grid grid-cols-2 gap-2 bg-chess-cream p-1.5 rounded-2xl border border-chess-border">
-                        <button type="button" onclick="switchAuthMode('signin')" id="auth-tab-signin" class="py-2.5 rounded-xl text-xs font-black bg-chess-walnut text-white shadow transition flex items-center justify-center gap-1.5">
+                        <button type="button" onclick="switchAuthMode('signin')" id="auth-tab-signin" class="py-2.5 px-2 rounded-xl text-xs font-black bg-chess-walnut text-white shadow transition flex items-center justify-center gap-1.5">
                             <i class="fa-solid fa-right-to-bracket text-chess-gold"></i>
                             <span data-i18n="auth_tab_signin_txt">Sign In (تسجيل الدخول)</span>
                         </button>
-                        <button type="button" onclick="switchAuthMode('register')" id="auth-tab-register" class="py-2.5 rounded-xl text-xs font-bold text-chess-espresso hover:bg-chess-light transition flex items-center justify-center gap-1.5">
+                        <button type="button" onclick="switchAuthMode('register')" id="auth-tab-register" class="py-2.5 px-2 rounded-xl text-xs font-bold text-chess-espresso hover:bg-chess-light transition flex items-center justify-center gap-1.5">
                             <i class="fa-solid fa-user-plus"></i>
-                            <span data-i18n="auth_tab_register_txt">Join Checkmate Club (حساب جديد)</span>
+                            <span data-i18n="auth_tab_register_txt">Join Club (حساب جديد)</span>
                         </button>
                     </div>
 
                     <!-- Security Alert Box inside Auth -->
                     <div id="auth-feedback-box" class="hidden p-3 rounded-xl text-xs font-bold border"></div>
 
-                    <!-- SIGN IN FORM -->
+                    <!-- SIGN IN FORM (CLEAN, MANUAL CREDENTIAL ENTRY FOR ALL USERS) -->
                     <form id="form-auth-signin" onsubmit="handleSignInSubmit(event)" class="space-y-4 text-xs">
                         <div>
                             <label class="font-extrabold text-chess-espresso block mb-1.5" data-i18n="lbl_login_id">
@@ -237,7 +245,7 @@
                             </label>
                             <div class="relative">
                                 <i class="fa-solid fa-user absolute left-3.5 top-3 text-chess-mahogany"></i>
-                                <input type="text" id="login-identifier" required value="mohammed.hossam.dedo@gmail.com" placeholder="mohammed.hossam.dedo@gmail.com or dedo_stark" class="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-chess-bg border-2 border-chess-border text-chess-espresso font-semibold focus:outline-none focus:border-chess-walnut">
+                                <input type="text" id="login-identifier" required value="" autocomplete="username" placeholder="Enter your username or email" class="w-full pl-9 pr-3.5 py-2.5 rounded-xl bg-chess-bg border-2 border-chess-border text-chess-espresso font-semibold focus:outline-none focus:border-chess-walnut">
                             </div>
                         </div>
 
@@ -247,7 +255,7 @@
                             </label>
                             <div class="relative">
                                 <i class="fa-solid fa-key absolute left-3.5 top-3 text-chess-mahogany"></i>
-                                <input type="password" id="login-password" required value="STEM#Dedo1035" placeholder="Enter your club password" class="w-full pl-9 pr-10 py-2.5 rounded-xl bg-chess-bg border-2 border-chess-border text-chess-espresso font-semibold focus:outline-none focus:border-chess-walnut">
+                                <input type="password" id="login-password" required value="" autocomplete="current-password" placeholder="Enter your password" class="w-full pl-9 pr-10 py-2.5 rounded-xl bg-chess-bg border-2 border-chess-border text-chess-espresso font-semibold focus:outline-none focus:border-chess-walnut">
                                 <button type="button" onclick="togglePasswordVisibility('login-password')" class="absolute right-3 top-2.5 text-chess-mahogany hover:text-chess-espresso">
                                     <i class="fa-solid fa-eye"></i>
                                 </button>
@@ -255,11 +263,11 @@
                         </div>
 
                         <!-- Remember Me (حفظ تسجيل الدخول) Checkbox -->
-                        <div class="flex items-center justify-between bg-chess-cream px-3.5 py-2.5 rounded-xl border border-chess-border">
+                        <div class="flex flex-wrap items-center justify-between gap-2 bg-chess-cream px-3.5 py-2.5 rounded-xl border border-chess-border">
                             <label class="flex items-center gap-2.5 cursor-pointer select-none">
                                 <input type="checkbox" id="login-remember-me" checked class="w-4 h-4 accent-chess-walnut rounded cursor-pointer">
                                 <span class="font-extrabold text-chess-espresso" data-i18n="lbl_remember_me">
-                                    Remember Me — Save Sign-In (حفظ تسجيل الدخول على هذا الجهاز)
+                                    Remember Me — Save Sign-In (حفظ تسجيل الدخول)
                                 </span>
                             </label>
                             <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded bg-chess-light text-chess-walnut border border-chess-border">Auto-Restore</span>
@@ -270,22 +278,11 @@
                             <span data-i18n="btn_signin_submit">Sign In to Brilliant Chess</span>
                         </button>
 
-                        <!-- Pre-configured Official Accounts Helper -->
-                        <div class="pt-3 border-t border-chess-border space-y-2">
-                            <span class="text-[11px] font-bold text-chess-mahogany block" data-i18n="lbl_quick_fill_accounts">
-                                Quick-Fill Official Checkmate Club Accounts:
-                            </span>
-                            <div class="flex flex-wrap gap-1.5">
-                                <button type="button" onclick="fillLoginCredentials('mohammed.hossam.dedo@gmail.com', 'STEM#Dedo1035')" class="px-2.5 py-1.5 rounded-lg bg-chess-light hover:bg-chess-walnut hover:text-white text-chess-espresso font-extrabold text-[11px] border border-chess-border transition">
-                                    👑 Mohammed Hossam (dedo_stark)
-                                </button>
-                                <button type="button" onclick="fillLoginCredentials('mohamed_nasser', 'STEM#Nasser2026')" class="px-2.5 py-1.5 rounded-lg bg-chess-bg hover:bg-chess-walnut hover:text-white text-chess-espresso font-bold text-[11px] border border-chess-border transition">
-                                    🛡️ Mohamed Nasser
-                                </button>
-                                <button type="button" onclick="fillLoginCredentials('ahmed_hassan', 'STEM#Hassan2026')" class="px-2.5 py-1.5 rounded-lg bg-chess-bg hover:bg-chess-walnut hover:text-white text-chess-espresso font-bold text-[11px] border border-chess-border transition">
-                                    🛡️ Ahmed Hassan
-                                </button>
-                            </div>
+                        <div class="pt-3 border-t border-chess-border flex items-center justify-between text-[11px] text-chess-mahogany">
+                            <span>Don't have an account yet?</span>
+                            <button type="button" onclick="switchAuthMode('register')" class="font-black text-chess-walnut underline hover:text-chess-espresso">
+                                Create a New Member Account &rarr;
+                            </button>
                         </div>
                     </form>
 
@@ -440,7 +437,7 @@
                 <!-- Signed-In User Pill -->
                 <div class="hidden md:flex items-center gap-2 bg-chess-espresso/85 border border-chess-gold/60 px-2.5 py-1 rounded-xl text-xs">
                     <i class="fa-solid fa-user-check text-chess-gold"></i>
-                    <span id="header-active-user" class="font-extrabold text-white">dedo_stark</span>
+                    <span id="header-active-user" class="font-extrabold text-white">Member</span>
                     <button onclick="signOutUser()" class="ml-1 px-2 py-0.5 rounded bg-red-800/80 hover:bg-red-700 text-white text-[10px] font-black transition" title="Sign Out / تسجيل الخروج">
                         <i class="fa-solid fa-power-off"></i> <span data-i18n="btn_signout">Sign Out</span>
                     </button>
@@ -451,7 +448,7 @@
                     <span id="header-streak-count" class="font-mono">1d</span>
                 </button>
 
-                <button onclick="toggleLanguage()" class="px-3 py-1.5 rounded-xl bg-chess-light text-chess-espresso border border-chess-gold text-xs font-black hover:bg-white transition flex items-center gap-1.5">
+                <button onclick="toggleLanguage()" class="px-2.5 sm:px-3 py-1.5 rounded-xl bg-chess-light text-chess-espresso border border-chess-gold text-xs font-black hover:bg-white transition flex items-center gap-1.5">
                     <i class="fa-solid fa-language text-sm"></i>
                     <span id="lang-btn-text">عربي</span>
                 </button>
@@ -474,33 +471,34 @@
             <button onclick="switchTab('books'); toggleMobileNav();" class="p-2.5 rounded-lg bg-chess-walnut/60 text-chess-light text-left flex items-center gap-2"><i class="fa-solid fa-book"></i> <span data-i18n="nav_books">Books</span></button>
             <button onclick="switchTab('members'); toggleMobileNav();" class="p-2.5 rounded-lg bg-chess-walnut/60 text-chess-light text-left flex items-center gap-2"><i class="fa-solid fa-id-card"></i> <span data-i18n="nav_members">Team & QR</span></button>
             <button onclick="switchTab('contact'); toggleMobileNav();" class="p-2.5 rounded-lg bg-chess-walnut/60 text-chess-light text-left flex items-center gap-2"><i class="fa-solid fa-envelope"></i> <span data-i18n="nav_contact">Contact</span></button>
+            <button onclick="signOutUser(); toggleMobileNav();" class="col-span-2 sm:col-span-3 p-2.5 rounded-lg bg-red-900/80 text-white text-center flex items-center justify-center gap-2"><i class="fa-solid fa-power-off"></i> <span>Sign Out (تسجيل الخروج)</span></button>
         </div>
     </header>
 
     <!-- Global Board Theme Switcher Bar (Appears cleanly below header so user can customize board look anytime) -->
-    <div class="bg-chess-cream border-b border-chess-border px-4 py-2">
-        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2 text-xs">
-            <div class="flex items-center gap-2 font-extrabold text-chess-walnut">
+    <div class="bg-chess-cream border-b border-chess-border px-3 sm:px-4 py-2">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+            <div class="flex items-center gap-2 font-extrabold text-chess-walnut shrink-0">
                 <i class="fa-solid fa-palette text-chess-wood"></i>
                 <span data-i18n="theme_bar_label">Interactive Chessboard Theme:</span>
             </div>
-            <div class="flex flex-wrap items-center gap-1.5" id="global-theme-buttons">
-                <button onclick="setBoardTheme('classic')" id="theme-btn-classic" class="px-2.5 py-1 rounded-lg font-extrabold bg-chess-walnut text-chess-gold border border-chess-gold flex items-center gap-1.5 text-[11px]">
+            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 w-full sm:w-auto" id="global-theme-buttons">
+                <button onclick="setBoardTheme('classic')" id="theme-btn-classic" class="shrink-0 px-2.5 py-1 rounded-lg font-extrabold bg-chess-walnut text-chess-gold border border-chess-gold flex items-center gap-1.5 text-[11px]">
                     <span class="w-3 h-3 rounded-sm inline-block border border-white/40" style="background: linear-gradient(135deg, #F0D9B5 50%, #B58863 50%);"></span> Classic Wood
                 </button>
-                <button onclick="setBoardTheme('green')" id="theme-btn-green" class="px-2.5 py-1 rounded-lg font-bold bg-white text-chess-espresso border border-chess-border hover:bg-chess-light flex items-center gap-1.5 text-[11px]">
+                <button onclick="setBoardTheme('green')" id="theme-btn-green" class="shrink-0 px-2.5 py-1 rounded-lg font-bold bg-white text-chess-espresso border border-chess-border hover:bg-chess-light flex items-center gap-1.5 text-[11px]">
                     <span class="w-3 h-3 rounded-sm inline-block border border-black/20" style="background: linear-gradient(135deg, #EEEED2 50%, #769656 50%);"></span> Tournament Green
                 </button>
-                <button onclick="setBoardTheme('blue')" id="theme-btn-blue" class="px-2.5 py-1 rounded-lg font-bold bg-white text-chess-espresso border border-chess-border hover:bg-chess-light flex items-center gap-1.5 text-[11px]">
+                <button onclick="setBoardTheme('blue')" id="theme-btn-blue" class="shrink-0 px-2.5 py-1 rounded-lg font-bold bg-white text-chess-espresso border border-chess-border hover:bg-chess-light flex items-center gap-1.5 text-[11px]">
                     <span class="w-3 h-3 rounded-sm inline-block border border-black/20" style="background: linear-gradient(135deg, #DEE3E6 50%, #4B7399 50%);"></span> Icy Sea Blue
                 </button>
-                <button onclick="setBoardTheme('marble')" id="theme-btn-marble" class="px-2.5 py-1 rounded-lg font-bold bg-white text-chess-espresso border border-chess-border hover:bg-chess-light flex items-center gap-1.5 text-[11px]">
+                <button onclick="setBoardTheme('marble')" id="theme-btn-marble" class="shrink-0 px-2.5 py-1 rounded-lg font-bold bg-white text-chess-espresso border border-chess-border hover:bg-chess-light flex items-center gap-1.5 text-[11px]">
                     <span class="w-3 h-3 rounded-sm inline-block border border-black/20" style="background: linear-gradient(135deg, #F5F5F0 50%, #8C7A6B 50%);"></span> Royal Marble
                 </button>
-                <button onclick="setBoardTheme('rosewood')" id="theme-btn-rosewood" class="px-2.5 py-1 rounded-lg font-bold bg-white text-chess-espresso border border-chess-border hover:bg-chess-light flex items-center gap-1.5 text-[11px]">
+                <button onclick="setBoardTheme('rosewood')" id="theme-btn-rosewood" class="shrink-0 px-2.5 py-1 rounded-lg font-bold bg-white text-chess-espresso border border-chess-border hover:bg-chess-light flex items-center gap-1.5 text-[11px]">
                     <span class="w-3 h-3 rounded-sm inline-block border border-black/20" style="background: linear-gradient(135deg, #F7E7CE 50%, #803122 50%);"></span> Rosewood & Ivory
                 </button>
-                <button onclick="setBoardTheme('purple')" id="theme-btn-purple" class="px-2.5 py-1 rounded-lg font-bold bg-white text-chess-espresso border border-chess-border hover:bg-chess-light flex items-center gap-1.5 text-[11px]">
+                <button onclick="setBoardTheme('purple')" id="theme-btn-purple" class="shrink-0 px-2.5 py-1 rounded-lg font-bold bg-white text-chess-espresso border border-chess-border hover:bg-chess-light flex items-center gap-1.5 text-[11px]">
                     <span class="w-3 h-3 rounded-sm inline-block border border-black/20" style="background: linear-gradient(135deg, #EFE6F7 50%, #7E57C2 50%);"></span> Purple GM
                 </button>
             </div>
@@ -508,29 +506,28 @@
     </div>
 
     <!-- Main Container -->
-    <main class="flex-grow max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 space-y-8">
+    <main class="flex-grow max-w-7xl mx-auto w-full px-3 sm:px-6 lg:px-8 py-5 sm:py-6 pb-20 xl:pb-8 space-y-6 sm:space-y-8 overflow-x-hidden">
 
         <!-- =====================================================================
              TAB 0: HOME HUB (CLEAN LANDING PORTAL TO ENTER ANY SECTION)
              ===================================================================== -->
-        <section id="tab-home" class="tab-section space-y-8">
+        <section id="tab-home" class="tab-section space-y-6 sm:space-y-8">
             <!-- Welcome Hero -->
-            <div class="wood-banner rounded-3xl border-2 border-chess-gold p-6 sm:p-10 text-white shadow-xl relative overflow-hidden">
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div class="wood-banner rounded-2xl sm:rounded-3xl border-2 border-chess-gold p-5 sm:p-10 text-white shadow-xl relative overflow-hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center">
                     <div class="lg:col-span-8 space-y-4">
                         <div class="inline-flex flex-wrap items-center gap-2">
                             <span class="px-3 py-1 rounded-full bg-chess-gold text-white text-xs font-black uppercase tracking-wider">
                                 <i class="fa-solid fa-chess-king mr-1"></i> Checkmate Club — STEM Suez
                             </span>
                             <span id="home-welcome-user-pill" class="px-3 py-1 rounded-full bg-white/15 border border-chess-gold text-chess-gold text-xs font-extrabold">
-                                Welcome, Mohammed Hossam (dedo_stark) — LEAD ADMIN ✓
+                                Welcome to Checkmate Club ✓
                             </span>
                         </div>
-                        <h1 class="text-3xl sm:text-5xl font-black tracking-tight leading-tight" data-i18n="home_hero_title">
+                        <h1 class="text-2xl sm:text-5xl font-black tracking-tight leading-tight" data-i18n="home_hero_title">
                             Brilliant Chess — Official Checkmate Club Platform
                         </h1>
-                        <p class="text-chess-light text-sm sm:text-base max-w-2xl leading-relaxed" data-i18n="home_hero_desc">
-                            Sync your live ratings from Chess.com and Lichess.org (automatically displaying your highest ELO and Peak), compete in Checkmate Club Double Elimination Challonge tournaments, master 12 famous openings & strategic endgames, unlock achievements, and download classic study books.
+                        <p class="text-chess-light text-xs sm:text-base max-w-2xl leading-relaxed" data-i18n="home_hero_desc">
                         </p>
                         <div class="flex flex-wrap gap-3 pt-2">
                             <button onclick="switchTab('leaderboard')" class="px-6 py-3 rounded-xl bg-chess-gold hover:bg-amber-500 text-white font-black text-xs sm:text-sm shadow-lg transition flex items-center gap-2">
@@ -549,17 +546,17 @@
                     </div>
 
                     <!-- Right Quick Status Dashboard -->
-                    <div class="lg:col-span-4 bg-chess-espresso/85 border-2 border-chess-gold/70 rounded-2xl p-5 space-y-3.5 shadow-inner">
+                    <div class="lg:col-span-4 bg-chess-espresso/85 border-2 border-chess-gold/70 rounded-2xl p-4 sm:p-5 space-y-3.5 shadow-inner">
                         <div class="flex items-center justify-between border-b border-white/15 pb-2.5">
                             <span class="text-xs font-black uppercase tracking-wider text-chess-gold" data-i18n="home_status_title">Active Session & Club Status</span>
                             <button onclick="signOutUser()" class="px-2 py-0.5 rounded bg-red-500/20 hover:bg-red-500/40 text-red-200 border border-red-400/30 text-[11px] font-bold transition">
                                 <i class="fa-solid fa-power-off mr-1"></i> Sign Out
                             </button>
                         </div>
-                        <div class="grid grid-cols-2 gap-3 text-xs">
+                        <div class="grid grid-cols-2 gap-2.5 sm:gap-3 text-xs">
                             <div class="p-3 rounded-xl bg-white/10 border border-white/15">
                                 <span class="text-chess-light/75 block text-[11px]">Signed-In Account</span>
-                                <strong id="home-card-username" class="text-white font-black text-sm mt-0.5 block truncate">dedo_stark</strong>
+                                <strong id="home-card-username" class="text-white font-black text-sm mt-0.5 block truncate">Member</strong>
                             </div>
                             <div class="p-3 rounded-xl bg-white/10 border border-white/15">
                                 <span class="text-chess-light/75 block text-[11px]">Login Persistence</span>
@@ -1113,20 +1110,20 @@
                             Famous Chess Openings, Strategic Plans & Clickable Variations
                         </h2>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <input type="text" id="opening-search-input" oninput="renderOpeningsList()" placeholder="Search opening (e.g. Sicilian, Italian, Ruy Lopez...)" class="px-3.5 py-2 rounded-xl bg-chess-bg border border-chess-border text-xs text-chess-espresso focus:outline-none focus:border-chess-walnut w-64">
+                    <div class="flex items-center gap-2 w-full md:w-auto">
+                        <input type="text" id="opening-search-input" oninput="renderOpeningsList()" placeholder="Search opening (e.g. Sicilian, Italian, Ruy Lopez...)" class="px-3.5 py-2 rounded-xl bg-chess-bg border border-chess-border text-xs text-chess-espresso focus:outline-none focus:border-chess-walnut w-full md:w-64">
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                     <!-- Left 4 Cols: List of 12 Famous Openings -->
-                    <div class="lg:col-span-4 space-y-2 max-h-[640px] overflow-y-auto pr-1" id="openings-sidebar-list">
+                    <div class="lg:col-span-4 space-y-2 max-h-[320px] lg:max-h-[640px] overflow-y-auto pr-1" id="openings-sidebar-list">
                         <!-- Populated via JS -->
                     </div>
 
                     <!-- Center 4 Cols: Interactive Wooden Chessboard -->
-                    <div class="lg:col-span-4 flex flex-col items-center">
-                        <div class="w-full max-w-[390px] chess-board-frame">
+                    <div class="lg:col-span-4 flex flex-col items-center w-full">
+                        <div class="chess-board-frame">
                             <div class="flex justify-between items-center text-[11px] font-bold text-chess-light mb-2 px-1">
                                 <span id="opening-board-top-label">Black Side</span>
                                 <span id="opening-move-counter" class="font-mono text-chess-gold">Move 0 / 0</span>
@@ -1237,11 +1234,11 @@
                 <!-- Interactive Academy Lesson Viewer -->
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start pt-2">
                     <!-- Left 4 Cols: Lessons in Selected Category -->
-                    <div class="lg:col-span-4 space-y-2 max-h-[560px] overflow-y-auto pr-1" id="academy-lessons-list"></div>
+                    <div class="lg:col-span-4 space-y-2 max-h-[300px] lg:max-h-[560px] overflow-y-auto pr-1" id="academy-lessons-list"></div>
 
                     <!-- Center 4 Cols: Academy Interactive Board -->
-                    <div class="lg:col-span-4 flex flex-col items-center">
-                        <div class="w-full max-w-[390px] chess-board-frame">
+                    <div class="lg:col-span-4 flex flex-col items-center w-full">
+                        <div class="chess-board-frame">
                             <div class="flex justify-between items-center text-[11px] font-bold text-chess-light mb-2 px-1">
                                 <span>Interactive Demonstration Board</span>
                                 <span id="acad-step-indicator" class="font-mono text-chess-gold">Step 0 / 0</span>
@@ -1282,27 +1279,27 @@
         <section id="tab-puzzles" class="tab-section hidden space-y-6">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                 <!-- Left 5 Cols: Interactive Playable Puzzle & Sandbox Board -->
-                <div class="lg:col-span-5 bg-white border-2 border-chess-border rounded-2xl p-5 shadow-md flex flex-col items-center">
-                    <div class="w-full flex items-center justify-between mb-3">
+                <div class="lg:col-span-5 bg-white border-2 border-chess-border rounded-2xl p-4 sm:p-5 shadow-md flex flex-col items-center w-full">
+                    <div class="w-full flex items-center justify-between mb-3 gap-2">
                         <div>
                             <span id="puzzle-theme-badge" class="px-2.5 py-0.5 rounded bg-chess-walnut text-chess-gold text-xs font-bold uppercase">Forced Mate</span>
-                            <h3 id="puzzle-title" class="text-lg font-black text-chess-espresso mt-0.5">Puzzle #1</h3>
+                            <h3 id="puzzle-title" class="text-base sm:text-lg font-black text-chess-espresso mt-0.5">Puzzle #1</h3>
                         </div>
-                        <div class="px-3 py-1.5 rounded-xl bg-chess-light border border-chess-gold text-chess-espresso text-xs font-black flex items-center gap-1.5">
+                        <div class="px-3 py-1.5 rounded-xl bg-chess-light border border-chess-gold text-chess-espresso text-xs font-black flex items-center gap-1.5 shrink-0">
                             <i class="fa-solid fa-fire text-amber-600"></i>
-                            <span>Streak: <strong id="puzzle-streak-num">1</strong> Days</span>
+                            <span>Streak: <strong id="puzzle-streak-num">1</strong>d</span>
                         </div>
                     </div>
 
-                    <div class="w-full max-w-[400px] chess-board-frame">
+                    <div class="chess-board-frame">
                         <div id="puzzle-board-grid" class="board-grid rounded-lg overflow-hidden"></div>
                     </div>
 
-                    <div id="puzzle-status-banner" class="w-full max-w-[400px] mt-3 p-3 rounded-xl bg-chess-light/70 border border-chess-border text-center text-xs font-extrabold text-chess-espresso">
+                    <div id="puzzle-status-banner" class="w-full max-w-[390px] mt-3 p-3 rounded-xl bg-chess-light/70 border border-chess-border text-center text-xs font-extrabold text-chess-espresso">
                         Click a piece and then click its target square to play the winning move!
                     </div>
 
-                    <div class="w-full max-w-[400px] grid grid-cols-3 gap-2 mt-3">
+                    <div class="w-full max-w-[390px] grid grid-cols-3 gap-2 mt-3">
                         <button onclick="showPuzzleHint()" class="py-2.5 rounded-xl bg-chess-bg hover:bg-chess-light text-chess-espresso border border-chess-border font-bold text-xs">
                             <i class="fa-solid fa-lightbulb text-amber-600 mr-1"></i> Hint
                         </button>
@@ -1630,32 +1627,32 @@
                             <span class="font-black text-chess-espresso uppercase">Test SQL Injection Defense Live:</span>
                             <button onclick="fillSampleSQLi()" class="text-[11px] font-bold text-chess-walnut underline">Insert Sample Attack (' OR 1=1 --)</button>
                         </div>
-                        <div class="flex gap-2">
-                            <input type="text" id="waf-test-input" placeholder="Try typing: admin' OR '1'='1'; DROP TABLE users; --" class="flex-grow px-3 py-2 rounded-lg bg-white border border-chess-border font-mono text-xs text-chess-espresso">
-                            <button onclick="runWAFSandboxTest()" class="px-4 py-2 rounded-lg bg-chess-walnut text-white font-black text-xs shrink-0">
-                                Test Shield
-                            </button>
-                        </div>
-                        <div id="waf-test-result" class="p-2.5 rounded-lg bg-white border border-chess-border font-mono text-[11px] text-chess-espresso">
-                            Status: Ready. All inputs across the website are actively monitored.
-                        </div>
-                    </div>
-
-                    <!-- Security Event Log -->
-                    <div class="space-y-1.5">
-                        <span class="text-[11px] font-black uppercase text-chess-mahogany block">Recent Security Audit Log:</span>
-                        <div id="waf-audit-log" class="max-h-36 overflow-y-auto bg-chess-espresso text-chess-light font-mono text-[11px] p-3 rounded-xl space-y-1">
-                            <div>[SYSTEM] BondkSecurityWAF initialized — Parameterized Store & SQLi/XSS Filters ACTIVE.</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-    </main>
+    <!-- Sticky Mobile Bottom Quick-Navigation Bar (Fits all mobile screens cleanly) -->
+    <nav class="xl:hidden fixed bottom-0 inset-x-0 z-40 wood-header border-t-2 border-chess-gold px-2 py-1.5 grid grid-cols-5 gap-1 text-[10px] font-bold text-chess-light shadow-2xl">
+        <button onclick="switchTab('home')" class="flex flex-col items-center justify-center py-1 rounded-lg hover:text-chess-gold">
+            <i class="fa-solid fa-house text-sm mb-0.5"></i>
+            <span>Home</span>
+        </button>
+        <button onclick="switchTab('leaderboard')" class="flex flex-col items-center justify-center py-1 rounded-lg hover:text-chess-gold">
+            <i class="fa-solid fa-ranking-star text-sm mb-0.5"></i>
+            <span>Rankings</span>
+        </button>
+        <button onclick="switchTab('tournaments')" class="flex flex-col items-center justify-center py-1 rounded-lg hover:text-chess-gold">
+            <i class="fa-solid fa-trophy text-sm mb-0.5"></i>
+            <span>Tourney</span>
+        </button>
+        <button onclick="switchTab('openings')" class="flex flex-col items-center justify-center py-1 rounded-lg hover:text-chess-gold">
+            <i class="fa-solid fa-chess-board text-sm mb-0.5"></i>
+            <span>Openings</span>
+        </button>
+        <button onclick="switchTab('puzzles')" class="flex flex-col items-center justify-center py-1 rounded-lg hover:text-chess-gold">
+            <i class="fa-solid fa-puzzle-piece text-sm mb-0.5"></i>
+            <span>Puzzles</span>
+        </button>
+    </nav>
 
     <!-- Footer (Clean & With Official Contact Email) -->
-    <footer class="wood-header text-chess-light mt-12 py-6 border-t-4 border-chess-gold">
+    <footer class="wood-header text-chess-light mt-12 py-6 pb-20 xl:pb-6 border-t-4 border-chess-gold">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
             <div class="flex flex-wrap items-center gap-2.5">
                 <i class="fa-solid fa-chess-knight text-chess-gold text-lg"></i>
@@ -1665,7 +1662,7 @@
                     <i class="fa-solid fa-envelope mr-1"></i> mohammed.hossam.dedo@gmail.com
                 </button>
             </div>
-            <div class="flex items-center gap-4">
+            <div class="flex flex-wrap items-center justify-center gap-4">
                 <button onclick="switchTab('home')" class="hover:text-chess-gold font-bold">Home</button>
                 <a href="https://challonge.com/stemchess" target="_blank" class="hover:text-chess-gold">challonge.com/stemchess</a>
                 <a href="https://lichess.org" target="_blank" class="hover:text-chess-gold">Lichess.org</a>
@@ -1892,19 +1889,6 @@
             el.type = el.type === 'password' ? 'text' : 'password';
         }
 
-        function fillLoginCredentials(identifier, password) {
-            switchAuthMode('signin');
-            document.getElementById('login-identifier').value = identifier;
-            document.getElementById('login-password').value = password;
-            showToast(`Filled credentials for ${identifier}`);
-        }
-
-        function quickLoginLeadAdmin() {
-            fillLoginCredentials('mohammed.hossam.dedo@gmail.com', 'STEM#Dedo1035');
-            document.getElementById('login-remember-me').checked = true;
-            authenticateAndUnlockPortal(clubAccounts[0], true);
-        }
-
         function showAuthFeedback(msg, isError = true) {
             const fb = document.getElementById('auth-feedback-box');
             if (!fb) return;
@@ -1930,21 +1914,19 @@
             }
 
             const idClean = rawId.trim().toLowerCase();
-            // Match against existing accounts (or auto-recognize mohammed.hossam.dedo@gmail.com / dedo_stark)
-            let matchedAcc = clubAccounts.find(acc =>
+            const matchedAcc = clubAccounts.find(acc =>
                 acc.username.toLowerCase() === idClean ||
                 (acc.email && acc.email.toLowerCase() === idClean)
             );
 
             if (matchedAcc) {
-                // Verify password or allow lead admin quick sign-in
-                if (matchedAcc.password !== rawPass.trim() && matchedAcc.username !== 'dedo_stark') {
-                    showAuthFeedback('❌ Incorrect password for this Checkmate Club account. Use the quick-fill buttons below or enter the correct password.', true);
+                if (matchedAcc.password !== rawPass.trim()) {
+                    showAuthFeedback('❌ Incorrect password for this Checkmate Club account. Please verify your password and try again.', true);
                     return;
                 }
                 authenticateAndUnlockPortal(matchedAcc, rememberMe);
             } else {
-                showAuthFeedback('❌ Account not found in Checkmate Club. Click "Join Checkmate Club" above to register your account first.', true);
+                showAuthFeedback('❌ Account not found in Checkmate Club. Click "Join Club (حساب جديد)" above to register your account first.', true);
             }
         }
 
