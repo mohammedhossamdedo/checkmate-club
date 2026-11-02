@@ -296,6 +296,9 @@
                             <button type="button" onclick="togglePasswordVisibility('regPassword', 'regEyeIcon')"
                                 class="absolute inset-y-0 right-0 px-3 flex items-center text-chess-mahogany hover:text-chess-walnut">
                                 <i id="regEyeIcon" class="fa-solid fa-eye text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
                     <button type="submit" id="registerSubmitBtn" class="w-full py-2.5 rounded-xl bg-chess-walnut hover:bg-chess-espresso text-white font-black text-xs shadow-lg transition">
                         <i class="fa-solid fa-user-check text-chess-gold mr-1"></i> Verify Chess.com & Lichess & Join Club
                     </button>
@@ -3411,29 +3414,38 @@
            15. INITIALIZATION ON WINDOW LOAD
         ============================================================================ */
         window.addEventListener('DOMContentLoaded', () => {
-            const savedTheme = localStorage.getItem('bc_board_theme') || 'classic';
-            setBoardTheme(savedTheme);
-            setPieceStyle(currentPieceStyle);
+            try {
+                const savedTheme = localStorage.getItem('bc_board_theme') || 'classic';
+                setBoardTheme(savedTheme);
+                setPieceStyle(currentPieceStyle);
 
-            const savedBroadcast = localStorage.getItem('bc_broadcast_text');
-            if (savedBroadcast) {
-                document.getElementById('clubBroadcastText').textContent = savedBroadcast;
+                const savedBroadcast = localStorage.getItem('bc_broadcast_text');
+                if (savedBroadcast) {
+                    document.getElementById('clubBroadcastText').textContent = savedBroadcast;
+                }
+
+                if (currentUser && currentUser.name) {
+                    document.getElementById('authGateOverlay').classList.add('hidden');
+                    updateUserHeaderUI();
+                } else {
+                    document.getElementById('authGateOverlay').classList.remove('hidden');
+                }
+
+                navigateTo('home');
+                renderEngineBoard();
+                selectOpeningLine(OPENINGS_DATABASE[0].id);
+                loadPuzzleByIndex(0);
+                renderLeaderboard();
+                renderAchievementsGrid();
+                renderBooksLibrary();
+                renderTeamAdmins();
+                renderSettingsPage();
+                renderTournamentsPage();
+            } catch (err) {
+                console.error('Initialization recovery:', err);
+                localStorage.removeItem('bc_active_user_v5');
+                document.getElementById('authGateOverlay').classList.remove('hidden');
             }
-
-            if (currentUser) {
-                document.getElementById('authGateOverlay').classList.add('hidden');
-                updateUserHeaderUI();
-            }
-
-            renderEngineBoard();
-            selectOpeningLine(OPENINGS_DATABASE[0].id);
-            loadPuzzleByIndex(0);
-            renderLeaderboard();
-            renderAchievementsGrid();
-            renderBooksLibrary();
-            renderTeamAdmins();
-            renderSettingsPage();
-            renderTournamentsPage();
         });
     </script>
 
