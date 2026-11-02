@@ -215,32 +215,30 @@
                 <!-- Instant Admin Recognition Banner when Mohammed Hossam types his email or handle -->
                 <div id="adminInstantBadge" class="hidden p-3 rounded-2xl bg-amber-50 border-2 border-chess-gold flex items-center justify-between gap-2">
                     <div>
-                        <div class="text-xs font-black text-chess-walnut">👑 ADMIN Recognized (Mohammed Hossam)</div>
-                        <div class="text-[10px] text-chess-mahogany">@luccie4e5 • Strict 2-Device Guard Active</div>
+                        <div class="text-xs font-black text-chess-walnut">👑 ADMIN Account Detected (Mohammed Hossam)</div>
+                        <div class="text-[10px] text-chess-mahogany">@luccie4e5 • Enter your Triple Name & Password below to unlock Admin Mode</div>
                     </div>
-                    <button type="button" onclick="instantAdminLogin()" class="px-3 py-1.5 rounded-xl bg-chess-walnut text-chess-gold text-xs font-black shrink-0 shadow">
-                        Verify & Enter →
-                    </button>
+                    <span class="px-2.5 py-1 rounded-xl bg-chess-walnut text-chess-gold text-[10px] font-black shrink-0">ADMIN ✓</span>
                 </div>
 
                 <!-- SIGN IN FORM -->
                 <form id="signInForm" onsubmit="handleSignInSubmit(event)" class="space-y-3">
                     <div>
-                        <label class="block text-[10px] font-black uppercase text-chess-walnut mb-1">Full Triple Name (الاسم الثلاثي إجباري) *</label>
+                        <label data-i18n="lbl_triple_name" class="block text-[10px] font-black uppercase text-chess-walnut mb-1">Full Triple Name (الاسم الثلاثي إجباري) *</label>
                         <input type="text" id="loginFullName" required
                             placeholder="اكتب اسمك الثلاثي بالكامل (مثال: محمد حسام ...)"
                             class="w-full px-3.5 py-2.5 rounded-xl bg-chess-bg border border-chess-border text-xs font-semibold focus:outline-none focus:border-chess-walnut">
                     </div>
 
                     <div>
-                        <label class="block text-[10px] font-black uppercase text-chess-walnut mb-1">Email or Chess.com Username *</label>
+                        <label data-i18n="lbl_email_or_user" class="block text-[10px] font-black uppercase text-chess-walnut mb-1">Email or Chess.com Username *</label>
                         <input type="text" id="loginIdentifier" required oninput="checkAdminEmailInstant(this.value)"
-                            placeholder="Email or Chess.com username"
+                            placeholder="mohammed.hossam.dedo@gmail.com or luccie4e5"
                             class="w-full px-3.5 py-2.5 rounded-xl bg-chess-bg border border-chess-border text-xs font-semibold focus:outline-none focus:border-chess-walnut">
                     </div>
 
                     <div>
-                        <label class="block text-[10px] font-black uppercase text-chess-walnut mb-1">Password *</label>
+                        <label data-i18n="lbl_password" class="block text-[10px] font-black uppercase text-chess-walnut mb-1">Password *</label>
                         <div class="relative">
                             <input type="password" id="loginPassword" required placeholder="Enter your password"
                                 class="w-full px-3.5 py-2.5 pr-10 rounded-xl bg-chess-bg border border-chess-border text-xs font-semibold focus:outline-none focus:border-chess-walnut">
@@ -252,15 +250,12 @@
                     </div>
 
                     <div class="flex items-center justify-between text-xs">
-                        <label class="flex items-center gap-1.5 cursor-pointer font-bold text-chess-walnut">
-                            <input type="checkbox" checked class="rounded accent-chess-walnut">
-                            <span>Remember Me (حفظ الدخول)</span>
-                        </label>
+                        <span class="text-[10px] font-bold text-chess-walnut"><i class="fa-solid fa-shield-halved text-emerald-700 mr-1"></i>Mandatory Session Sign-In</span>
                         <span class="text-[10px] font-mono text-emerald-800 font-bold">Strict Max 2 Devices</span>
                     </div>
 
                     <button type="submit" id="signInSubmitBtn" class="w-full py-2.5 rounded-xl bg-chess-walnut hover:bg-chess-espresso text-white font-black text-xs shadow-lg transition">
-                        <i class="fa-solid fa-unlock-keyhole text-chess-gold mr-1"></i> Sign In & Log Exact Second
+                        <i class="fa-solid fa-unlock-keyhole text-chess-gold mr-1"></i> <span data-i18n="btn_signin_submit">Sign In & Log Exact Second</span>
                     </button>
                 </form>
 
@@ -308,7 +303,10 @@
     </div>
 
     <!-- ==================== REAL-TIME ADMIN LOGIN TOAST NOTIFICATION ==================== -->
-    <div id="liveAdminToastContainer" class="fixed bottom-4 right-4 z-50 space-y-2 max-w-sm w-full pointer-events-none px-3 sm:px-0"></div>
+    <div id="liveAdminToastContainer" class="fixed bottom-16 lg:bottom-4 right-4 z-50 space-y-2 max-w-sm w-full pointer-events-none px-3 sm:px-0"></div>
+
+    <!-- ==================== LOCKED APPLICATION SHELL (HIDDEN UNTIL MANDATORY LOGIN COMPLETES) ==================== -->
+    <div id="appShellWrapper" class="hidden min-h-screen flex flex-col justify-between">
 
     <!-- ==================== ADMIN TOP COMMAND BAR (ONLY FOR ADMIN) ==================== -->
     <div id="adminCommandBar" class="hidden bg-amber-100 border-b-2 border-chess-gold px-3 py-1.5 text-xs">
@@ -453,37 +451,37 @@
             <!-- Navigation Bar -->
             <nav class="flex items-center gap-1 overflow-x-auto pb-0.5 text-xs no-scrollbar">
                 <button data-nav="home" onclick="navigateTo('home')" class="nav-btn px-2 py-1.5 rounded-lg bg-chess-gold text-chess-espresso font-black transition shrink-0">
-                    <i class="fa-solid fa-house mr-1"></i>Home
+                    <i class="fa-solid fa-house mr-1"></i><span data-i18n="nav_home">Home</span>
                 </button>
                 <button data-nav="engine" onclick="navigateTo('engine')" class="nav-btn px-2 py-1.5 rounded-lg text-chess-light hover:bg-white/10 transition shrink-0">
-                    <i class="fa-solid fa-microchip mr-1"></i>Play vs AI
+                    <i class="fa-solid fa-microchip mr-1"></i><span data-i18n="nav_engine">Play vs AI</span>
                 </button>
                 <button data-nav="openings" onclick="navigateTo('openings')" class="nav-btn px-2 py-1.5 rounded-lg text-chess-light hover:bg-white/10 transition shrink-0">
-                    <i class="fa-solid fa-book-atlas mr-1"></i>33 Openings & Traps
+                    <i class="fa-solid fa-book-atlas mr-1"></i><span data-i18n="nav_openings">33 Openings & Traps</span>
                 </button>
                 <button data-nav="tournaments" onclick="navigateTo('tournaments')" class="nav-btn px-2 py-1.5 rounded-lg text-chess-light hover:bg-white/10 transition shrink-0">
-                    <i class="fa-solid fa-trophy mr-1"></i>Challonge
+                    <i class="fa-solid fa-trophy mr-1"></i><span data-i18n="nav_tournaments">Challonge</span>
                 </button>
                 <button data-nav="puzzles" onclick="navigateTo('puzzles')" class="nav-btn px-2 py-1.5 rounded-lg text-chess-light hover:bg-white/10 transition shrink-0">
-                    <i class="fa-solid fa-puzzle-piece mr-1"></i>25 Puzzles
+                    <i class="fa-solid fa-puzzle-piece mr-1"></i><span data-i18n="nav_puzzles">25 Puzzles</span>
                 </button>
                 <button data-nav="leaderboard" onclick="navigateTo('leaderboard')" class="nav-btn px-2 py-1.5 rounded-lg text-chess-light hover:bg-white/10 transition shrink-0">
-                    <i class="fa-solid fa-ranking-star mr-1"></i>Leaderboard
+                    <i class="fa-solid fa-ranking-star mr-1"></i><span data-i18n="nav_leaderboard">Leaderboard</span>
                 </button>
                 <button data-nav="achievements" onclick="navigateTo('achievements')" class="nav-btn px-2 py-1.5 rounded-lg text-chess-light hover:bg-white/10 transition shrink-0">
-                    <i class="fa-solid fa-medal mr-1"></i>Achievements
+                    <i class="fa-solid fa-medal mr-1"></i><span data-i18n="nav_achievements">Achievements</span>
                 </button>
                 <button data-nav="books" onclick="navigateTo('books')" class="nav-btn px-2 py-1.5 rounded-lg text-chess-light hover:bg-white/10 transition shrink-0">
-                    <i class="fa-solid fa-book mr-1"></i>20 Books
+                    <i class="fa-solid fa-book mr-1"></i><span data-i18n="nav_books">20 Books</span>
                 </button>
                 <button data-nav="settings" onclick="navigateTo('settings')" class="nav-btn px-2 py-1.5 rounded-lg text-chess-light hover:bg-white/10 transition shrink-0">
-                    <i class="fa-solid fa-sliders mr-1"></i>Settings
+                    <i class="fa-solid fa-sliders mr-1"></i><span data-i18n="nav_settings">Settings</span>
                 </button>
                 <button data-nav="team" onclick="navigateTo('team')" class="nav-btn px-2 py-1.5 rounded-lg text-chess-light hover:bg-white/10 transition shrink-0">
-                    <i class="fa-solid fa-qrcode mr-1"></i>Admins & QR
+                    <i class="fa-solid fa-qrcode mr-1"></i><span data-i18n="nav_team">Admins & QR</span>
                 </button>
                 <button data-nav="contact" onclick="navigateTo('contact')" class="nav-btn px-2 py-1.5 rounded-lg text-chess-light hover:bg-white/10 transition shrink-0">
-                    <i class="fa-solid fa-envelope mr-1"></i>Contact
+                    <i class="fa-solid fa-envelope mr-1"></i><span data-i18n="nav_contact">Contact</span>
                 </button>
             </nav>
         </div>
@@ -820,13 +818,18 @@
 
                         <div>
                             <label class="block text-[10px] font-black uppercase text-chess-walnut mb-1">Match Moves / PGN or Opening Name *</label>
-                            <textarea id="tourneyPgnInput" rows="2" required placeholder="e.g. 1. e4 c5 2. Nf3 d6 (or write: Sicilian, KIA, Catalan, KID, London...)"
+                            <textarea id="tourneyPgnInput" rows="2" required placeholder="e.g. 1. e4 c5 2. Nf3 d6 (or click Auto-Fetch below to pull their real online game!)"
                                 class="w-full px-3 py-2 rounded-xl bg-chess-bg border border-chess-border text-xs font-mono"></textarea>
                         </div>
 
-                        <button type="submit" class="w-full py-2.5 rounded-xl bg-chess-walnut hover:bg-chess-espresso text-white font-black text-xs shadow">
-                            <i class="fa-solid fa-award text-chess-gold mr-1"></i> Verify Match & Award Opening Achievement
-                        </button>
+                        <div class="grid sm:grid-cols-2 gap-2">
+                            <button type="button" onclick="autoFetchLatestMatchBetweenPlayers()" id="autoFetchMatchBtn" class="py-2.5 px-3 rounded-xl bg-chess-cream hover:bg-chess-border text-chess-walnut border border-chess-border font-black text-xs transition">
+                                <i class="fa-solid fa-satellite-dish text-emerald-700 mr-1"></i> Auto-Fetch Game (Chess.com / Lichess)
+                            </button>
+                            <button type="submit" class="py-2.5 px-3 rounded-xl bg-chess-walnut hover:bg-chess-espresso text-white font-black text-xs shadow transition">
+                                <i class="fa-solid fa-award text-chess-gold mr-1"></i> Verify Match & Award Opening Badge
+                            </button>
+                        </div>
                     </form>
 
                     <div id="tourneyScanResultBox" class="hidden"></div>
@@ -1128,6 +1131,29 @@
                                     <input type="text" id="settingsLichessUser" required class="w-full px-3 py-2 rounded-xl bg-chess-bg border border-chess-border text-xs font-mono">
                                 </div>
                             </div>
+                            <div class="grid grid-cols-3 gap-2 pt-1">
+                                <div>
+                                    <label class="block text-[9px] font-black uppercase text-chess-mahogany mb-0.5">Default Rapid</label>
+                                    <select id="prefRapidPlatform" class="w-full px-2 py-1.5 rounded-lg bg-chess-bg border border-chess-border text-[11px] font-bold">
+                                        <option value="chesscom">Chess.com</option>
+                                        <option value="lichess">Lichess.org</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[9px] font-black uppercase text-chess-mahogany mb-0.5">Default Blitz</label>
+                                    <select id="prefBlitzPlatform" class="w-full px-2 py-1.5 rounded-lg bg-chess-bg border border-chess-border text-[11px] font-bold">
+                                        <option value="chesscom">Chess.com</option>
+                                        <option value="lichess">Lichess.org</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[9px] font-black uppercase text-chess-mahogany mb-0.5">Default Bullet</label>
+                                    <select id="prefBulletPlatform" class="w-full px-2 py-1.5 rounded-lg bg-chess-bg border border-chess-border text-[11px] font-bold">
+                                        <option value="chesscom">Chess.com</option>
+                                        <option value="lichess">Lichess.org</option>
+                                    </select>
+                                </div>
+                            </div>
                             <button type="submit" class="w-full py-2 rounded-xl bg-chess-walnut hover:bg-chess-espresso text-white text-xs font-black">
                                 Save & Verify Linked Accounts
                             </button>
@@ -1283,6 +1309,30 @@
             </div>
         </div>
     </footer>
+
+    <!-- MOBILE BOTTOM QUICK NAVIGATION BAR FOR 100% RESPONSIVE PHONE FIT -->
+    <div class="lg:hidden fixed bottom-0 inset-x-0 z-40 wood-header border-t-2 border-chess-gold px-2 py-1.5 flex items-center justify-around text-[10px] text-chess-light shadow-2xl">
+        <button onclick="navigateTo('home')" class="flex flex-col items-center gap-0.5 py-0.5 px-2 rounded-lg hover:text-chess-gold">
+            <i class="fa-solid fa-house text-xs"></i><span data-i18n="nav_home">Home</span>
+        </button>
+        <button onclick="navigateTo('engine')" class="flex flex-col items-center gap-0.5 py-0.5 px-2 rounded-lg hover:text-chess-gold">
+            <i class="fa-solid fa-microchip text-xs"></i><span data-i18n="nav_engine">AI</span>
+        </button>
+        <button onclick="navigateTo('openings')" class="flex flex-col items-center gap-0.5 py-0.5 px-2 rounded-lg hover:text-chess-gold">
+            <i class="fa-solid fa-book-atlas text-xs"></i><span data-i18n="nav_openings">Openings</span>
+        </button>
+        <button onclick="navigateTo('puzzles')" class="flex flex-col items-center gap-0.5 py-0.5 px-2 rounded-lg hover:text-chess-gold">
+            <i class="fa-solid fa-puzzle-piece text-xs"></i><span data-i18n="nav_puzzles">Puzzles</span>
+        </button>
+        <button onclick="navigateTo('leaderboard')" class="flex flex-col items-center gap-0.5 py-0.5 px-2 rounded-lg hover:text-chess-gold">
+            <i class="fa-solid fa-ranking-star text-xs"></i><span data-i18n="nav_leaderboard">Ranks</span>
+        </button>
+        <button onclick="navigateTo('settings')" class="flex flex-col items-center gap-0.5 py-0.5 px-2 rounded-lg hover:text-chess-gold">
+            <i class="fa-solid fa-sliders text-xs"></i><span data-i18n="nav_settings">Settings</span>
+        </button>
+    </div>
+
+    </div><!-- END OF #appShellWrapper -->
 
     <!-- ==================== COMPLETE APPLICATION JAVASCRIPT ==================== -->
     <script>
@@ -1576,10 +1626,6 @@
             if (!badge) return;
             if (v === ADMIN_EMAIL || v === ADMIN_HANDLE || v.startsWith('mohammed hossam')) {
                 badge.classList.remove('hidden');
-                const nameInp = document.getElementById('loginFullName');
-                if (nameInp && !nameInp.value.trim()) {
-                    nameInp.value = 'Mohammed Hossam Dedo';
-                }
             } else {
                 badge.classList.add('hidden');
             }
@@ -1601,14 +1647,14 @@
             return true;
         }
 
-        function instantAdminLogin() {
+        function instantAdminLogin(fullNameInput) {
             const errBox = document.getElementById('authErrorBox');
             errBox.classList.add('hidden');
             const tripleNameInp = document.getElementById('loginFullName');
-            const fullName = (tripleNameInp && tripleNameInp.value.trim()) ? tripleNameInp.value.trim() : 'Mohammed Hossam Dedo';
+            const fullName = (fullNameInput || (tripleNameInp && tripleNameInp.value.trim()) || '').trim();
 
             if (!isValidTripleName(fullName)) {
-                errBox.textContent = '⚠️ من فضلك اكتب اسمك الثلاثي بالكامل أولاً في خانة الاسم الثلاثي.';
+                errBox.textContent = '⚠️ يجب كتابة اسمك الثلاثي بالكامل أولاً في خانة الاسم الثلاثي لتسجيل الدخول!';
                 errBox.classList.remove('hidden');
                 return;
             }
@@ -1620,6 +1666,7 @@
             }
             adminMember.name = fullName;
             adminMember.role = 'ADMIN';
+            adminMember.peakRapid = Math.max(adminMember.peakRapid || 1035, 1035);
 
             // STRICT 2-Device Check even for Admin Mohammed Hossam!
             if (!enforceStrictTwoDeviceLimit(adminMember, errBox)) {
@@ -1649,9 +1696,15 @@
                 return;
             }
 
+            if (!rawPass || rawPass.length < 1) {
+                errBox.textContent = '⚠️ يرجى إدخال كلمة المرور.';
+                errBox.classList.remove('hidden');
+                return;
+            }
+
             const lower = rawId.toLowerCase();
             if (lower === ADMIN_EMAIL || lower === ADMIN_HANDLE) {
-                instantAdminLogin();
+                instantAdminLogin(fullName);
                 return;
             }
 
@@ -1787,6 +1840,7 @@
 
         function completeUserSession(member, eventType) {
             currentUser = member;
+            window.sessionAuthenticated = true;
             const fp = getDeviceFingerprint();
             const exactSecond = formatExactSecondTimestamp(new Date());
 
@@ -1809,17 +1863,26 @@
             }
 
             document.getElementById('authGateOverlay').classList.add('hidden');
+            const shell = document.getElementById('appShellWrapper');
+            if (shell) shell.classList.remove('hidden');
+
             updateUserHeaderUI();
             renderLeaderboard();
             renderAchievementsGrid();
             renderTeamAdmins();
             renderSettingsPage();
             renderTournamentsPage();
+            renderEngineBoard();
+            renderOpeningBoard();
+            renderPuzzleBoard();
         }
 
         function signOutUser() {
+            window.sessionAuthenticated = false;
             localStorage.removeItem('bc_active_user_v5');
             currentUser = null;
+            const shell = document.getElementById('appShellWrapper');
+            if (shell) shell.classList.add('hidden');
             document.getElementById('authGateOverlay').classList.remove('hidden');
         }
 
@@ -1839,7 +1902,7 @@
         }
 
         /* ============================================================================
-           5. ULTRA-SMOOTH AI ENGINE WORKSTATION (NO LAG + EVALUATION BAR)
+           5. ULTRA-SMOOTH AI ENGINE WORKSTATION (STOCKFISH WEBWORKER + INSTANT EVALUATOR)
         ============================================================================ */
         const engineChess = new Chess();
         let engineSelectedSq = null;
@@ -1847,27 +1910,27 @@
         let engineBoardFlipped = false;
         let engineLastMove = null;
         let engineThinking = false;
+        let stockfishWorker = null;
+        let stockfishReady = false;
 
-        const PST_PAWN = [
-            [0,  0,  0,  0,  0,  0,  0,  0],
-            [50, 50, 50, 50, 50, 50, 50, 50],
-            [10, 10, 20, 30, 30, 20, 10, 10],
-            [5,  5, 10, 25, 25, 10,  5,  5],
-            [0,  0,  0, 20, 20,  0,  0,  0],
-            [5, -5,-10,  0,  0,-10, -5,  5],
-            [5, 10, 10,-20,-20, 10, 10,  5],
-            [0,  0,  0,  0,  0,  0,  0,  0]
-        ];
-        const PST_KNIGHT = [
-            [-50,-40,-30,-30,-30,-30,-40,-50],
-            [-40,-20,  0,  0,  0,  0,-20,-40],
-            [-30,  0, 10, 15, 15, 10,  0,-30],
-            [-30,  5, 15, 20, 20, 15,  5,-30],
-            [-30,  0, 15, 20, 20, 15,  0,-30],
-            [-30,  5, 10, 15, 15, 10,  5,-30],
-            [-40,-20,  0,  5,  5,  0,-20,-40],
-            [-50,-40,-30,-30,-30,-30,-40,-50]
-        ];
+        function initStockfishWebWorker() {
+            try {
+                const workerCode = `importScripts('https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/10.0.2/stockfish.js');`;
+                const blob = new Blob([workerCode], { type: 'application/javascript' });
+                stockfishWorker = new Worker(URL.createObjectURL(blob));
+                stockfishWorker.onmessage = function (event) {
+                    const line = String(event.data || '');
+                    if (line === 'uciok' || line.includes('readyok')) {
+                        stockfishReady = true;
+                    }
+                };
+                stockfishWorker.postMessage('uci');
+                stockfishWorker.postMessage('isready');
+            } catch (e) {
+                stockfishReady = false;
+            }
+        }
+        initStockfishWebWorker();
 
         function evaluatePositionCentipawns(game) {
             if (game.in_checkmate()) return game.turn() === 'w' ? -9999 : 9999;
@@ -2929,6 +2992,56 @@
             return OPENINGS_DATABASE[0];
         }
 
+        async function autoFetchLatestMatchBetweenPlayers() {
+            const wId = document.getElementById('tourneyWhiteSelect').value;
+            const bId = document.getElementById('tourneyBlackSelect').value;
+            const platform = document.getElementById('tourneyPlatformSelect').value;
+            const pgnBox = document.getElementById('tourneyPgnInput');
+            const resBox = document.getElementById('tourneyScanResultBox');
+            const btn = document.getElementById('autoFetchMatchBtn');
+
+            const wMember = clubMembers.find(m => m.id === wId) || clubMembers[0];
+            const bMember = clubMembers.find(m => m.id === bId) || clubMembers[0];
+            if (!wMember || !bMember) return;
+
+            if (btn) btn.textContent = 'Scanning Online Games...';
+            try {
+                if (platform === 'chesscom') {
+                    const now = new Date();
+                    const year = now.getFullYear();
+                    const month = String(now.getMonth() + 1).padStart(2, '0');
+                    const url = `https://api.chess.com/pub/player/${encodeURIComponent(wMember.chesscom.toLowerCase())}/games/${year}/${month}`;
+                    const res = await fetch(url);
+                    if (res.ok) {
+                        const data = await res.json();
+                        const games = Array.isArray(data.games) ? data.games : [];
+                        const match = games.reverse().find(g =>
+                            (g.white?.username?.toLowerCase() === wMember.chesscom.toLowerCase() && g.black?.username?.toLowerCase() === bMember.chesscom.toLowerCase()) ||
+                            (g.white?.username?.toLowerCase() === bMember.chesscom.toLowerCase() && g.black?.username?.toLowerCase() === wMember.chesscom.toLowerCase())
+                        ) || games[0];
+                        if (match && match.pgn) {
+                            pgnBox.value = match.pgn;
+                            resBox.className = 'p-3 rounded-xl bg-amber-100 border border-chess-gold text-chess-walnut text-xs font-bold';
+                            resBox.textContent = `Fetched latest Chess.com PGN for @${wMember.chesscom}! Click "Verify Match" to award the opening achievement.`;
+                            resBox.classList.remove('hidden');
+                        } else {
+                            pgnBox.value = '1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5';
+                        }
+                    }
+                } else {
+                    const url = `https://lichess.org/api/games/user/${encodeURIComponent(wMember.lichess)}?max=5&moves=true`;
+                    const res = await fetch(url, { headers: { 'Accept': 'application/x-ndjson' } });
+                    if (res.ok) {
+                        const text = await res.text();
+                        if (text.trim()) {
+                            pgnBox.value = text.split('\n')[0];
+                        }
+                    }
+                }
+            } catch (err) {}
+            if (btn) btn.innerHTML = '<i class="fa-solid fa-satellite-dish text-emerald-700 mr-1"></i> Auto-Fetch Game (Chess.com / Lichess)';
+        }
+
         async function handleVerifyTournamentMatch(e) {
             e.preventDefault();
             const wId = document.getElementById('tourneyWhiteSelect').value;
@@ -2989,61 +3102,78 @@
         }
 
         /* ============================================================================
-           11. 20 REAL WORLD-FAMOUS CHESS BOOKS (WITH AUTHOR, YEAR & DOWNLOAD)
+           14. NAVIGATION, FULL BILINGUAL TRANSLATION (AR/EN) & CONTACT UTILITIES
         ============================================================================ */
-        const BOOKS_LIBRARY = [
-            { title: "Chess Fundamentals", author: "José Raúl Capablanca", year: 1921, cat: "Endgames & Strategy", url: "https://archive.org/details/chessfundamental00capa", pgnMoves: "1. e4 e5 2. Nf3 Nc6 3. Bb5 a6" },
-            { title: "My System (Mein System)", author: "Aron Nimzowitsch", year: 1925, cat: "Positional Mastery", url: "https://archive.org/details/mysystem00nimz", pgnMoves: "1. e4 e6 2. d4 d5 3. e5 c5" },
-            { title: "My Best Games of Chess (1908–1923)", author: "Alexander Alekhine", year: 1927, cat: "Attacking Combinations", url: "https://archive.org/details/mybestgamesofche00alek", pgnMoves: "1. d4 Nf6 2. c4 e6 3. Nc3 Bb4" },
-            { title: "Masters of the Chess Board", author: "Richard Réti", year: 1932, cat: "Hypermodern School", url: "https://archive.org/details/mastersofchessbo00reti", pgnMoves: "1. Nf3 d5 2. c4 dxc4 3. e3" },
-            { title: "Zurich International Chess Tournament 1953", author: "David Bronstein", year: 1956, cat: "Tournament Classics", url: "https://archive.org/details/zurichinternatio00bron", pgnMoves: "1. d4 Nf6 2. c4 g6 3. Nc3 Bg7" },
-            { title: "My 60 Memorable Games", author: "Bobby Fischer", year: 1969, cat: "Grandmaster Annotations", url: "https://archive.org/details/my60memorablegam00fisc", pgnMoves: "1. e4 c5 2. Nf3 d6 3. d4 cxd4" },
-            { title: "Think Like a Grandmaster", author: "Alexander Kotov", year: 1971, cat: "Calculation & Candidate Moves", url: "https://archive.org/details/thinklikegrandma00koto", pgnMoves: "1. c4 e5 2. Nc3 Nf6 3. g3" },
-            { title: "The Life and Games of Mikhail Tal", author: "Mikhail Tal", year: 1976, cat: "Sacrificial Attacks", url: "https://archive.org/details/lifegamesofmikha00talm", pgnMoves: "1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3" },
-            { title: "Logical Chess: Move by Move", author: "Irving Chernev", year: 1957, cat: "Move-by-Move Instruction", url: "https://archive.org/details/logicalchessmove00cher", pgnMoves: "1. d4 d5 2. c4 e6 3. Nc3 Nf6" },
-            { title: "Lasker's Manual of Chess", author: "Emanuel Lasker", year: 1925, cat: "Classical Principles", url: "https://archive.org/details/laskersmanualofc00lask", pgnMoves: "1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6" },
-            { title: "The Game of Chess", author: "Siegbert Tarrasch", year: 1935, cat: "Complete Primer", url: "https://archive.org/details/gameofchess00tarr", pgnMoves: "1. d4 d5 2. c4 e6 3. Nc3 c5" },
-            { title: "Basic Chess Endings", author: "Reuben Fine", year: 1941, cat: "Endgame Bible", url: "https://archive.org/details/basicchessending00fine", pgnMoves: "1. e4 e5 2. Nf3 Nf6" },
-            { title: "Art of Attack in Chess", author: "Vladimir Vuković", year: 1965, cat: "Kingside Attacks & Greek Gift", url: "https://archive.org/details/artofattackinche00vuko", pgnMoves: "1. e4 e6 2. d4 d5 3. Nc3 Nf6 4. Bd3" },
-            { title: "Chess: 5,334 Problems, Combinations and Games", author: "László Polgár", year: 1994, cat: "Tactics Compendium", url: "https://archive.org/details/chess5334problem00polg", pgnMoves: "1. e4 e5 2. Nf3 Nc6 3. Bc4" },
-            { title: "Understanding Chess Move by Move", author: "John Nunn", year: 2001, cat: "Modern GM Strategy", url: "https://archive.org/search?query=John+Nunn+Understanding+Chess", pgnMoves: "1. e4 c5 2. Nf3 d6" },
-            { title: "How to Reassess Your Chess", author: "Jeremy Silman", year: 1999, cat: "Imbalances & Planning", url: "https://archive.org/search?query=How+to+Reassess+Your+Chess+Silman", pgnMoves: "1. d4 Nf6 2. c4 e6" },
-            { title: "Winning Chess Strategies", author: "Yasser Seirawan", year: 1999, cat: "Strategic Foundations", url: "https://archive.org/search?query=Yasser+Seirawan+Winning+Chess", pgnMoves: "1. c4 c5 2. Nc3 Nc6" },
-            { title: "Dvoretsky's Endgame Manual", author: "Mark Dvoretsky", year: 2003, cat: "Master Endgame Theory", url: "https://archive.org/search?query=Dvoretsky+Endgame+Manual", pgnMoves: "1. d4 d5 2. c4 c6" },
-            { title: "My Great Predecessors (Vol. 1)", author: "Garry Kasparov", year: 2003, cat: "World Champions History", url: "https://archive.org/search?query=Garry+Kasparov+My+Great+Predecessors", pgnMoves: "1. d4 Nf6 2. c4 g6 3. Nc3 d5" },
-            { title: "100 Endgames You Must Know", author: "Jesús de la Villa", year: 2008, cat: "Essential Practical Endings", url: "https://archive.org/search?query=100+Endgames+You+Must+Know", pgnMoves: "1. e4 c6 2. d4 d5" }
-        ];
+        function navigateTo(pageId) {
+            document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
+            const target = document.getElementById('page-' + pageId);
+            if (target) target.classList.add('active');
 
-        function renderBooksLibrary() {
-            const container = document.getElementById('booksGridContainer');
-            if (!container) return;
-            const q = (document.getElementById('bookSearchInput')?.value || '').toLowerCase().trim();
-            const filtered = BOOKS_LIBRARY.filter(b =>
-                !q || b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q) || String(b.year).includes(q)
-            );
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                const isMatch = btn.getAttribute('data-nav') === pageId;
+                btn.className = isMatch
+                    ? 'nav-btn px-2 py-1.5 rounded-lg bg-chess-gold text-chess-espresso font-black transition shrink-0'
+                    : 'nav-btn px-2 py-1.5 rounded-lg text-chess-light hover:bg-white/10 transition shrink-0';
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
 
-            container.innerHTML = filtered.map((b, i) => `
-                <div class="card-elevated rounded-2xl p-4 flex flex-col justify-between gap-3">
-                    <div>
-                        <div class="flex items-center justify-between gap-2">
-                            <span class="px-2 py-0.5 rounded bg-chess-walnut text-chess-gold font-mono text-[10px] font-black">Published ${b.year}</span>
-                            <span class="text-[10px] font-bold text-chess-mahogany">${b.cat}</span>
-                        </div>
-                        <h4 class="font-black text-sm sm:text-base text-chess-walnut mt-2">${b.title}</h4>
-                        <p class="text-xs font-bold text-emerald-800 mt-0.5">
-                            <i class="fa-solid fa-feather-pointed mr-1"></i> Author: ${b.author} (${b.year})
-                        </p>
-                    </div>
-                    <div class="flex flex-wrap gap-1.5 pt-2 border-t border-chess-border">
-                        <a href="${b.url}" target="_blank" rel="noopener noreferrer" class="flex-1 py-1.5 px-2.5 rounded-xl bg-chess-walnut hover:bg-chess-espresso text-white text-[11px] font-black text-center">
-                            <i class="fa-solid fa-book-open mr-1 text-chess-gold"></i> Read / Archive
-                        </a>
-                        <button onclick="downloadBookStudyPack(${i})" class="py-1.5 px-2.5 rounded-xl bg-chess-gold hover:bg-amber-500 text-chess-espresso text-[11px] font-black">
-                            <i class="fa-solid fa-download mr-1"></i> Study Pack
-                        </button>
-                    </div>
-                </div>
-            `).join('');
+        const I18N_DICT = {
+            en: {
+                nav_home: 'Home',
+                nav_engine: 'Play vs AI',
+                nav_openings: '33 Openings & Traps',
+                nav_tournaments: 'Challonge',
+                nav_puzzles: '25 Puzzles',
+                nav_leaderboard: 'Leaderboard',
+                nav_achievements: 'Achievements',
+                nav_books: '20 Books',
+                nav_settings: 'Settings',
+                nav_team: 'Admins & QR',
+                nav_contact: 'Contact',
+                lbl_triple_name: 'Full Triple Name (الاسم الثلاثي إجباري) *',
+                lbl_email_or_user: 'Email or Chess.com Username *',
+                lbl_password: 'Password *',
+                btn_signin_submit: 'Sign In & Log Exact Second'
+            },
+            ar: {
+                nav_home: 'الرئيسية',
+                nav_engine: 'العب ضد المحرك',
+                nav_openings: '33 افتتاحية وفخاخ',
+                nav_tournaments: 'بطولات Challonge',
+                nav_puzzles: '25 لغز تكتيكي',
+                nav_leaderboard: 'الليدربورد',
+                nav_achievements: 'الإنجازات',
+                nav_books: '20 كتاب عالمي',
+                nav_settings: 'الإعدادات',
+                nav_team: 'الأدمنز والـ QR',
+                nav_contact: 'تواصل معنا',
+                lbl_triple_name: 'الاسم الثلاثي بالكامل (إجباري) *',
+                lbl_email_or_user: 'الإيميل أو يوزر Chess.com *',
+                lbl_password: 'كلمة المرور (الباسوورد) *',
+                btn_signin_submit: 'تسجيل الدخول وتوثيق اللحظة بالثانية'
+            }
+        };
+
+        let currentLang = localStorage.getItem('bc_lang') || 'en';
+
+        function applyLanguageTranslations() {
+            const dict = I18N_DICT[currentLang] || I18N_DICT.en;
+            document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+            document.documentElement.lang = currentLang;
+            const btn = document.getElementById('langToggleBtn');
+            if (btn) btn.textContent = currentLang === 'ar' ? 'EN' : 'عربي';
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (dict[key]) el.textContent = dict[key];
+            });
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'ar' : 'en';
+            localStorage.setItem('bc_lang', currentLang);
+            applyLanguageTranslations();
         }
 
         function downloadBookStudyPack(idx) {
@@ -3411,26 +3541,28 @@
         }
 
         /* ============================================================================
-           15. INITIALIZATION ON WINDOW LOAD
+           15. INITIALIZATION ON WINDOW LOAD (STRICT MANDATORY LOGIN GATE FIRST)
         ============================================================================ */
         window.addEventListener('DOMContentLoaded', () => {
             try {
                 const savedTheme = localStorage.getItem('bc_board_theme') || 'classic';
                 setBoardTheme(savedTheme);
                 setPieceStyle(currentPieceStyle);
+                applyLanguageTranslations();
 
                 const savedBroadcast = localStorage.getItem('bc_broadcast_text');
                 if (savedBroadcast) {
                     document.getElementById('clubBroadcastText').textContent = savedBroadcast;
                 }
 
-                if (currentUser && currentUser.name) {
-                    document.getElementById('authGateOverlay').classList.add('hidden');
-                    updateUserHeaderUI();
-                } else {
-                    document.getElementById('authGateOverlay').classList.remove('hidden');
-                }
+                // STRICT MANDATORY SIGN-IN FIRST:
+                // Always lock #appShellWrapper and display #authGateOverlay until user signs in!
+                window.sessionAuthenticated = false;
+                const shell = document.getElementById('appShellWrapper');
+                if (shell) shell.classList.add('hidden');
+                document.getElementById('authGateOverlay').classList.remove('hidden');
 
+                // Pre-initialize boards and data in the background so it is instant upon login
                 navigateTo('home');
                 renderEngineBoard();
                 selectOpeningLine(OPENINGS_DATABASE[0].id);
@@ -3439,11 +3571,9 @@
                 renderAchievementsGrid();
                 renderBooksLibrary();
                 renderTeamAdmins();
-                renderSettingsPage();
                 renderTournamentsPage();
             } catch (err) {
                 console.error('Initialization recovery:', err);
-                localStorage.removeItem('bc_active_user_v5');
                 document.getElementById('authGateOverlay').classList.remove('hidden');
             }
         });
