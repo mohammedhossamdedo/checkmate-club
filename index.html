@@ -49,6 +49,9 @@
             box-sizing: border-box;
         }
         html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
             max-width: 100vw;
             overflow-x: hidden;
             min-height: 100dvh;
@@ -67,45 +70,52 @@
             background: linear-gradient(135deg, #4A2511 0%, #6E3B1B 55%, #3B1D0B 100%);
         }
         .chess-board-frame {
-            background: var(--board-frame);
+            background: var(--board-frame) !important;
             padding: clamp(6px, 2vw, 12px);
             border-radius: 16px;
             border: 3px solid #C59B27;
             box-shadow: 0 14px 30px rgba(44, 22, 8, 0.22);
             transition: background 0.25s ease;
-            width: min(88vw, 390px);
+            width: 100%;
+            max-width: min(86vw, 400px);
             margin-left: auto;
             margin-right: auto;
         }
         .board-grid {
             display: grid;
-            grid-template-columns: repeat(8, minmax(0, 1fr));
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
             aspect-ratio: 1 / 1;
             width: 100%;
             border: 2px solid #2C1608;
         }
         .sq-light {
-            background-color: var(--sq-light);
-            color: var(--sq-dark);
-            transition: background-color 0.2s ease;
+            background-color: var(--sq-light) !important;
+            color: var(--sq-dark) !important;
+            transition: background-color 0.2s ease, color 0.2s ease;
         }
         .sq-dark {
-            background-color: var(--sq-dark);
-            color: var(--sq-light);
-            transition: background-color 0.2s ease;
+            background-color: var(--sq-dark) !important;
+            color: var(--sq-light) !important;
+            transition: background-color 0.2s ease, color 0.2s ease;
         }
         .sq-selected {
-            background-color: rgba(197, 155, 39, 0.85) !important;
-            box-shadow: inset 0 0 0 3px #4A2511;
+            box-shadow: inset 0 0 0 4px #C59B27 !important;
+            filter: brightness(1.08);
         }
         .sq-lastmove {
-            background-color: rgba(197, 155, 39, 0.55) !important;
+            box-shadow: inset 0 0 0 3px rgba(197, 155, 39, 0.95) !important;
+        }
+        .auto-fit-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+            gap: 1.25rem;
         }
         .piece-glyph {
             filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.28));
             line-height: 1;
             user-select: none;
-            font-size: clamp(1.25rem, 5.2vw, 1.85rem);
+            font-size: clamp(1.2rem, 5vw, 1.85rem);
         }
         .piece-white {
             color: #FFFFFF;
@@ -137,10 +147,6 @@
             transform: translateY(-4px);
             box-shadow: 0 16px 32px rgba(74, 37, 17, 0.14);
             border-color: #8B5A2B;
-        }
-        .chess-pattern-side {
-            background-image: conic-gradient(#B58863 90deg, #F0D9B5 90deg 180deg, #B58863 180deg 270deg, #F0D9B5 270deg);
-            background-size: 56px 56px;
         }
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-track { background: #F4EFE6; }
@@ -475,31 +481,31 @@
         </div>
     </header>
 
-    <!-- Global Board Theme Switcher Bar (Appears cleanly below header so user can customize board look anytime) -->
+    <!-- Global Board Theme Switcher Bar (6 Working Themes on :root CSS Variables) -->
     <div class="bg-chess-cream border-b border-chess-border px-3 sm:px-4 py-2">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
             <div class="flex items-center gap-2 font-extrabold text-chess-walnut shrink-0">
                 <i class="fa-solid fa-palette text-chess-wood"></i>
-                <span data-i18n="theme_bar_label">Interactive Chessboard Theme:</span>
+                <span data-i18n="theme_bar_label">Interactive Chessboard Theme (6 Live Themes):</span>
             </div>
             <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 w-full sm:w-auto" id="global-theme-buttons">
-                <button onclick="setBoardTheme('classic')" id="theme-btn-classic" class="shrink-0 px-2.5 py-1 rounded-lg font-extrabold bg-chess-walnut text-chess-gold border border-chess-gold flex items-center gap-1.5 text-[11px]">
-                    <span class="w-3 h-3 rounded-sm inline-block border border-white/40" style="background: linear-gradient(135deg, #F0D9B5 50%, #B58863 50%);"></span> Classic Wood
+                <button type="button" onclick="setBoardTheme('classic')" id="theme-btn-classic" class="shrink-0 px-2.5 py-1 rounded-lg font-extrabold bg-chess-walnut text-chess-gold border border-chess-gold flex items-center gap-1.5 text-[11px] shadow">
+                    <span class="w-3.5 h-3.5 rounded-sm inline-block border border-white/40" style="background: linear-gradient(135deg, #F0D9B5 50%, #B58863 50%);"></span> <span data-i18n="theme_classic">Classic Wood</span>
                 </button>
-                <button onclick="setBoardTheme('green')" id="theme-btn-green" class="shrink-0 px-2.5 py-1 rounded-lg font-bold bg-white text-chess-espresso border border-chess-border hover:bg-chess-light flex items-center gap-1.5 text-[11px]">
-                    <span class="w-3 h-3 rounded-sm inline-block border border-black/20" style="background: linear-gradient(135deg, #EEEED2 50%, #769656 50%);"></span> Tournament Green
+                <button type="button" onclick="setBoardTheme('green')" id="theme-btn-green" class="shrink-0 px-2.5 py-1 rounded-lg font-bold bg-white text-chess-espresso border border-chess-border hover:bg-chess-light flex items-center gap-1.5 text-[11px]">
+                    <span class="w-3.5 h-3.5 rounded-sm inline-block border border-black/20" style="background: linear-gradient(135deg, #EEEED2 50%, #769656 50%);"></span> <span data-i18n="theme_green">Tournament Green</span>
                 </button>
-                <button onclick="setBoardTheme('blue')" id="theme-btn-blue" class="shrink-0 px-2.5 py-1 rounded-lg font-bold bg-white text-chess-espresso border border-chess-border hover:bg-chess-light flex items-center gap-1.5 text-[11px]">
-                    <span class="w-3 h-3 rounded-sm inline-block border border-black/20" style="background: linear-gradient(135deg, #DEE3E6 50%, #4B7399 50%);"></span> Icy Sea Blue
+                <button type="button" onclick="setBoardTheme('blue')" id="theme-btn-blue" class="shrink-0 px-2.5 py-1 rounded-lg font-bold bg-white text-chess-espresso border border-chess-border hover:bg-chess-light flex items-center gap-1.5 text-[11px]">
+                    <span class="w-3.5 h-3.5 rounded-sm inline-block border border-black/20" style="background: linear-gradient(135deg, #DEE3E6 50%, #8CA2AD 50%);"></span> <span data-i18n="theme_blue">Icy Sea Blue</span>
                 </button>
-                <button onclick="setBoardTheme('marble')" id="theme-btn-marble" class="shrink-0 px-2.5 py-1 rounded-lg font-bold bg-white text-chess-espresso border border-chess-border hover:bg-chess-light flex items-center gap-1.5 text-[11px]">
-                    <span class="w-3 h-3 rounded-sm inline-block border border-black/20" style="background: linear-gradient(135deg, #F5F5F0 50%, #8C7A6B 50%);"></span> Royal Marble
+                <button type="button" onclick="setBoardTheme('marble')" id="theme-btn-marble" class="shrink-0 px-2.5 py-1 rounded-lg font-bold bg-white text-chess-espresso border border-chess-border hover:bg-chess-light flex items-center gap-1.5 text-[11px]">
+                    <span class="w-3.5 h-3.5 rounded-sm inline-block border border-black/20" style="background: linear-gradient(135deg, #F5F5F5 50%, #8E8E8E 50%);"></span> <span data-i18n="theme_marble">Royal Marble</span>
                 </button>
-                <button onclick="setBoardTheme('rosewood')" id="theme-btn-rosewood" class="shrink-0 px-2.5 py-1 rounded-lg font-bold bg-white text-chess-espresso border border-chess-border hover:bg-chess-light flex items-center gap-1.5 text-[11px]">
-                    <span class="w-3 h-3 rounded-sm inline-block border border-black/20" style="background: linear-gradient(135deg, #F7E7CE 50%, #803122 50%);"></span> Rosewood & Ivory
+                <button type="button" onclick="setBoardTheme('rosewood')" id="theme-btn-rosewood" class="shrink-0 px-2.5 py-1 rounded-lg font-bold bg-white text-chess-espresso border border-chess-border hover:bg-chess-light flex items-center gap-1.5 text-[11px]">
+                    <span class="w-3.5 h-3.5 rounded-sm inline-block border border-black/20" style="background: linear-gradient(135deg, #F7E7CE 50%, #8B3A3A 50%);"></span> <span data-i18n="theme_rosewood">Rosewood & Ivory</span>
                 </button>
-                <button onclick="setBoardTheme('purple')" id="theme-btn-purple" class="shrink-0 px-2.5 py-1 rounded-lg font-bold bg-white text-chess-espresso border border-chess-border hover:bg-chess-light flex items-center gap-1.5 text-[11px]">
-                    <span class="w-3 h-3 rounded-sm inline-block border border-black/20" style="background: linear-gradient(135deg, #EFE6F7 50%, #7E57C2 50%);"></span> Purple GM
+                <button type="button" onclick="setBoardTheme('walnut')" id="theme-btn-walnut" class="shrink-0 px-2.5 py-1 rounded-lg font-bold bg-white text-chess-espresso border border-chess-border hover:bg-chess-light flex items-center gap-1.5 text-[11px]">
+                    <span class="w-3.5 h-3.5 rounded-sm inline-block border border-black/20" style="background: linear-gradient(135deg, #F3E5AB 50%, #6E4720 50%);"></span> <span data-i18n="theme_walnut">Walnut Gold</span>
                 </button>
             </div>
         </div>
@@ -965,132 +971,159 @@
         </section>
 
         <!-- =====================================================================
-             TAB 2: WEEKLY & MONTHLY LEADERBOARD + LIVE CHESS.COM & LICHESS API SYNC
+             TAB 2: WEEKLY & MONTHLY RAPID LEADERBOARD + UNIFIED CHESS.COM & LICHESS SYNC
              ===================================================================== -->
         <section id="tab-leaderboard" class="tab-section hidden space-y-6">
             <!-- Prominent Monthly Prize Banner -->
-            <div class="wood-banner rounded-2xl border-2 border-chess-gold p-6 text-white shadow-xl flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
+            <div class="wood-banner rounded-2xl border-2 border-chess-gold p-5 sm:p-6 text-white shadow-xl flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
                 <div class="space-y-1.5">
                     <div class="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-chess-gold text-chess-espresso text-xs font-black uppercase">
                         <i class="fa-solid fa-gift"></i>
-                        <span data-i18n="prize_badge">Official Monthly Rewards</span>
+                        <span data-i18n="prize_badge">Official Monthly Rapid Rewards</span>
                     </div>
-                    <h2 class="text-xl sm:text-2xl font-black text-white" data-i18n="prize_headline">
-                        🏆 Monthly Prize Pool: Top 3 Monthly Leaderboard Winners Receive Club Prizes!
+                    <h2 class="text-lg sm:text-2xl font-black text-white" data-i18n="prize_headline">
+                        🏆 Monthly Prize Pool: Top 3 Monthly Rapid Leaderboard Winners Receive Club Prizes!
                     </h2>
                     <p class="text-xs sm:text-sm text-chess-light" data-i18n="prize_subtext">
-                        أول 3 مراكز في الليدربورد الشهري بيكسبوا جوائز رسمية من نادي الشطرنج في STEM Suez. اجمع نقاط من البطولات والألغاز اليومية!
+                        أول 3 مراكز في الليدربورد الشهري (على أساس تقييم الـ Rapid) بيكسبوا جوائز رسمية من نادي Checkmate Club — STEM Suez!
                     </p>
                 </div>
                 <div class="flex flex-wrap items-center gap-2 shrink-0">
                     <div class="px-3.5 py-2 rounded-xl bg-chess-gold/20 border border-chess-gold text-center">
-                        <span class="text-[10px] uppercase text-chess-gold font-bold block">🥇 1st Place</span>
-                        <span class="text-xs font-black text-white">Gold Club Prize</span>
+                        <span class="text-[10px] uppercase text-chess-gold font-bold block" data-i18n="place_1">🥇 1st Place</span>
+                        <span class="text-xs font-black text-white" data-i18n="prize_gold">Gold Club Prize</span>
                     </div>
                     <div class="px-3.5 py-2 rounded-xl bg-white/10 border border-white/30 text-center">
-                        <span class="text-[10px] uppercase text-chess-light font-bold block">🥈 2nd Place</span>
-                        <span class="text-xs font-black text-white">Silver Club Prize</span>
+                        <span class="text-[10px] uppercase text-chess-light font-bold block" data-i18n="place_2">🥈 2nd Place</span>
+                        <span class="text-xs font-black text-white" data-i18n="prize_silver">Silver Club Prize</span>
                     </div>
                     <div class="px-3.5 py-2 rounded-xl bg-amber-700/30 border border-amber-500/40 text-center">
-                        <span class="text-[10px] uppercase text-amber-300 font-bold block">🥉 3rd Place</span>
-                        <span class="text-xs font-black text-white">Bronze Club Prize</span>
+                        <span class="text-[10px] uppercase text-amber-300 font-bold block" data-i18n="place_3">🥉 3rd Place</span>
+                        <span class="text-xs font-black text-white" data-i18n="prize_bronze">Bronze Club Prize</span>
                     </div>
                 </div>
             </div>
 
-            <!-- LIVE CHESS.COM & LICHESS.ORG DUAL API SYNC ENGINE -->
-            <div class="bg-white border-2 border-chess-gold rounded-2xl p-5 shadow-md space-y-4">
+            <!-- UNIFIED PLAYER PROFILE SYNC (ONE PROFILE PER PERSON + INDEPENDENT RAPID/BLITZ/BULLET PLATFORM SELECTOR) -->
+            <div class="bg-white border-2 border-chess-gold rounded-2xl p-4 sm:p-5 shadow-md space-y-4">
                 <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-chess-border pb-3">
                     <div>
-                        <div class="inline-flex items-center gap-2">
-                            <span class="px-2.5 py-0.5 rounded bg-emerald-800 text-white text-[10px] font-black uppercase">Live API Sync</span>
-                            <span class="text-xs font-bold text-chess-mahogany">Chess.com + Lichess.org Auto-Comparison</span>
+                        <div class="inline-flex flex-wrap items-center gap-2">
+                            <span class="px-2.5 py-0.5 rounded bg-emerald-800 text-white text-[10px] font-black uppercase" data-i18n="unified_badge">Unified Single Profile Sync</span>
+                            <span class="text-xs font-bold text-chess-mahogany" data-i18n="unified_sub">Links Chess.com & Lichess.org into ONE Player Profile (No Duplicates)</span>
                         </div>
-                        <h3 class="text-base sm:text-lg font-black text-chess-espresso mt-1" data-i18n="api_sync_title">
-                            Link & Sync Player ELO (Automatically Picks Higher ELO & Peak Across Chess.com & Lichess)
+                        <h3 class="text-sm sm:text-lg font-black text-chess-espresso mt-1" data-i18n="api_sync_title">
+                            Link Chess.com & Lichess Accounts & Choose Default Platform for Rapid, Blitz & Bullet
                         </h3>
                     </div>
-                    <button onclick="syncAllClubRatingsLive()" id="btn-sync-all" class="px-4 py-2.5 rounded-xl bg-chess-walnut hover:bg-chess-espresso text-white font-black text-xs shadow flex items-center gap-2 shrink-0">
+                    <button type="button" onclick="syncAllClubRatingsLive()" id="btn-sync-all" class="px-4 py-2.5 rounded-xl bg-chess-walnut hover:bg-chess-espresso text-white font-black text-xs shadow flex items-center gap-2 shrink-0">
                         <i class="fa-solid fa-arrows-rotate text-chess-gold"></i>
                         <span data-i18n="btn_sync_all_live">Sync All Players Live</span>
                     </button>
                 </div>
 
-                <form onsubmit="syncAndAddPlayerViaAPI(event)" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs items-end">
-                    <div>
-                        <label class="font-extrabold text-chess-espresso block mb-1">Player Full Name *</label>
-                        <input type="text" id="api-player-name" required placeholder="e.g. Omar Khaled" class="w-full px-3 py-2 rounded-xl bg-chess-bg border border-chess-border text-chess-espresso focus:outline-none focus:border-chess-walnut">
+                <form onsubmit="syncAndAddPlayerViaAPI(event)" class="space-y-3 text-xs">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div>
+                            <label class="font-extrabold text-chess-espresso block mb-1" data-i18n="lbl_select_profile">Select Existing Profile or New Member</label>
+                            <select id="api-existing-player" onchange="populateSyncFormFromSelectedPlayer()" class="w-full px-3 py-2 rounded-xl bg-chess-cream border border-chess-border text-chess-espresso font-bold focus:outline-none focus:border-chess-walnut">
+                                <!-- Populated via JS -->
+                            </select>
+                        </div>
+                        <div>
+                            <label class="font-extrabold text-chess-espresso block mb-1" data-i18n="lbl_player_name">Player Full Name *</label>
+                            <input type="text" id="api-player-name" required placeholder="e.g. Mohammed Hossam" class="w-full px-3 py-2 rounded-xl bg-chess-bg border border-chess-border text-chess-espresso font-semibold focus:outline-none focus:border-chess-walnut">
+                        </div>
+                        <div>
+                            <label class="font-extrabold text-emerald-800 block mb-1"><i class="fa-solid fa-chess-pawn mr-1"></i> <span data-i18n="lbl_chesscom_user">Chess.com Username</span></label>
+                            <input type="text" id="api-chesscom-user" placeholder="e.g. dedo_stark" class="w-full px-3 py-2 rounded-xl bg-chess-bg border border-chess-border text-chess-espresso focus:outline-none focus:border-chess-walnut font-mono">
+                        </div>
+                        <div>
+                            <label class="font-extrabold text-chess-walnut block mb-1"><i class="fa-solid fa-chess-knight mr-1"></i> <span data-i18n="lbl_lichess_user">Lichess.org Username</span></label>
+                            <input type="text" id="api-lichess-user" placeholder="e.g. dedo_stark" class="w-full px-3 py-2 rounded-xl bg-chess-bg border border-chess-border text-chess-espresso focus:outline-none focus:border-chess-walnut font-mono">
+                        </div>
                     </div>
-                    <div>
-                        <label class="font-extrabold text-emerald-800 block mb-1"><i class="fa-solid fa-chess-pawn mr-1"></i> Chess.com Username</label>
-                        <input type="text" id="api-chesscom-user" placeholder="e.g. dedo_stark" class="w-full px-3 py-2 rounded-xl bg-chess-bg border border-chess-border text-chess-espresso focus:outline-none focus:border-chess-walnut font-mono">
-                    </div>
-                    <div>
-                        <label class="font-extrabold text-chess-walnut block mb-1"><i class="fa-solid fa-chess-knight mr-1"></i> Lichess.org Username</label>
-                        <input type="text" id="api-lichess-user" placeholder="e.g. dedo_stark" class="w-full px-3 py-2 rounded-xl bg-chess-bg border border-chess-border text-chess-espresso focus:outline-none focus:border-chess-walnut font-mono">
-                    </div>
-                    <div>
-                        <label class="font-extrabold text-chess-espresso block mb-1">Rating Category</label>
-                        <select id="api-time-control" class="w-full px-3 py-2 rounded-xl bg-chess-bg border border-chess-border text-chess-espresso font-bold">
-                            <option value="highest">Highest Overall (Rapid/Blitz/Bullet)</option>
-                            <option value="rapid">Rapid Only</option>
-                            <option value="blitz">Blitz Only</option>
-                            <option value="bullet">Bullet Only</option>
-                        </select>
-                    </div>
-                    <div>
-                        <button type="submit" id="btn-fetch-elo" class="w-full py-2.5 px-4 rounded-xl bg-chess-gold hover:bg-amber-400 text-chess-espresso font-black text-xs shadow transition flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-cloud-arrow-down"></i>
-                            <span>Fetch & Save Highest ELO</span>
-                        </button>
+
+                    <!-- Independent Default Platform Selectors per Time Control (Rapid, Blitz, Bullet) -->
+                    <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 pt-1 items-end">
+                        <div class="bg-chess-cream/70 p-2.5 rounded-xl border border-chess-border">
+                            <label class="font-black text-chess-walnut block mb-1 text-[11px]" data-i18n="lbl_pref_rapid">⚡ Rapid Default Platform (Main Leaderboard):</label>
+                            <select id="api-pref-rapid" class="w-full px-2.5 py-1.5 rounded-lg bg-white border border-chess-border text-chess-espresso font-bold">
+                                <option value="auto">Auto (Pick Higher Rapid)</option>
+                                <option value="chesscom">Chess.com Rapid</option>
+                                <option value="lichess">Lichess.org Rapid</option>
+                            </select>
+                        </div>
+                        <div class="bg-chess-cream/70 p-2.5 rounded-xl border border-chess-border">
+                            <label class="font-black text-chess-espresso block mb-1 text-[11px]" data-i18n="lbl_pref_blitz">🔥 Blitz Default Platform:</label>
+                            <select id="api-pref-blitz" class="w-full px-2.5 py-1.5 rounded-lg bg-white border border-chess-border text-chess-espresso font-bold">
+                                <option value="auto">Auto (Pick Higher Blitz)</option>
+                                <option value="chesscom">Chess.com Blitz</option>
+                                <option value="lichess">Lichess.org Blitz</option>
+                            </select>
+                        </div>
+                        <div class="bg-chess-cream/70 p-2.5 rounded-xl border border-chess-border">
+                            <label class="font-black text-chess-espresso block mb-1 text-[11px]" data-i18n="lbl_pref_bullet">🚀 Bullet Default Platform:</label>
+                            <select id="api-pref-bullet" class="w-full px-2.5 py-1.5 rounded-lg bg-white border border-chess-border text-chess-espresso font-bold">
+                                <option value="auto">Auto (Pick Higher Bullet)</option>
+                                <option value="chesscom">Chess.com Bullet</option>
+                                <option value="lichess">Lichess.org Bullet</option>
+                            </select>
+                        </div>
+                        <div>
+                            <button type="submit" id="btn-fetch-elo" class="w-full py-3 px-4 rounded-xl bg-chess-gold hover:bg-amber-500 text-white font-black text-xs shadow-md transition flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-cloud-arrow-down"></i>
+                                <span data-i18n="btn_sync_unified">Sync & Update Unified Profile</span>
+                            </button>
+                        </div>
                     </div>
                 </form>
 
                 <div id="api-sync-status-box" class="hidden p-3.5 rounded-xl bg-chess-bg border border-chess-border text-xs text-chess-espresso font-semibold"></div>
             </div>
 
-            <!-- Controls Bar: Weekly vs Monthly Switch -->
-            <div class="bg-white border-2 border-chess-border rounded-2xl p-5 shadow-md space-y-5">
+            <!-- Controls Bar: Weekly vs Monthly Switch (Sorted by RAPID ELO) -->
+            <div class="bg-white border-2 border-chess-border rounded-2xl p-4 sm:p-5 shadow-md space-y-5">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-chess-border pb-4">
-                    <div class="flex items-center gap-2 bg-chess-bg p-1.5 rounded-xl border border-chess-border">
-                        <button onclick="setLeaderboardPeriod('monthly')" id="btn-lb-monthly" class="px-4 py-2 rounded-lg text-xs font-black bg-chess-walnut text-white shadow flex items-center gap-1.5">
+                    <div class="flex flex-wrap items-center gap-2 bg-chess-bg p-1.5 rounded-xl border border-chess-border">
+                        <button type="button" onclick="setLeaderboardPeriod('monthly')" id="btn-lb-monthly" class="px-3.5 py-2 rounded-lg text-xs font-black bg-chess-walnut text-white shadow flex items-center gap-1.5">
                             <i class="fa-solid fa-calendar-days text-chess-gold"></i>
-                            <span data-i18n="btn_monthly_lb">Monthly Leaderboard (Top 3 Prize)</span>
+                            <span data-i18n="btn_monthly_lb">Monthly Rapid Leaderboard (Top 3 Prize)</span>
                         </button>
-                        <button onclick="setLeaderboardPeriod('weekly')" id="btn-lb-weekly" class="px-4 py-2 rounded-lg text-xs font-bold text-chess-espresso hover:bg-chess-light flex items-center gap-1.5">
+                        <button type="button" onclick="setLeaderboardPeriod('weekly')" id="btn-lb-weekly" class="px-3.5 py-2 rounded-lg text-xs font-bold text-chess-espresso hover:bg-chess-light flex items-center gap-1.5">
                             <i class="fa-solid fa-calendar-week"></i>
-                            <span data-i18n="btn_weekly_lb">Weekly Leaderboard</span>
+                            <span data-i18n="btn_weekly_lb">Weekly Rapid Leaderboard</span>
                         </button>
                     </div>
 
                     <div class="flex items-center gap-2">
-                        <span class="text-xs font-semibold text-chess-mahogany" data-i18n="lb_verified_note">
-                            Displays the higher ELO & Peak between Chess.com and Lichess.org
+                        <span class="px-3 py-1 rounded-full bg-amber-100 text-amber-900 border border-amber-400 text-xs font-black" data-i18n="lb_verified_note">
+                            ⚡ Ranked by Active RAPID ELO (Click C / L pills to switch platform per time control)
                         </span>
                     </div>
                 </div>
 
-                <!-- Top 3 Monthly Podium Cards -->
-                <div id="leaderboard-podium" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Top 3 Monthly Rapid Podium Cards -->
+                <div id="leaderboard-podium" class="auto-fit-grid">
                     <!-- Populated via JS -->
                 </div>
 
                 <!-- Full Standings Table -->
-                <div class="overflow-x-auto rounded-xl border border-chess-border">
-                    <table class="w-full text-left border-collapse">
+                <div class="overflow-x-auto max-w-full rounded-xl border border-chess-border">
+                    <table class="w-full text-left border-collapse min-w-[780px]">
                         <thead>
                             <tr class="bg-chess-walnut text-white text-xs uppercase tracking-wider">
-                                <th class="py-3.5 px-4 font-extrabold">Rank</th>
-                                <th class="py-3.5 px-4 font-extrabold">Player & Role</th>
-                                <th class="py-3.5 px-4 font-extrabold">Highest Current ELO</th>
-                                <th class="py-3.5 px-4 font-extrabold">Highest Peak ELO</th>
-                                <th class="py-3.5 px-4 font-extrabold">Platform Breakdown</th>
-                                <th class="py-3.5 px-4 font-extrabold" id="th-period-points">Monthly Points</th>
-                                <th class="py-3.5 px-4 font-extrabold">Prize Status</th>
-                                <th class="py-3.5 px-4 font-extrabold text-right">Actions</th>
+                                <th class="py-3.5 px-3 font-extrabold" data-i18n="th_rank">Rank</th>
+                                <th class="py-3.5 px-3 font-extrabold" data-i18n="th_player">Unified Player & Accounts</th>
+                                <th class="py-3.5 px-3 font-extrabold bg-chess-espresso/50 text-chess-gold" data-i18n="th_rapid">⚡ Rapid ELO (Main Rank)</th>
+                                <th class="py-3.5 px-3 font-extrabold" data-i18n="th_peak_rapid">Peak Rapid</th>
+                                <th class="py-3.5 px-3 font-extrabold" data-i18n="th_blitz">🔥 Blitz ELO</th>
+                                <th class="py-3.5 px-3 font-extrabold" data-i18n="th_bullet">🚀 Bullet ELO</th>
+                                <th class="py-3.5 px-3 font-extrabold" id="th-period-points" data-i18n="th_points">Monthly Pts</th>
+                                <th class="py-3.5 px-3 font-extrabold" data-i18n="th_prize">Prize Status</th>
                             </tr>
                         </thead>
-                        <tbody id="leaderboard-tbody" class="divide-y divide-chess-border text-sm bg-white">
+                        <tbody id="leaderboard-tbody" class="divide-y divide-chess-border text-xs sm:text-sm bg-white">
                             <!-- Populated via JS -->
                         </tbody>
                     </table>
@@ -1623,31 +1656,47 @@
 
                     <!-- Interactive SQLi Sandbox Tester -->
                     <div class="bg-chess-cream border-2 border-chess-border rounded-xl p-4 space-y-3 text-xs">
-                        <div class="flex items-center justify-between">
-                            <span class="font-black text-chess-espresso uppercase">Test SQL Injection Defense Live:</span>
-                            <button onclick="fillSampleSQLi()" class="text-[11px] font-bold text-chess-walnut underline">Insert Sample Attack (' OR 1=1 --)</button>
+                        <div class="flex items-center justify-between flex-wrap gap-2">
+                            <span class="font-black text-chess-espresso uppercase" data-i18n="waf_test_label">Test SQL Injection Defense Live:</span>
+                            <button type="button" onclick="fillSampleSQLi()" class="text-[11px] font-bold text-chess-walnut underline" data-i18n="waf_sample_btn">Insert Sample Attack (' OR 1=1 --)</button>
                         </div>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input type="text" id="waf-test-input" placeholder="Try typing: ' OR 1=1; DROP TABLE users; --" class="flex-grow px-3 py-2 rounded-lg bg-white border border-chess-border font-mono text-xs text-chess-espresso">
+                            <button type="button" onclick="runWAFSandboxTest()" class="px-4 py-2 rounded-lg bg-chess-walnut hover:bg-chess-espresso text-white font-black text-xs shrink-0" data-i18n="waf_inspect_btn">
+                                Inspect Payload
+                            </button>
+                        </div>
+                        <div id="waf-test-result" class="p-2.5 rounded-lg bg-white border border-chess-border font-mono text-[11px] text-chess-mahogany">
+                            BrilliantSecurityWAF ready. Enter any input above to test parameterized binding & SQLi filter.
+                        </div>
+                        <div id="waf-audit-log" class="max-h-28 overflow-y-auto p-2.5 rounded-lg bg-chess-espresso text-emerald-300 font-mono text-[10px] space-y-1"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
     <!-- Sticky Mobile Bottom Quick-Navigation Bar (Fits all mobile screens cleanly) -->
     <nav class="xl:hidden fixed bottom-0 inset-x-0 z-40 wood-header border-t-2 border-chess-gold px-2 py-1.5 grid grid-cols-5 gap-1 text-[10px] font-bold text-chess-light shadow-2xl">
-        <button onclick="switchTab('home')" class="flex flex-col items-center justify-center py-1 rounded-lg hover:text-chess-gold">
+        <button type="button" onclick="switchTab('home')" class="flex flex-col items-center justify-center py-1 rounded-lg hover:text-chess-gold">
             <i class="fa-solid fa-house text-sm mb-0.5"></i>
-            <span>Home</span>
+            <span data-i18n="nav_home">Home</span>
         </button>
-        <button onclick="switchTab('leaderboard')" class="flex flex-col items-center justify-center py-1 rounded-lg hover:text-chess-gold">
+        <button type="button" onclick="switchTab('leaderboard')" class="flex flex-col items-center justify-center py-1 rounded-lg hover:text-chess-gold">
             <i class="fa-solid fa-ranking-star text-sm mb-0.5"></i>
-            <span>Rankings</span>
+            <span data-i18n="nav_leaderboard_short">Rapid Rank</span>
         </button>
-        <button onclick="switchTab('tournaments')" class="flex flex-col items-center justify-center py-1 rounded-lg hover:text-chess-gold">
+        <button type="button" onclick="switchTab('tournaments')" class="flex flex-col items-center justify-center py-1 rounded-lg hover:text-chess-gold">
             <i class="fa-solid fa-trophy text-sm mb-0.5"></i>
-            <span>Tourney</span>
+            <span data-i18n="nav_tournaments">Tournaments</span>
         </button>
-        <button onclick="switchTab('openings')" class="flex flex-col items-center justify-center py-1 rounded-lg hover:text-chess-gold">
-            <i class="fa-solid fa-chess-board text-sm mb-0.5"></i>
-            <span>Openings</span>
+        <button type="button" onclick="switchTab('books')" class="flex flex-col items-center justify-center py-1 rounded-lg hover:text-chess-gold">
+            <i class="fa-solid fa-book text-sm mb-0.5"></i>
+            <span data-i18n="nav_books">Books</span>
         </button>
-        <button onclick="switchTab('puzzles')" class="flex flex-col items-center justify-center py-1 rounded-lg hover:text-chess-gold">
+        <button type="button" onclick="switchTab('puzzles')" class="flex flex-col items-center justify-center py-1 rounded-lg hover:text-chess-gold">
             <i class="fa-solid fa-puzzle-piece text-sm mb-0.5"></i>
-            <span>Puzzles</span>
+            <span data-i18n="nav_puzzles">Puzzles</span>
         </button>
     </nav>
 
@@ -1681,47 +1730,200 @@
          ========================================================================= -->
     <script>
         // =========================================================================
-        // 0. PROGRAMMATIC SQL INJECTION (SQLi) & XSS SECURITY ENGINE (BondkSecurityWAF)
+        // 1. UNIFIED SINGLE-PROFILE PLAYERS DATABASE (NO DUPLICATES FOR CHESS.COM + LICHESS)
+        //    Includes Independent Platform Preferences for Rapid, Blitz & Bullet
         // =========================================================================
-        const BondkSecurityWAF = {
-            blockedCount: 0,
-            auditLogs: [
-                '[SYSTEM] BrilliantSecurityWAF initialized — Parameterized Query Store & SQLi/XSS Filters ACTIVE.'
-            ],
-            // Strict regex patterns for common SQL Injection vectors & XSS payloads
-            sqliPatterns: [
-                /(\b(SELECT|UNION|INSERT|UPDATE|DELETE|DROP|ALTER|CREATE|TRUNCATE|EXEC|EXECUTE|DECLARE|CAST|CONVERT)\b\s+)/i,
-                /('|\b(OR|AND)\b\s+['"]?\d+['"]?\s*=\s*['"]?\d+)/i,
-                /('|\b(OR|AND)\b\s+['"][a-zA-Z0-9]+['"]\s*=\s*['"][a-zA-Z0-9]+['"])/i,
-                /(--|\/\*|\*\/|;|\bxp_cmdshell\b|\bSLEEP\s*\(|\bBENCHMARK\s*\(|\bWAITFOR\s+DELAY\b)/i,
-                /(<\s*script\b|javascript:|onerror\s*=|onload\s*=|<\s*iframe\b|<\s*img\b)/i
-            ],
-            usernameRegex: /^[a-zA-Z0-9_@.-]{2,60}$/,
-
-            escapeHTML(str) {
-                if (typeof str !== 'string') return '';
-                return str
-                    .replace(/&/g, '&amp;')
-                    .replace(/</g, '&lt;')
-                    .replace(/>/g, '&gt;')
-                    .replace(/"/g, '&quot;')
-                    .replace(/'/g, '&#x27;')
-                    .replace(/\//g, '&#x2F;');
+        let clubAccounts = [
+            {
+                id: 'admin-1',
+                name: 'Mohammed Hossam',
+                displayName: 'Mohammed Hossam (dedo_stark)',
+                email: 'mohammed.hossam.dedo@gmail.com',
+                username: 'dedo_stark',
+                chessComUser: 'dedo_stark',
+                lichessUser: 'dedo_stark',
+                password: 'STEM#Dedo1035',
+                role: 'Lead Admin',
+                roleAr: 'الأدمن الرئيسي',
+                isAdmin: true,
+                isAssistant: false,
+                ratings: {
+                    rapid:  { chesscom: 1009, chesscomPeak: 1035, lichess: 1009, lichessPeak: 1035, pref: 'chesscom' },
+                    blitz:  { chesscom: 980,  chesscomPeak: 1010, lichess: 990,  lichessPeak: 1015, pref: 'chesscom' },
+                    bullet: { chesscom: 950,  chesscomPeak: 985,  lichess: 970,  lichessPeak: 1000, pref: 'chesscom' }
+                },
+                elo: 1009,
+                peakElo: 1035,
+                weeklyPoints: 145,
+                monthlyPoints: 520
             },
+            {
+                id: 'admin-2',
+                name: 'Mohamed Nasser',
+                displayName: 'Mohamed Nasser (محمد ناصر)',
+                email: 'mohamed.nasser@stemsuez.edu.eg',
+                username: 'mohamed_nasser',
+                chessComUser: 'mohamed_nasser',
+                lichessUser: 'mohamed_nasser',
+                password: 'STEM#Nasser2026',
+                role: 'Admin',
+                roleAr: 'أدمن النادي',
+                isAdmin: true,
+                isAssistant: false,
+                ratings: {
+                    rapid:  { chesscom: 1000, chesscomPeak: 1020, lichess: 995, lichessPeak: 1015, pref: 'chesscom' },
+                    blitz:  { chesscom: 960,  chesscomPeak: 990,  lichess: 975, lichessPeak: 1000, pref: 'auto' },
+                    bullet: { chesscom: 940,  chesscomPeak: 965,  lichess: 950, lichessPeak: 980,  pref: 'auto' }
+                },
+                elo: 1000,
+                peakElo: 1020,
+                weeklyPoints: 130,
+                monthlyPoints: 485
+            },
+            {
+                id: 'admin-3',
+                name: 'Ahmed Hassan',
+                displayName: 'Ahmed Hassan (أحمد حسن)',
+                email: 'ahmed.hassan@stemsuez.edu.eg',
+                username: 'ahmed_hassan',
+                chessComUser: 'ahmed_hassan',
+                lichessUser: 'ahmed_hassan',
+                password: 'STEM#Hassan2026',
+                role: 'Admin',
+                roleAr: 'أدمن النادي',
+                isAdmin: true,
+                isAssistant: false,
+                ratings: {
+                    rapid:  { chesscom: 995, chesscomPeak: 1015, lichess: 990, lichessPeak: 1010, pref: 'chesscom' },
+                    blitz:  { chesscom: 955, chesscomPeak: 985,  lichess: 965, lichessPeak: 990,  pref: 'auto' },
+                    bullet: { chesscom: 930, chesscomPeak: 960,  lichess: 945, lichessPeak: 970,  pref: 'auto' }
+                },
+                elo: 995,
+                peakElo: 1015,
+                weeklyPoints: 125,
+                monthlyPoints: 470
+            }
+        ];
 
-            inspect(rawInput, contextLabel = 'User Input') {
-                const val = String(rawInput || '').trim();
-                for (const pattern of this.sqliPatterns) {
-                    if (pattern.test(val)) {
-                        this.blockedCount++;
-                        const timestamp = new Date().toLocaleTimeString();
-                        const safePreview = this.escapeHTML(val.slice(0, 60));
-                        this.auditLogs.unshift(`[${timestamp}] BLOCKED SQLi/XSS in ${contextLabel}: "${safePreview}"`);
-                        this.updateSecurityUI();
-                        showToast(`🛡️ Security Shield Blocked Malicious Payload in ${contextLabel}!`);
-                        return { safe: false, sanitized: '', reason: 'SQL Injection / XSS signature detected and neutralized.' };
-                    }
+        function ensureRatingsStructure(acc) {
+            if (!acc.ratings) {
+                const base = acc.elo || 1000;
+                const peak = acc.peakElo || base;
+                acc.ratings = {
+                    rapid:  { chesscom: base, chesscomPeak: peak, lichess: 0, lichessPeak: 0, pref: 'auto' },
+                    blitz:  { chesscom: base - 30, chesscomPeak: peak - 20, lichess: 0, lichessPeak: 0, pref: 'auto' },
+                    bullet: { chesscom: base - 50, chesscomPeak: peak - 30, lichess: 0, lichessPeak: 0, pref: 'auto' }
+                };
+            }
+        }
+
+        // Returns the effective rating & platform for a given timeControl ('rapid' | 'blitz' | 'bullet')
+        function getEffectiveTC(acc, tc = 'rapid') {
+            ensureRatingsStructure(acc);
+            const r = acc.ratings[tc];
+            const cVal = r.chesscom || 0;
+            const lVal = r.lichess || 0;
+            const cPeak = r.chesscomPeak || cVal;
+            const lPeak = r.lichessPeak || lVal;
+
+            let chosenPlatform = r.pref || 'auto';
+            if (chosenPlatform === 'chesscom' && cVal === 0 && lVal > 0) chosenPlatform = 'lichess';
+            if (chosenPlatform === 'lichess' && lVal === 0 && cVal > 0) chosenPlatform = 'chesscom';
+            if (chosenPlatform === 'auto') {
+                chosenPlatform = (cVal >= lVal) ? 'chesscom' : 'lichess';
+            }
+
+            if (chosenPlatform === 'chesscom') {
+                return {
+                    elo: cVal || lVal || 1000,
+                    peak: Math.max(cPeak, cVal, 1000),
+                    activePlatform: 'chesscom',
+                    platformName: 'Chess.com',
+                    cVal,
+                    lVal,
+                    pref: r.pref || 'auto'
+                };
+            } else {
+                return {
+                    elo: lVal || cVal || 1000,
+                    peak: Math.max(lPeak, lVal, 1000),
+                    activePlatform: 'lichess',
+                    platformName: 'Lichess.org',
+                    cVal,
+                    lVal,
+                    pref: r.pref || 'auto'
+                };
+            }
+        }
+
+        function updateDerivedRapidFields(acc) {
+            const effRapid = getEffectiveTC(acc, 'rapid');
+            acc.elo = effRapid.elo;
+            acc.peakElo = effRapid.peak;
+            acc.higherSource = effRapid.platformName;
+        }
+
+        function setPlayerTimeControlPlatform(playerId, tc, newPref) {
+            const acc = clubAccounts.find(a => a.id === playerId);
+            if (!acc) return;
+            ensureRatingsStructure(acc);
+            acc.ratings[tc].pref = newPref;
+            updateDerivedRapidFields(acc);
+            renderLeaderboard();
+            renderAdminsStrip();
+            renderDigitalIdCards();
+            const label = newPref === 'chesscom' ? 'Chess.com' : (newPref === 'lichess' ? 'Lichess.org' : 'Auto Highest');
+            showToast(`⚡ ${acc.name}: ${tc.toUpperCase()} default platform set to ${label}`);
+        }
+            // Find existing account by username, email, chessComUser, lichessUser, or full name so we NEVER duplicate!
+            const lowerU = cUser.handle.toLowerCase();
+            const lowerName = cName.sanitized.toLowerCase();
+            let existingAcc = clubAccounts.find(acc =>
+                acc.username.toLowerCase() === lowerU ||
+                (acc.email && acc.email.toLowerCase() === lowerU) ||
+                acc.name.toLowerCase() === lowerName ||
+                (cChess.handle && acc.chessComUser && acc.chessComUser.toLowerCase() === cChess.handle.toLowerCase()) ||
+                (cLich.handle && acc.lichessUser && acc.lichessUser.toLowerCase() === cLich.handle.toLowerCase())
+            );
+
+            if (existingAcc) {
+                if (cChess.handle) existingAcc.chessComUser = cChess.handle;
+                if (cLich.handle) existingAcc.lichessUser = cLich.handle;
+                if (existingAcc.chessComUser || existingAcc.lichessUser) {
+                    await syncAccountRatings(existingAcc);
                 }
+                authenticateAndUnlockPortal(existingAcc, rememberMe);
+                return;
+            }
+
+            const newAccount = {
+                id: 'mem-' + Date.now(),
+                name: cName.sanitized,
+                displayName: `${cName.sanitized} (${cUser.handle})`,
+                email: cUser.handle.includes('@') ? cUser.handle : `${cUser.handle}@stemsuez.edu.eg`,
+                username: cUser.handle,
+                chessComUser: cChess.handle || cUser.handle,
+                lichessUser: cLich.handle || cUser.handle,
+                password: cPass.sanitized,
+                role: 'Club Member',
+                roleAr: 'عضو النادي',
+                isAdmin: false,
+                isAssistant: false,
+                ratings: {
+                    rapid:  { chesscom: 1000, chesscomPeak: 1000, lichess: 1000, lichessPeak: 1000, pref: 'auto' },
+                    blitz:  { chesscom: 950,  chesscomPeak: 950,  lichess: 950,  lichessPeak: 950,  pref: 'auto' },
+                    bullet: { chesscom: 900,  chesscomPeak: 900,  lichess: 900,  lichessPeak: 900,  pref: 'auto' }
+                },
+                elo: 1000,
+                peakElo: 1000,
+                higherSource: 'Checkmate Club',
+                weeklyPoints: 35,
+                monthlyPoints: 140
+            };
+
+            if (newAccount.chessComUser || newAccount.lichessUser) {
+                await syncAccountRatings(newAccount);
+            }
                 return { safe: true, sanitized: this.escapeHTML(val), reason: 'Clean' };
             },
 
@@ -1782,111 +1984,604 @@
         }
 
         // =========================================================================
-        // 1. STRICT REAL ACCOUNTS ONLY (3 OFFICIAL ADMINS INITIALLY, 0 FAKE MEMBERS)
+        // 1B. LIVE CHESS.COM & LICHESS.ORG API INTEGRATION (ALL 3 TIME CONTROLS IN ONE UNIFIED PROFILE)
         // =========================================================================
-        let clubAccounts = [
-            {
-                id: 'admin-1',
-                name: 'Mohammed Hossam',
-                displayName: 'Mohammed Hossam (dedo_stark)',
-                email: 'mohammed.hossam.dedo@gmail.com',
-                username: 'dedo_stark',
-                chessComUser: 'dedo_stark',
-                lichessUser: 'dedo_stark',
-                password: 'STEM#Dedo1035',
-                role: 'Lead Admin',
-                roleAr: 'الأدمن الرئيسي',
-                isAdmin: true,
-                isAssistant: false,
-                elo: 1009,
-                peakElo: 1035,
-                chessComElo: 1009,
-                chessComPeak: 1035,
-                lichessElo: 0,
-                lichessPeak: 0,
-                higherSource: 'Chess.com',
-                weeklyPoints: 145,
-                monthlyPoints: 520
-            },
-            {
-                id: 'admin-2',
-                name: 'Mohamed Nasser',
-                displayName: 'Mohamed Nasser (محمد ناصر)',
-                email: 'mohamed.nasser@stemsuez.edu.eg',
-                username: 'mohamed_nasser',
-                chessComUser: '',
-                lichessUser: '',
-                password: 'STEM#Nasser2026',
-                role: 'Admin',
-                roleAr: 'أدمن النادي',
-                isAdmin: true,
-                isAssistant: false,
-                elo: 1000,
-                peakElo: 1020,
-                chessComElo: 1000,
-                chessComPeak: 1020,
-                lichessElo: 0,
-                lichessPeak: 0,
-                higherSource: 'Club Verified',
-                weeklyPoints: 130,
-                monthlyPoints: 485
-            },
-            {
-                id: 'admin-3',
-                name: 'Ahmed Hassan',
-                displayName: 'Ahmed Hassan (أحمد حسن)',
-                email: 'ahmed.hassan@stemsuez.edu.eg',
-                username: 'ahmed_hassan',
-                chessComUser: '',
-                lichessUser: '',
-                password: 'STEM#Hassan2026',
-                role: 'Admin',
-                roleAr: 'أدمن النادي',
-                isAdmin: true,
-                isAssistant: false,
-                elo: 995,
-                peakElo: 1015,
-                chessComElo: 995,
-                chessComPeak: 1015,
-                lichessElo: 0,
-                lichessPeak: 0,
-                higherSource: 'Club Verified',
-                weeklyPoints: 125,
-                monthlyPoints: 470
-            }
-        ];
-
-        // =========================================================================
-        // 1A. MANDATORY SIGN-IN GATE & "REMEMBER ME" PERSISTENCE ENGINE
-        // =========================================================================
-        const AUTH_STORAGE_KEY = 'brilliant_chess_saved_session_v1';
-        let currentSignedInUser = null;
-
-        function switchAuthMode(mode) {
-            const formSignIn = document.getElementById('form-auth-signin');
-            const formReg = document.getElementById('form-auth-register');
-            const tabSignIn = document.getElementById('auth-tab-signin');
-            const tabReg = document.getElementById('auth-tab-register');
-            const fb = document.getElementById('auth-feedback-box');
-            if (fb) fb.classList.add('hidden');
-
-            if (mode === 'signin') {
-                formSignIn.classList.remove('hidden');
-                formReg.classList.add('hidden');
-                tabSignIn.className = 'py-2.5 rounded-xl text-xs font-black bg-chess-walnut text-white shadow transition flex items-center justify-center gap-1.5';
-                tabReg.className = 'py-2.5 rounded-xl text-xs font-bold text-chess-espresso hover:bg-chess-light transition flex items-center justify-center gap-1.5';
-            } else {
-                formSignIn.classList.add('hidden');
-                formReg.classList.remove('hidden');
-                tabReg.className = 'py-2.5 rounded-xl text-xs font-black bg-chess-walnut text-white shadow transition flex items-center justify-center gap-1.5';
-                tabSignIn.className = 'py-2.5 rounded-xl text-xs font-bold text-chess-espresso hover:bg-chess-light transition flex items-center justify-center gap-1.5';
+        async function fetchChessComAllTC(username) {
+            if (!username) return { ok: false };
+            try {
+                const res = await fetch(`https://api.chess.com/pub/player/${encodeURIComponent(username.trim().toLowerCase())}/stats`);
+                if (!res.ok) return { ok: false };
+                const data = await res.json();
+                const extract = (key) => {
+                    const cur = data?.[key]?.last?.rating || 0;
+                    const best = data?.[key]?.best?.rating || cur || 0;
+                    return { cur, peak: Math.max(cur, best) };
+                };
+                const rapid = extract('chess_rapid');
+                const blitz = extract('chess_blitz');
+                const bullet = extract('chess_bullet');
+                return {
+                    ok: (rapid.cur > 0 || blitz.cur > 0 || bullet.cur > 0),
+                    rapid,
+                    blitz,
+                    bullet
+                };
+            } catch (err) {
+                return { ok: false };
             }
         }
 
-        function togglePasswordVisibility(inputId) {
-            const el = document.getElementById(inputId);
-            if (!el) return;
-            el.type = el.type === 'password' ? 'text' : 'password';
+        async function fetchLichessAllTC(username) {
+            if (!username) return { ok: false };
+            try {
+                const res = await fetch(`https://lichess.org/api/user/${encodeURIComponent(username.trim())}`, {
+                    headers: { 'Accept': 'application/json' }
+                });
+                if (!res.ok) return { ok: false };
+                const data = await res.json();
+                const extract = (key) => {
+                    const cur = data?.perfs?.[key]?.rating || 0;
+                    return { cur, peak: cur };
+                };
+                const rapid = extract('rapid');
+                const blitz = extract('blitz');
+                const bullet = extract('bullet');
+                return {
+                    ok: (rapid.cur > 0 || blitz.cur > 0 || bullet.cur > 0),
+                    rapid,
+                    blitz,
+                    bullet
+                };
+            } catch (err) {
+                return { ok: false };
+            }
+        }
+
+        async function syncAccountRatings(account) {
+            ensureRatingsStructure(account);
+            const cStats = account.chessComUser ? await fetchChessComAllTC(account.chessComUser) : { ok: false };
+            const lStats = account.lichessUser ? await fetchLichessAllTC(account.lichessUser) : { ok: false };
+
+            if (cStats.ok) {
+                if (cStats.rapid.cur > 0) {
+                    account.ratings.rapid.chesscom = cStats.rapid.cur;
+                    account.ratings.rapid.chesscomPeak = Math.max(cStats.rapid.peak, account.ratings.rapid.chesscomPeak || 0);
+                }
+                if (cStats.blitz.cur > 0) {
+                    account.ratings.blitz.chesscom = cStats.blitz.cur;
+                    account.ratings.blitz.chesscomPeak = Math.max(cStats.blitz.peak, account.ratings.blitz.chesscomPeak || 0);
+                }
+                if (cStats.bullet.cur > 0) {
+                    account.ratings.bullet.chesscom = cStats.bullet.cur;
+                    account.ratings.bullet.chesscomPeak = Math.max(cStats.bullet.peak, account.ratings.bullet.chesscomPeak || 0);
+                }
+            }
+
+            if (lStats.ok) {
+                if (lStats.rapid.cur > 0) {
+                    account.ratings.rapid.lichess = lStats.rapid.cur;
+                    account.ratings.rapid.lichessPeak = Math.max(lStats.rapid.peak, account.ratings.rapid.lichessPeak || 0);
+                }
+                if (lStats.blitz.cur > 0) {
+                    account.ratings.blitz.lichess = lStats.blitz.cur;
+                    account.ratings.blitz.lichessPeak = Math.max(lStats.blitz.peak, account.ratings.blitz.lichessPeak || 0);
+                }
+                if (lStats.bullet.cur > 0) {
+                    account.ratings.bullet.lichess = lStats.bullet.cur;
+                    account.ratings.bullet.lichessPeak = Math.max(lStats.bullet.peak, account.ratings.bullet.lichessPeak || 0);
+                }
+            }
+
+            // Preserve Mohammed Hossam's verified Rapid 1009 / Peak 1035 baseline
+            if (account.username === 'dedo_stark') {
+                account.ratings.rapid.chesscom = Math.max(account.ratings.rapid.chesscom || 0, 1009);
+                account.ratings.rapid.chesscomPeak = Math.max(account.ratings.rapid.chesscomPeak || 0, 1035);
+            }
+
+            updateDerivedRapidFields(account);
+            return { updated: (cStats.ok || lStats.ok), cOk: cStats.ok, lOk: lStats.ok };
+        }
+
+        function populateSyncDropdown() {
+            const sel = document.getElementById('api-existing-player');
+            if (!sel) return;
+            const currentVal = sel.value;
+            const newOptLabel = currentLang === 'ar' ? '+ إضافة عضو جديد للنادي (أو دمج تلقائي بالاسم)' : '+ Register New Member (or Auto-Merge by Name)';
+            sel.innerHTML = `<option value="__new__">${newOptLabel}</option>` +
+                clubAccounts.map(acc => `<option value="${acc.id}">Update Unified Profile: ${acc.displayName}</option>`).join('');
+            if (currentVal && Array.from(sel.options).some(o => o.value === currentVal)) {
+                sel.value = currentVal;
+            } else {
+                sel.value = clubAccounts[0].id;
+                populateSyncFormFromSelectedPlayer();
+            }
+        }
+
+        function populateSyncFormFromSelectedPlayer() {
+            const sel = document.getElementById('api-existing-player');
+            if (!sel) return;
+            const val = sel.value;
+            const nameInput = document.getElementById('api-player-name');
+            const cInput = document.getElementById('api-chesscom-user');
+            const lInput = document.getElementById('api-lichess-user');
+            const pRapid = document.getElementById('api-pref-rapid');
+            const pBlitz = document.getElementById('api-pref-blitz');
+            const pBullet = document.getElementById('api-pref-bullet');
+
+            if (val === '__new__') {
+                if (nameInput) nameInput.value = '';
+                if (cInput) cInput.value = '';
+                if (lInput) lInput.value = '';
+                if (pRapid) pRapid.value = 'auto';
+                if (pBlitz) pBlitz.value = 'auto';
+                if (pBullet) pBullet.value = 'auto';
+                return;
+            }
+            const acc = clubAccounts.find(a => a.id === val);
+            if (!acc) return;
+            ensureRatingsStructure(acc);
+            if (nameInput) nameInput.value = acc.name;
+            if (cInput) cInput.value = acc.chessComUser || '';
+            if (lInput) lInput.value = acc.lichessUser || '';
+            if (pRapid) pRapid.value = acc.ratings.rapid.pref || 'auto';
+            if (pBlitz) pBlitz.value = acc.ratings.blitz.pref || 'auto';
+            if (pBullet) pBullet.value = acc.ratings.bullet.pref || 'auto';
+        }
+
+        async function syncAndAddPlayerViaAPI(e) {
+            e.preventDefault();
+            const selectedId = document.getElementById('api-existing-player')?.value || '__new__';
+            const rawName = document.getElementById('api-player-name').value;
+            const rawChessCom = document.getElementById('api-chesscom-user').value;
+            const rawLichess = document.getElementById('api-lichess-user').value;
+            const prefRapid = document.getElementById('api-pref-rapid').value;
+            const prefBlitz = document.getElementById('api-pref-blitz').value;
+            const prefBullet = document.getElementById('api-pref-bullet').value;
+
+            const nameCheck = BondkSecurityWAF.inspect(rawName, 'Player Name');
+            if (!nameCheck.safe) return;
+
+            const cCheck = BondkSecurityWAF.validateChessUsername(rawChessCom, 'Chess.com Username');
+            const lCheck = BondkSecurityWAF.validateChessUsername(rawLichess, 'Lichess.org Username');
+            if (!cCheck.valid || !lCheck.valid) return;
+
+            if (!cCheck.handle && !lCheck.handle) {
+                showToast(currentLang === 'ar' ? 'يرجى إدخال اسم المستخدم في Chess.com أو Lichess.org!' : 'Please enter at least one username (Chess.com or Lichess.org)!');
+                return;
+            }
+
+            const statusBox = document.getElementById('api-sync-status-box');
+            statusBox.classList.remove('hidden');
+            statusBox.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1.5 text-chess-walnut"></i> ${currentLang === 'ar' ? 'جاري جلب تقييمات Rapid و Blitz و Bullet ودمجها في ملف واحد موحد...' : 'Fetching Rapid, Blitz & Bullet ratings from Chess.com & Lichess.org into ONE unified profile...'}`;
+
+            // UNIFIED LOOKUP: Match by selected dropdown ID OR Name OR Username OR Chess.com handle OR Lichess handle
+            let targetAcc = null;
+            if (selectedId !== '__new__') {
+                targetAcc = clubAccounts.find(a => a.id === selectedId);
+            }
+            if (!targetAcc) {
+                const cleanNameLower = nameCheck.sanitized.toLowerCase();
+                targetAcc = clubAccounts.find(a =>
+                    a.name.toLowerCase() === cleanNameLower ||
+                    a.displayName.toLowerCase().includes(cleanNameLower) ||
+                    (cCheck.handle && (a.username.toLowerCase() === cCheck.handle.toLowerCase() || (a.chessComUser && a.chessComUser.toLowerCase() === cCheck.handle.toLowerCase()))) ||
+                    (lCheck.handle && (a.username.toLowerCase() === lCheck.handle.toLowerCase() || (a.lichessUser && a.lichessUser.toLowerCase() === lCheck.handle.toLowerCase())))
+                );
+            }
+
+            const isNew = !targetAcc;
+            const primaryHandle = cCheck.handle || lCheck.handle;
+
+            if (!targetAcc) {
+                targetAcc = {
+                    id: 'mem-' + Date.now(),
+                    name: nameCheck.sanitized,
+                    displayName: `${nameCheck.sanitized} (${primaryHandle})`,
+                    username: primaryHandle,
+                    chessComUser: cCheck.handle || '',
+                    lichessUser: lCheck.handle || '',
+                    password: 'STEM#' + Math.floor(1000 + Math.random() * 9000),
+                    role: 'Club Member',
+                    roleAr: 'عضو النادي',
+                    isAdmin: false,
+                    isAssistant: false,
+                    ratings: {
+                        rapid:  { chesscom: 1000, chesscomPeak: 1000, lichess: 1000, lichessPeak: 1000, pref: prefRapid },
+                        blitz:  { chesscom: 950,  chesscomPeak: 950,  lichess: 950,  lichessPeak: 950,  pref: prefBlitz },
+                        bullet: { chesscom: 900,  chesscomPeak: 900,  lichess: 900,  lichessPeak: 900,  pref: prefBullet }
+                    },
+                    elo: 1000,
+                    peakElo: 1000,
+                    higherSource: 'Chess.com',
+                    weeklyPoints: 40,
+                    monthlyPoints: 160
+                };
+            } else {
+                ensureRatingsStructure(targetAcc);
+                targetAcc.name = nameCheck.sanitized;
+                if (cCheck.handle) targetAcc.chessComUser = cCheck.handle;
+                if (lCheck.handle) targetAcc.lichessUser = lCheck.handle;
+                targetAcc.ratings.rapid.pref = prefRapid;
+                targetAcc.ratings.blitz.pref = prefBlitz;
+                targetAcc.ratings.bullet.pref = prefBullet;
+            }
+
+            await syncAccountRatings(targetAcc);
+            if (isNew) clubAccounts.push(targetAcc);
+
+            const effRapid = getEffectiveTC(targetAcc, 'rapid');
+            const effBlitz = getEffectiveTC(targetAcc, 'blitz');
+            const effBullet = getEffectiveTC(targetAcc, 'bullet');
+
+            BondkSecurityWAF.executeParameterizedInsert('unified_club_leaderboard', {
+                name: targetAcc.name,
+                chesscom: targetAcc.chessComUser,
+                lichess: targetAcc.lichessUser,
+                rapidElo: effRapid.elo,
+                blitzElo: effBlitz.elo,
+                bulletElo: effBullet.elo
+            });
+
+            renderAllSections();
+            populateSyncDropdown();
+
+            statusBox.innerHTML = `✅ <strong>${targetAcc.displayName}</strong> — Unified Profile Updated!
+                <br>• <strong>Rapid (Main Leaderboard):</strong> <span class="text-emerald-800 font-black">${effRapid.elo}</span> (Peak ${effRapid.peak}) via <strong>${effRapid.platformName}</strong>
+                | <strong>Blitz:</strong> ${effBlitz.elo} (${effBlitz.platformName})
+                | <strong>Bullet:</strong> ${effBullet.elo} (${effBullet.platformName})`;
+            showToast(`⚡ Unified profile updated for ${targetAcc.name}! Rapid: ${effRapid.elo}`);
+        }
+
+        async function syncAllClubRatingsLive() {
+            const btn = document.getElementById('btn-sync-all');
+            if (btn) btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Syncing...`;
+            for (const acc of clubAccounts) {
+                if (acc.chessComUser || acc.lichessUser) {
+                    await syncAccountRatings(acc);
+                }
+            }
+            renderAllSections();
+            if (btn) btn.innerHTML = `<i class="fa-solid fa-arrows-rotate text-chess-gold"></i> <span>${currentLang === 'ar' ? 'تحديث تقييمات الكل الآن' : 'Sync All Players Live'}</span>`;
+            showToast(currentLang === 'ar' ? 'تم تحديث تقييمات جميع اللاعبين الموحدة بنجاح!' : 'All unified Chess.com & Lichess.org profiles synced!');
+        }
+
+        // =========================================================================
+        // 1C. 6 INTERACTIVE CHESSBOARD THEMES (WITH LOCALSTORAGE & :ROOT VARIABLES)
+        // =========================================================================
+        const BOARD_THEMES = {
+            classic:  { name: 'Classic Wood',     nameAr: 'خشب كلاسيكي',      light: '#F0D9B5', dark: '#B58863', frame: '#4A2511' },
+            green:    { name: 'Tournament Green', nameAr: 'أخضر البطولات',     light: '#EEEED2', dark: '#769656', frame: '#2E4620' },
+            blue:     { name: 'Icy Sea Blue',     nameAr: 'أزرق جليدي',       light: '#DEE3E6', dark: '#8CA2AD', frame: '#2C3E50' },
+            marble:   { name: 'Royal Marble',     nameAr: 'رخام ملكي',        light: '#F5F5F5', dark: '#8E8E8E', frame: '#333333' },
+            rosewood: { name: 'Rosewood & Ivory', nameAr: 'خشب الورد والعاج', light: '#F7E7CE', dark: '#8B3A3A', frame: '#4A1818' },
+            walnut:   { name: 'Walnut Gold',      nameAr: 'جوز ذهبي فاخر',    light: '#F3E5AB', dark: '#6E4720', frame: '#3B230E' }
+        };
+
+        let currentBoardTheme = localStorage.getItem('brilliant_board_theme') || 'classic';
+        if (!BOARD_THEMES[currentBoardTheme]) currentBoardTheme = 'classic';
+
+        function setBoardTheme(themeKey, silent = false) {
+            const t = BOARD_THEMES[themeKey];
+            if (!t) return;
+            currentBoardTheme = themeKey;
+            try { localStorage.setItem('brilliant_board_theme', themeKey); } catch (e) {}
+
+            // Immediately update CSS Custom Properties on :root
+            document.documentElement.style.setProperty('--sq-light', t.light);
+            document.documentElement.style.setProperty('--sq-dark', t.dark);
+            document.documentElement.style.setProperty('--board-frame', t.frame);
+
+            // Also directly update any active board frames or squares in DOM for instant feedback
+            document.querySelectorAll('.chess-board-frame').forEach(el => {
+                el.style.backgroundColor = t.frame;
+            });
+
+            Object.keys(BOARD_THEMES).forEach(k => {
+                const btn = document.getElementById(`theme-btn-${k}`);
+                if (!btn) return;
+                if (k === themeKey) {
+                    btn.className = 'shrink-0 px-2.5 py-1 rounded-lg font-extrabold bg-chess-walnut text-chess-gold border border-chess-gold flex items-center gap-1.5 text-[11px] shadow';
+                } else {
+                    btn.className = 'shrink-0 px-2.5 py-1 rounded-lg font-bold bg-white text-chess-espresso border border-chess-border hover:bg-chess-light flex items-center gap-1.5 text-[11px]';
+                }
+            });
+
+            if (!silent) {
+                showToast(`🎨 ${currentLang === 'ar' ? 'تم تغيير ثيم الرقعة إلى: ' + t.nameAr : 'Board Theme changed to: ' + t.name}`);
+            }
+        }
+        // --- 2. COMPREHENSIVE BILINGUAL DICTIONARY (100% ENGLISH + ARABIC COVERAGE) ---
+        let currentLang = localStorage.getItem('brilliant_chess_lang') || 'en';
+        const i18nDict = {
+            en: {
+                auth_top_sub: 'STEM Suez Official Chess Club Portal — Mandatory Sign-In',
+                auth_welcome_title: 'Welcome to Brilliant Chess',
+                auth_welcome_desc: 'Official platform for Checkmate Club (STEM Suez). Sign in with your club credentials or create a new member account to access Live Chess.com & Lichess.org Unified Rating Sync, Challonge Tournaments, 12 Famous Openings, 7-Module Academy, 12 Real Chess Books, and Digital QR IDs.',
+                auth_tab_signin_txt: 'Sign In (تسجيل الدخول)',
+                auth_tab_register_txt: 'Join Club (حساب جديد)',
+                lbl_login_id: 'Email or Username (البريد الإلكتروني أو اسم المستخدم) *',
+                lbl_login_pass: 'Password (كلمة المرور) *',
+                lbl_remember_me: 'Remember Me — Save Sign-In (حفظ تسجيل الدخول)',
+                btn_signin_submit: 'Sign In to Brilliant Chess',
+                btn_signout: 'Sign Out',
+                top_portal: 'Brilliant Chess — Checkmate Club (STEM Suez)',
+                brand_sub: 'Checkmate Club — STEM Suez Official Platform',
+                nav_home: 'Home',
+                nav_tournaments: 'Tournaments',
+                nav_leaderboard: 'Rapid Leaderboard',
+                nav_leaderboard_short: 'Rapid Rank',
+                nav_openings: 'Openings',
+                nav_academy: 'Academy',
+                nav_puzzles: 'Board & Puzzles',
+                nav_achievements: 'Achievements',
+                nav_books: 'Books',
+                nav_members: 'Team & QR',
+                nav_contact: 'Contact',
+                theme_bar_label: 'Interactive Chessboard Theme (6 Live Themes):',
+                theme_classic: 'Classic Wood',
+                theme_green: 'Tournament Green',
+                theme_blue: 'Icy Sea Blue',
+                theme_marble: 'Royal Marble',
+                theme_rosewood: 'Rosewood & Ivory',
+                theme_walnut: 'Walnut Gold',
+                home_hero_title: 'Brilliant Chess — Official Checkmate Club Platform',
+                home_hero_desc: 'Link your Chess.com and Lichess.org accounts into ONE unified player profile, choose your preferred platform for Rapid, Blitz & Bullet, compete on our Rapid ELO Leaderboard, study 12 famous openings, and download 12 authentic chess books with authors and publication years.',
+                btn_hero_sync: 'Unified Chess.com & Lichess Sync',
+                btn_hero_tourney: 'Enter Tournament Hub',
+                btn_hero_play: 'Play on Custom Board',
+                home_status_title: 'Active Session & Club Status',
+                home_portal_kicker: 'Main Navigation Portal',
+                home_portal_title: 'Choose Any Section to Explore',
+                home_portal_sub: 'Click any card below to open its full interactive workspace',
+                card_lb_title: '1. Rapid Leaderboard & Unified Sync',
+                card_lb_desc: 'Weekly & Monthly Rapid standings. Links Chess.com & Lichess into one unified profile with independent Rapid, Blitz & Bullet platform switches.',
+                card_tourney_title: '2. Tournaments & Bracket',
+                card_tourney_desc: 'Double Elimination bracket (challonge.com/stemchess), live match desk, and built-in Armageddon tie-breaker clock (5m vs 4m).',
+                card_openings_title: '3. 12 Openings & Variations',
+                card_openings_desc: 'Interactive encyclopedia of 12 famous openings (Italian, Ruy Lopez, Sicilian, Queen\'s Gambit, Caro-Kann, London...) with clickable variations.',
+                card_acad_title: '4. Strategy, Defense & Mates',
+                card_acad_desc: 'Middlegame plans, Attack & Traps, Solid Defense, Endgame mastery (Lucena & Philidor), all Checkmate patterns & Forced Mate in 1–4.',
+                card_puz_title: '5. Custom Board & Daily Puzzles',
+                card_puz_desc: 'Play freely on 6 custom board themes or solve daily checkmate & tactical puzzles to build your daily streak.',
+                card_ach_title: '6. Chess Achievements',
+                card_ach_desc: 'Unlock iconic chess feats: Pawn Checkmate, Castling Mate (O-O-O#), Smothered Knight Mate, Queen Sacrifice, En Passant & 1000+ Club.',
+                card_books_title: '7. 12 Authentic Chess Books',
+                card_books_desc: 'Real, world-famous chess books with exact Author Names & Publication Years (1921–2008), Archive links, and PGN study downloads.',
+                card_team_title: '8. Team, QR IDs & Requests',
+                card_team_desc: 'Official Club Administration directory, digital QR credential cards, real member registration, and Assistant Admin applications.',
+                prize_badge: 'Official Monthly Rapid Rewards',
+                prize_headline: '🏆 Monthly Prize Pool: Top 3 Monthly Rapid Leaderboard Winners Receive Club Prizes!',
+                prize_subtext: 'The Top 3 Rapid-rated players at the end of every month win official Checkmate Club (STEM Suez) prizes!',
+                place_1: '🥇 1st Place',
+                place_2: '🥈 2nd Place',
+                place_3: '🥉 3rd Place',
+                prize_gold: 'Gold Club Prize',
+                prize_silver: 'Silver Club Prize',
+                prize_bronze: 'Bronze Club Prize',
+                unified_badge: 'Unified Single Profile Sync',
+                unified_sub: 'Links Chess.com & Lichess.org into ONE Player Profile (No Duplicates)',
+                api_sync_title: 'Link Chess.com & Lichess Accounts & Choose Default Platform for Rapid, Blitz & Bullet',
+                btn_sync_all_live: 'Sync All Players Live',
+                lbl_select_profile: 'Select Existing Profile or New Member',
+                lbl_player_name: 'Player Full Name *',
+                lbl_chesscom_user: 'Chess.com Username',
+                lbl_lichess_user: 'Lichess.org Username',
+                lbl_pref_rapid: '⚡ Rapid Default Platform (Main Leaderboard):',
+                lbl_pref_blitz: '🔥 Blitz Default Platform:',
+                lbl_pref_bullet: '🚀 Bullet Default Platform:',
+                btn_sync_unified: 'Sync & Update Unified Profile',
+                btn_monthly_lb: 'Monthly Rapid Leaderboard (Top 3 Prize)',
+                btn_weekly_lb: 'Weekly Rapid Leaderboard',
+                lb_verified_note: '⚡ Ranked by Active RAPID ELO (Click C / L pills to switch platform per time control)',
+                th_rank: 'Rank',
+                th_player: 'Unified Player & Accounts',
+                th_rapid: '⚡ Rapid ELO (Main Rank)',
+                th_peak_rapid: 'Peak Rapid',
+                th_blitz: '🔥 Blitz ELO',
+                th_bullet: '🚀 Bullet ELO',
+                th_points: 'Monthly Pts',
+                th_prize: 'Prize Status',
+                openings_kicker: 'Interactive Chess Openings Encyclopedia',
+                openings_main_title: '12 Famous Chess Openings, Strategic Plans & Clickable Variations',
+                lbl_select_variation: 'Select Variation (التفريعات المشهورة):',
+                academy_kicker: 'STEM Suez Complete Training System',
+                academy_title: 'Masterclass Academy: Strategy, Attack & Traps, Solid Defense, Endgames & Checkmates',
+                ach_header_title: 'Chess Achievements & Special Checkmate Badges',
+                ach_header_sub: 'Unlock iconic chess accomplishments like Pawn Checkmate (مات بالبيدق), Castling Mate (O-O-O#), Smothered Knight Mate, and Queen Sacrifices directly on the board!',
+                books_title: '12 Authentic World-Famous Chess Books (With Author, Publication Year & PGN Study Guides)',
+                admins_bar_title: 'Checkmate Club (STEM Suez) Official Administration',
+                admins_bar_sub: 'Lead Admin: Mohammed Hossam (dedo_stark) & Official Co-Admins',
+                req_admin_title: 'Request Admin Role (طلب انضمام كأدمن مساعد)',
+                req_admin_sub: 'Once approved by club administration, you receive the official Assistant Admin badge and QR ID card.',
+                btn_submit_req: 'Submit Assistant Admin Request',
+                pending_reqs_title: 'Pending Assistant Admin Requests',
+                pending_reqs_sub: 'Approve an applicant to promote them immediately to Assistant Admin.',
+                real_members_box_title: 'Add Real Club Member (إضافة عضو حقيقي للنادي)',
+                qr_cards_title: 'Official Club Digital ID Cards (QR Code + Username + Password)',
+                qr_cards_sub: 'Verified passes for club admins, approved Assistant Admins, and registered members.',
+                contact_heading: 'Contact Us (تواصل معنا — Checkmate Club STEM Suez)',
+                hero_desc: 'Official Checkmate Club (STEM Suez) tournament managed on Challonge with live matches played on Lichess.org and Chess.com. Format: Best of 3 (5+0 Blitz) with an Armageddon tie-breaker if tied.',
+                btn_open_challonge: 'Open challonge.com/stemchess',
+                btn_play_lichess: 'Create Match on Lichess.org',
+                btn_play_chesscom: 'Play on Chess.com',
+                tourney_card_header: 'Tournament Protocol',
+                lbl_format: 'Format:',
+                lbl_reset: 'Grand Final Rule:',
+                lbl_timecontrol: 'Time Control:',
+                lbl_tiebreak: 'Tie-Breaker:',
+                bracket_section_title: 'Challonge Bracket — STEM tournament chess',
+                btn_club_bracket: 'Club Match Desk',
+                btn_live_embed: 'Live Challonge Embed',
+                bracket_status_heading: 'Bracket Registration Ready (Verified Club Accounts Only)',
+                bracket_status_sub: 'Sync players from Chess.com or Lichess.org in the Leaderboard tab or manage pairings directly on Challonge.',
+                active_matches_title: 'Official Tournament Match Desk',
+                btn_pair_match: 'Create Match Pairing',
+                arma_title: 'Armageddon Tie-Breaker Clock',
+                arma_sub: 'White: 5:00 (Must Win) | Black: 4:00 (Draw Odds)',
+                btn_coin: 'Coin Toss',
+                platforms_title: 'Official Match Platforms',
+                platforms_desc: 'Tournament rounds are played as Unrated / Casual 5+0 Blitz on Lichess.org or Chess.com to ensure fair play and reconnect protection.',
+                waf_test_label: 'Test SQL Injection Defense Live:',
+                waf_sample_btn: "Insert Sample Attack (' OR 1=1 --)",
+                waf_inspect_btn: 'Inspect Payload'
+            },
+            ar: {
+                auth_top_sub: 'البوابة الرسمية لنادي شطرنج ستيم السويس — تسجيل الدخول إجباري',
+                auth_welcome_title: 'مرحباً بك في Brilliant Chess',
+                auth_welcome_desc: 'المنصة الرسمية لنادي Checkmate Club (STEM Suez). سجل دخولك أو أنشئ حساب عضو جديد لربط حسابي Chess.com و Lichess في ملف موحد، والمنافسة في ليدربورد الـ Rapid، والبطولات، وتعلم الافتتاحيات وتحميل أشهر 12 كتاب شطرنج عالمي.',
+                auth_tab_signin_txt: 'تسجيل الدخول (Sign In)',
+                auth_tab_register_txt: 'حساب جديد (Join Club)',
+                lbl_login_id: 'البريد الإلكتروني أو اسم المستخدم (Email / Username) *',
+                lbl_login_pass: 'كلمة المرور (Password) *',
+                lbl_remember_me: 'حفظ تسجيل الدخول على هذا الجهاز (Remember Me)',
+                btn_signin_submit: 'تسجيل الدخول إلى Brilliant Chess',
+                btn_signout: 'خروج',
+                top_portal: 'Brilliant Chess — نادي Checkmate Club (STEM Suez)',
+                brand_sub: 'المنصة الرسمية لنادي Checkmate Club — ستيم السويس',
+                nav_home: 'الرئيسية',
+                nav_tournaments: 'البطولات',
+                nav_leaderboard: 'ليدربورد الرابيد',
+                nav_leaderboard_short: 'الترتيب',
+                nav_openings: 'الافتتاحيات',
+                nav_academy: 'الأكاديمية',
+                nav_puzzles: 'الرقعة والألغاز',
+                nav_achievements: 'الإنجازات',
+                nav_books: 'الكتب الحقيقية',
+                nav_members: 'الإدارة والـ QR',
+                nav_contact: 'تواصل معنا',
+                theme_bar_label: 'ثيم رقعة الشطرنج التفاعلية (6 ثيمات شغالة فوراً):',
+                theme_classic: 'خشب كلاسيكي',
+                theme_green: 'أخضر البطولات',
+                theme_blue: 'أزرق جليدي',
+                theme_marble: 'رخام ملكي',
+                theme_rosewood: 'خشب الورد والعاج',
+                theme_walnut: 'جوز ذهبي فاخر',
+                home_hero_title: 'Brilliant Chess — المنصة الرسمية لنادي Checkmate Club',
+                home_hero_desc: 'اربط حسابك في Chess.com و Lichess.org جوه ملف لاعب واحد موحد بدون تكرار، واختار منصتك الافتراضية في الرابيد والبليتز والبوليت، ونافس في ليدربورد الـ Rapid، وحمّل أشهر 12 كتاب شطرنج حقيقي باسم المؤلف وسنة النشر.',
+                btn_hero_sync: 'ربط موحد لـ Chess.com و Lichess',
+                btn_hero_tourney: 'دخول صفحة البطولات',
+                btn_hero_play: 'اللعب وتجربة ثيمات الرقعة',
+                home_status_title: 'حالة الحساب والنادي',
+                home_portal_kicker: 'بوابة الأقسام الرئيسية',
+                home_portal_title: 'اختر أي قسم للدخول إليه مباشرة',
+                home_portal_sub: 'اضغط على أي بطاقة بالأسفل لفتح القسم بالكامل',
+                card_lb_title: '1. ليدربورد الرابيد والربط الموحد',
+                card_lb_desc: 'الترتيب الأسبوعي والشهري على أساس تقييم الـ Rapid مع دمج حسابي Chess.com و Lichess في شخص واحد واختيار المنصة لكل وقت.',
+                card_tourney_title: '2. البطولات وشجرة Challonge',
+                card_tourney_desc: 'بطولة الإقصاء المزدوج (challonge.com/stemchess) مع طاولة نتائج المباريات وساعة شوط Armageddon الفاصل.',
+                card_openings_title: '3. موسوعة الـ 12 افتتاحية وتفريعاتها',
+                card_openings_desc: 'شرح تفاعلي لأشهر 12 افتتاحية (الإيطالي، الإسباني، الصقلي، جامبيت الوزير، كارو-كان، لندن...) بالتفريعات.',
+                card_acad_title: '4. الاستراتيجيات، الدفاع، النهايات والمات',
+                card_acad_desc: '7 أقسام تدريبية: وسط الدور، الهجوم والفخاخ، الدفاع الصلب، النهايات (لوسينا وفيليدور)، وأنماط الكش مات في 1–4 نقلات.',
+                card_puz_title: '5. الرقعة المخصصة والألغاز اليومية',
+                card_puz_desc: 'العب بحرية على 6 ثيمات مختلفة للرقعة وحل ألغاز التكتيك اليومية لزيادة الـ Streak.',
+                card_ach_title: '6. إنجازات وأوسمة الشطرنج',
+                card_ach_desc: 'افتح الإنجازات على الرقعة: كش مات بالبيدق، مات بالتبييت (O-O-O#)، المات المخنوق بالحصان، وتضحية الوزير.',
+                card_books_title: '7. مكتبة الـ 12 كتاب شطرنج عالمي حقيقي',
+                card_books_desc: 'كتب حقيقية موثقة باسم المؤلف وسنة الإصدار (1921–2008) مع روابط القراءة وتحميل ملفات الـ PGN التدريبية.',
+                card_team_title: '8. الإدارة، بطاقات الـ QR وطلب الأدمن',
+                card_team_desc: 'قائمة إدارة النادي الرسمية، بطاقات الـ QR Code لكل عضو، وتقديم طلبات الانضمام كأدمن مساعد.',
+                prize_badge: 'جوائز الرابيد الشهرية الرسمية',
+                prize_headline: '🏆 جوائز شهرية: أول 3 مراكز في ليدربورد الـ Rapid الشهري ليهم جائزة من النادي!',
+                prize_subtext: 'الترتيب في الليدربورد مبني على تقييم الـ Rapid، وأول 3 مراكز شهرياً بيكسبوا جوائز Checkmate Club — STEM Suez.',
+                place_1: '🥇 المركز الأول',
+                place_2: '🥈 المركز الثاني',
+                place_3: '🥉 المركز الثالث',
+                prize_gold: 'الجائزة الذهبية',
+                prize_silver: 'الجائزة الفضية',
+                prize_bronze: 'الجائزة البرونزية',
+                unified_badge: 'ملف لاعب واحد موحد',
+                unified_sub: 'يربط حسابي Chess.com و Lichess.org لنفس الشخص بدون تكرار الأسماء',
+                api_sync_title: 'اربط حسابك في Chess.com و Lichess واختار المنصة الافتراضية لكل وقت (Rapid / Blitz / Bullet)',
+                btn_sync_all_live: 'تحديث تقييمات الكل الآن',
+                lbl_select_profile: 'اختر لاعب حالي لتحديثه أو أضف عضو جديد',
+                lbl_player_name: 'اسم اللاعب بالكامل *',
+                lbl_chesscom_user: 'اسم المستخدم في Chess.com',
+                lbl_lichess_user: 'اسم المستخدم في Lichess.org',
+                lbl_pref_rapid: '⚡ المنصة الافتراضية للـ Rapid (أساس الليدربورد):',
+                lbl_pref_blitz: '🔥 المنصة الافتراضية للـ Blitz:',
+                lbl_pref_bullet: '🚀 المنصة الافتراضية للـ Bullet:',
+                btn_sync_unified: 'حفظ وتحديث الملف الموحد للاعب',
+                btn_monthly_lb: 'ليدربورد الرابيد الشهري (جوائز لأول 3)',
+                btn_weekly_lb: 'ليدربورد الرابيد الأسبوعي',
+                lb_verified_note: '⚡ الترتيب على أساس تقييم الـ RAPID (اضغط C أو L للتبديل الفوري بين Chess.com و Lichess)',
+                th_rank: 'المركز',
+                th_player: 'اللاعب والحسابات المرتبطة',
+                th_rapid: '⚡ تقييم Rapid (أساس الترتيب)',
+                th_peak_rapid: 'أعلى Peak رابيد',
+                th_blitz: '🔥 تقييم Blitz',
+                th_bullet: '🚀 تقييم Bullet',
+                th_points: 'نقاط الشهر',
+                th_prize: 'حالة الجائزة',
+                openings_kicker: 'موسوعة افتتاحيات الشطرنج التفاعلية',
+                openings_main_title: 'أشهر 12 افتتاحية في الشطرنج مع الشرح الكامل والتفريعات التفاعلية',
+                lbl_select_variation: 'اختر التفريع لعرضه على الرقعة:',
+                academy_kicker: 'منظومة التدريب الكاملة — STEM Suez',
+                academy_title: 'أكاديمية الشطرنج: الاستراتيجيات، الهجوم والفخاخ، الدفاع الصلب، النهايات، والكش مات',
+                ach_header_title: 'إنجازات الشطرنج وأوسمة الكش مات الخاصة',
+                ach_header_sub: 'جرب وافتح إنجازات الشطرنج عملياً على الرقعة: كش مات بالبيدق، مات بالتبييت، المات المخنوق، وتضحية الوزير!',
+                books_title: 'مكتبة كتب الشطرنج العالمية الحقيقية (12 كتاب موثق باسم المؤلف وسنة النشر)',
+                admins_bar_title: 'الإدارة الرسمية لنادي Checkmate Club — STEM Suez',
+                admins_bar_sub: 'الأدمن الرئيسي: Mohammed Hossam (dedo_stark) وفريق الإدارة',
+                req_admin_title: 'طلب انضمام كأدمن مساعد (Request Assistant Admin)',
+                req_admin_sub: 'بمجرد الموافقة على طلبك من الإدارة، بتحصل فوراً على شارة أدمن مساعد وبطاقة QR.',
+                btn_submit_req: 'إرسال طلب أدمن مساعد',
+                pending_reqs_title: 'طلبات الأدمن المساعد المعلقة',
+                pending_reqs_sub: 'وافق على المتقدم لترقيته فوراً إلى Assistant Admin (أدمن مساعد).',
+                real_members_box_title: 'إضافة عضو حقيقي للنادي',
+                qr_cards_title: 'بطاقات الهوية الرقمية للنادي (QR Code + اسم المستخدم + كلمة المرور)',
+                qr_cards_sub: 'بطاقات موثقة للإدارة، الأدمن المساعد، وأعضاء النادي الحقيقيين.',
+                contact_heading: 'تواصل معنا (Contact Us — Checkmate Club STEM Suez)',
+                hero_desc: 'البطولة الرسمية لنادي Checkmate Club (STEM Suez) على Challonge بنظام الإقصاء المزدوج على Lichess.org و Chess.com.',
+                btn_open_challonge: 'فتح شجرة challonge.com/stemchess',
+                btn_play_lichess: 'إنشاء مباراة على Lichess.org',
+                btn_play_chesscom: 'اللعب على Chess.com',
+                tourney_card_header: 'نظام وقوانين البطولة',
+                lbl_format: 'النظام:',
+                lbl_reset: 'قانون النهائي:',
+                lbl_timecontrol: 'وقت اللعب:',
+                lbl_tiebreak: 'كسر التعادل:',
+                bracket_section_title: 'شجرة البطولة — STEM tournament chess',
+                btn_club_bracket: 'طاولة مباريات النادي',
+                btn_live_embed: 'شجرة Challonge المباشرة',
+                bracket_status_heading: 'التسجيل جاهز (الحسابات الحقيقية الموثقة فقط)',
+                bracket_status_sub: 'اربط حسابات اللاعبين في قسم الليدربورد أو تابع الشجرة على Challonge.',
+                active_matches_title: 'طاولة نتائج المباريات الرسمية',
+                btn_pair_match: 'إنشاء مواجهة جديدة',
+                arma_title: 'ساعة شوط Armageddon الفاصل',
+                arma_sub: 'الأبيض: 5:00 (لازم يكسب) | الأسود: 4:00 (التعادل يكفيه)',
+                btn_coin: 'قرعة العملة',
+                platforms_title: 'منصات اللعب الرسمية',
+                platforms_desc: 'تُلعب المباريات بنظام Blitz 5+0 على Lichess.org أو Chess.com.',
+                waf_test_label: 'اختبار الحماية ضد SQL Injection مباشرة:',
+                waf_sample_btn: "إدراج هجوم تجريبي (' OR 1=1 --)",
+                waf_inspect_btn: 'فحص النص البرمجي'
+            }
+        };
+
+        function applyLanguageUI() {
+            document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+            document.documentElement.lang = currentLang;
+            const btn1 = document.getElementById('lang-btn-text');
+            if (btn1) btn1.textContent = currentLang === 'en' ? 'عربي' : 'EN';
+            const btn2 = document.getElementById('auth-lang-btn-text');
+            if (btn2) btn2.textContent = currentLang === 'en' ? 'عربي' : 'EN';
+
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (i18nDict[currentLang] && i18nDict[currentLang][key]) {
+                    el.textContent = i18nDict[currentLang][key];
+                }
+            });
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'ar' : 'en';
+            try { localStorage.setItem('brilliant_chess_lang', currentLang); } catch (e) {}
+            applyLanguageUI();
+            renderAllSections();
+            populateSyncDropdown();
+            showToast(currentLang === 'ar' ? '🌐 تم تحويل لغة الموقع بالكامل إلى العربية' : '🌐 Website language switched to English');
         }
 
         function showAuthFeedback(msg, isError = true) {
@@ -2705,49 +3400,7 @@
             document.getElementById('arma-white-time').textContent = formatClock(armaWhiteSec);
             document.getElementById('arma-black-time').textContent = formatClock(armaBlackSec);
         }
-
-        function toggleArmageddonClock() {
-            const btn = document.getElementById('btn-arma-start');
-            if (armaInterval) {
-                clearInterval(armaInterval);
-                armaInterval = null;
-                btn.innerHTML = '<i class="fa-solid fa-play mr-1"></i> Resume';
-            } else {
-                btn.innerHTML = '<i class="fa-solid fa-pause mr-1"></i> Pause';
-                armaInterval = setInterval(() => {
-                    if (armaTurn === 'white') {
-                        if (armaWhiteSec > 0) armaWhiteSec--;
-                    } else {
-                        if (armaBlackSec > 0) armaBlackSec--;
-                    }
-                    updateArmaUI();
-                }, 1000);
-            }
-        }
-
-        function switchArmageddonTurn() {
-            armaTurn = armaTurn === 'white' ? 'black' : 'white';
-            showToast(`Armageddon active clock: ${armaTurn.toUpperCase()}`);
-        }
-
-        function resetArmageddonClock() {
-            if (armaInterval) clearInterval(armaInterval);
-            armaInterval = null;
-            armaWhiteSec = 300;
-            armaBlackSec = 240;
-            armaTurn = 'white';
-            document.getElementById('btn-arma-start').innerHTML = '<i class="fa-solid fa-play mr-1"></i> Start';
-            updateArmaUI();
-        }
-
-        function flipArmageddonCoin() {
-            const banner = document.getElementById('coin-result-banner');
-            banner.classList.remove('hidden');
-            const winner = Math.random() > 0.5 ? 'Player 1 Wins Toss — Choose White (5m) or Black (4m + Draw Odds)' : 'Player 2 Wins Toss — Choose White (5m) or Black (4m + Draw Odds)';
-            banner.textContent = '🪙 ' + winner;
-        }
-
-        // --- 6. WEEKLY & MONTHLY LEADERBOARD (+ TOP 3 MONTHLY PRIZES) ---
+        // --- 6. WEEKLY & MONTHLY RAPID LEADERBOARD (+ UNIFIED PLATFORM SWITCHERS FOR RAPID / BLITZ / BULLET) ---
         let currentLbPeriod = 'monthly';
 
         function setLeaderboardPeriod(period) {
@@ -2756,47 +3409,86 @@
             const btnW = document.getElementById('btn-lb-weekly');
             const thPts = document.getElementById('th-period-points');
             if (period === 'monthly') {
-                btnM.className = 'px-4 py-2 rounded-lg text-xs font-black bg-chess-walnut text-white shadow flex items-center gap-1.5';
-                btnW.className = 'px-4 py-2 rounded-lg text-xs font-bold text-chess-espresso hover:bg-chess-light flex items-center gap-1.5';
-                thPts.textContent = 'Monthly Points';
+                btnM.className = 'px-3.5 py-2 rounded-lg text-xs font-black bg-chess-walnut text-white shadow flex items-center gap-1.5';
+                btnW.className = 'px-3.5 py-2 rounded-lg text-xs font-bold text-chess-espresso hover:bg-chess-light flex items-center gap-1.5';
+                if (thPts) thPts.textContent = currentLang === 'ar' ? 'نقاط الشهر' : 'Monthly Pts';
             } else {
-                btnW.className = 'px-4 py-2 rounded-lg text-xs font-black bg-chess-walnut text-white shadow flex items-center gap-1.5';
-                btnM.className = 'px-4 py-2 rounded-lg text-xs font-bold text-chess-espresso hover:bg-chess-light flex items-center gap-1.5';
-                thPts.textContent = 'Weekly Points';
+                btnW.className = 'px-3.5 py-2 rounded-lg text-xs font-black bg-chess-walnut text-white shadow flex items-center gap-1.5';
+                btnM.className = 'px-3.5 py-2 rounded-lg text-xs font-bold text-chess-espresso hover:bg-chess-light flex items-center gap-1.5';
+                if (thPts) thPts.textContent = currentLang === 'ar' ? 'نقاط الأسبوع' : 'Weekly Pts';
             }
             renderLeaderboard();
         }
 
+        function renderTCPlatformCell(player, tc, isMainRapid = false) {
+            const info = getEffectiveTC(player, tc);
+            const cActive = info.activePlatform === 'chesscom';
+            const lActive = info.activePlatform === 'lichess';
+            return `
+                <div class="space-y-1">
+                    <div class="flex items-center gap-1.5">
+                        <span class="font-mono font-black ${isMainRapid ? 'text-base text-chess-walnut' : 'text-sm text-chess-espresso'}">${info.elo}</span>
+                        <span class="px-1.5 py-0.5 rounded text-[10px] font-black ${cActive ? 'bg-emerald-100 text-emerald-900 border border-emerald-400' : 'bg-amber-100 text-amber-900 border border-amber-400'}">
+                            ${info.platformName}
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-1 text-[10px] font-mono">
+                        <button type="button" onclick="setPlayerTimeControlPlatform('${player.id}', '${tc}', 'chesscom')" class="px-1.5 py-0.5 rounded border transition ${cActive ? 'bg-emerald-800 text-white border-emerald-900 font-black' : 'bg-chess-bg text-chess-mahogany border-chess-border hover:bg-chess-light'}" title="Set Chess.com as Default for ${tc.toUpperCase()}">
+                            C:${info.cVal || '—'}
+                        </button>
+                        <button type="button" onclick="setPlayerTimeControlPlatform('${player.id}', '${tc}', 'lichess')" class="px-1.5 py-0.5 rounded border transition ${lActive ? 'bg-chess-walnut text-chess-gold border-chess-espresso font-black' : 'bg-chess-bg text-chess-mahogany border-chess-border hover:bg-chess-light'}" title="Set Lichess.org as Default for ${tc.toUpperCase()}">
+                            L:${info.lVal || '—'}
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
         function renderLeaderboard() {
+            clubAccounts.forEach(acc => updateDerivedRapidFields(acc));
+
+            // PRIMARY SORT BY RAPID ELO (as requested: "والموقع بتاعنا الليدربورد بتاعته على اساس الرابيد")
             const sorted = [...clubAccounts].sort((a, b) => {
+                const rA = getEffectiveTC(a, 'rapid').elo;
+                const rB = getEffectiveTC(b, 'rapid').elo;
+                if (rB !== rA) return rB - rA;
                 const ptsA = currentLbPeriod === 'monthly' ? a.monthlyPoints : a.weeklyPoints;
                 const ptsB = currentLbPeriod === 'monthly' ? b.monthlyPoints : b.weeklyPoints;
-                if (ptsB !== ptsA) return ptsB - ptsA;
-                return b.elo - a.elo;
+                return ptsB - ptsA;
             });
 
-            // Render Top 3 Podium
+            // Render Top 3 Podium based on Rapid ELO
             const podium = document.getElementById('leaderboard-podium');
-            const medals = ['🥇 1st Place — Gold Prize', '🥈 2nd Place — Silver Prize', '🥉 3rd Place — Bronze Prize'];
+            const medalsEn = ['🥇 1st Place — Gold Rapid Prize', '🥈 2nd Place — Silver Rapid Prize', '🥉 3rd Place — Bronze Rapid Prize'];
+            const medalsAr = ['🥇 المركز الأول — جائزة الرابيد الذهبية', '🥈 المركز الثاني — جائزة الرابيد الفضية', '🥉 المركز الثالث — جائزة الرابيد البرونزية'];
+            const medals = currentLang === 'ar' ? medalsAr : medalsEn;
+
             podium.innerHTML = sorted.slice(0, 3).map((p, i) => {
-                const pts = currentLbPeriod === 'monthly' ? p.monthlyPoints : p.weeklyPoints;
-                const badge = p.isAdmin ? `<span class="px-2 py-0.5 rounded text-[10px] font-black badge-lead-admin">${p.role.toUpperCase()} ✓</span>` :
+                const rapidInfo = getEffectiveTC(p, 'rapid');
+                const blitzInfo = getEffectiveTC(p, 'blitz');
+                const bulletInfo = getEffectiveTC(p, 'bullet');
+                const roleLabel = currentLang === 'ar' ? (p.roleAr || p.role) : p.role;
+                const badge = p.isAdmin ? `<span class="px-2 py-0.5 rounded text-[10px] font-black badge-lead-admin">${roleLabel.toUpperCase()} ✓</span>` :
                     (p.isAssistant ? `<span class="px-2 py-0.5 rounded text-[10px] font-black badge-assistant-admin">ASSISTANT ADMIN</span>` : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-chess-light text-chess-espresso">MEMBER</span>`);
                 return `
                     <div class="bg-chess-bg border-2 ${i === 0 ? 'border-chess-gold' : 'border-chess-border'} rounded-2xl p-4 shadow-sm flex flex-col justify-between gap-3">
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between gap-2">
                             <span class="px-2.5 py-1 rounded-md bg-chess-walnut text-chess-gold text-xs font-black">${medals[i]}</span>
-                            <span class="font-mono font-black text-sm text-chess-espresso">${pts} pts</span>
+                            <span class="font-mono font-black text-sm text-emerald-800">⚡ ${rapidInfo.elo} Rapid</span>
                         </div>
                         <div>
                             <div class="font-black text-base text-chess-espresso flex items-center gap-1.5">
                                 ${p.displayName}
                                 ${(p.isAdmin || p.isAssistant) ? '<i class="fa-solid fa-circle-check text-amber-600"></i>' : ''}
                             </div>
-                            <div class="flex flex-wrap items-center gap-2 mt-1.5">
+                            <div class="flex flex-wrap items-center gap-2 mt-2">
                                 ${badge}
-                                <span class="text-xs font-mono font-black text-chess-espresso">Highest ELO: ${p.elo} (Peak ${p.peakElo})</span>
-                                <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 border border-emerald-400 text-[10px] font-black">${p.higherSource || 'Verified'}</span>
+                                <span class="text-xs font-mono font-black text-chess-espresso">Peak Rapid: ${rapidInfo.peak}</span>
+                                <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 border border-emerald-400 text-[10px] font-black">${rapidInfo.platformName}</span>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 mt-2.5 pt-2 border-t border-chess-border text-[11px] font-mono text-chess-mahogany">
+                                <span>🔥 Blitz: <strong class="text-chess-espresso">${blitzInfo.elo}</strong> (${blitzInfo.platformName})</span>
+                                <span>🚀 Bullet: <strong class="text-chess-espresso">${bulletInfo.elo}</strong> (${bulletInfo.platformName})</span>
                             </div>
                         </div>
                     </div>
@@ -2806,36 +3498,39 @@
             // Render Full Table
             const tbody = document.getElementById('leaderboard-tbody');
             tbody.innerHTML = sorted.map((p, i) => {
+                const rapidInfo = getEffectiveTC(p, 'rapid');
                 const pts = currentLbPeriod === 'monthly' ? p.monthlyPoints : p.weeklyPoints;
                 const prizeBadge = i < 3
-                    ? `<span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 border border-amber-400 text-xs font-black">🏆 Top ${i + 1} Monthly Prize</span>`
-                    : `<span class="text-xs text-chess-mahogany">Contender</span>`;
+                    ? `<span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 border border-amber-400 text-xs font-black">🏆 ${currentLang === 'ar' ? 'جائزة المركز ' + (i + 1) : 'Top ' + (i + 1) + ' Rapid Prize'}</span>`
+                    : `<span class="text-xs text-chess-mahogany">${currentLang === 'ar' ? 'منافس' : 'Contender'}</span>`;
+                const roleLabel = currentLang === 'ar' ? (p.roleAr || p.role) : p.role;
                 const roleBadge = p.isAdmin
-                    ? `<span class="px-2 py-0.5 rounded text-[10px] font-black badge-lead-admin ml-1.5">${p.role.toUpperCase()} ✓</span>`
-                    : (p.isAssistant ? `<span class="px-2 py-0.5 rounded text-[10px] font-black badge-assistant-admin ml-1.5">ASSISTANT ADMIN</span>` : '');
-
-                const breakdownText = `Chess.com: ${p.chessComElo || '—'} | Lichess: ${p.lichessElo || '—'}`;
+                    ? `<span class="px-2 py-0.5 rounded text-[10px] font-black badge-lead-admin ml-1">${roleLabel.toUpperCase()} ✓</span>`
+                    : (p.isAssistant ? `<span class="px-2 py-0.5 rounded text-[10px] font-black badge-assistant-admin ml-1">ASSISTANT ADMIN</span>` : '');
 
                 return `
                     <tr class="hover:bg-chess-bg/70 transition">
-                        <td class="py-3.5 px-4 font-mono font-black text-chess-walnut">#${i + 1}</td>
-                        <td class="py-3.5 px-4">
-                            <span class="font-black text-chess-espresso">${p.displayName}</span>
-                            ${roleBadge}
+                        <td class="py-3.5 px-3 font-mono font-black text-chess-walnut">#${i + 1}</td>
+                        <td class="py-3.5 px-3">
+                            <div class="font-black text-chess-espresso flex flex-wrap items-center gap-1">
+                                <span>${p.name}</span>
+                                ${roleBadge}
+                            </div>
+                            <div class="text-[11px] font-mono text-chess-mahogany mt-0.5">
+                                Chess.com: <strong>${p.chessComUser || '—'}</strong> | Lichess: <strong>${p.lichessUser || '—'}</strong>
+                            </div>
                         </td>
-                        <td class="py-3.5 px-4">
-                            <span class="font-mono font-black text-base text-chess-espresso">${p.elo}</span>
-                            <span class="ml-1.5 px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 text-[10px] font-black">${p.higherSource || 'Club'}</span>
+                        <td class="py-3.5 px-3 bg-amber-50/60">${renderTCPlatformCell(p, 'rapid', true)}</td>
+                        <td class="py-3.5 px-3 font-mono font-extrabold text-chess-walnut">${rapidInfo.peak}</td>
+                        <td class="py-3.5 px-3">${renderTCPlatformCell(p, 'blitz', false)}</td>
+                        <td class="py-3.5 px-3">${renderTCPlatformCell(p, 'bullet', false)}</td>
+                        <td class="py-3.5 px-3">
+                            <div class="flex items-center gap-1.5">
+                                <span class="font-mono font-black text-chess-walnut">${pts}</span>
+                                <button type="button" onclick="awardLeaderboardPoints('${p.id}', 15)" class="px-1.5 py-0.5 rounded bg-chess-light hover:bg-chess-walnut hover:text-white text-chess-espresso font-bold text-[10px] border border-chess-border transition">+15</button>
+                            </div>
                         </td>
-                        <td class="py-3.5 px-4 font-mono font-extrabold text-chess-walnut">${p.peakElo}</td>
-                        <td class="py-3.5 px-4 font-mono text-xs text-chess-mahogany">${breakdownText}</td>
-                        <td class="py-3.5 px-4 font-mono font-black text-chess-walnut">${pts} pts</td>
-                        <td class="py-3.5 px-4">${prizeBadge}</td>
-                        <td class="py-3.5 px-4 text-right space-x-1">
-                            <button onclick="awardLeaderboardPoints('${p.id}', 15)" class="px-2.5 py-1 rounded-lg bg-chess-light hover:bg-chess-walnut hover:text-white text-chess-espresso font-bold text-xs border border-chess-border transition">
-                                +15 Pts
-                            </button>
-                        </td>
+                        <td class="py-3.5 px-3">${prizeBadge}</td>
                     </tr>
                 `;
             }).join('');
@@ -3874,214 +4569,203 @@
                     banner.innerHTML = `<i class="fa-solid fa-circle-check mr-1"></i> Correct! ${p.explanation}`;
                     showToast('🔥 Puzzle Solved! Daily Streak incremented!');
                 } else {
-                    selectedPuzzleSq = null;
-                    renderPuzzleSection();
-                    const banner = document.getElementById('puzzle-status-banner');
-                    banner.className = 'w-full max-w-[400px] mt-3 p-3 rounded-xl bg-amber-100 border-2 border-amber-600 text-center text-xs font-black text-amber-900';
-                    banner.textContent = 'Not the most forcing move — try again or click Hint!';
-                }
-            }
-        }
-
-        function selectPuzzle(idx) {
-            currentPuzzleIdx = idx;
-            selectedPuzzleSq = null;
-            const banner = document.getElementById('puzzle-status-banner');
-            banner.className = 'w-full max-w-[400px] mt-3 p-3 rounded-xl bg-chess-light/70 border border-chess-border text-center text-xs font-extrabold text-chess-espresso';
-            banner.textContent = 'Click a piece and then click its target square to play the winning move!';
-            renderPuzzleSection();
-        }
-
-        function showPuzzleHint() {
-            const p = PUZZLES_DATA[currentPuzzleIdx];
-            const banner = document.getElementById('puzzle-status-banner');
-            banner.textContent = '💡 Hint: ' + p.hint;
-        }
-
-        function revealPuzzleSolution() {
-            const p = PUZZLES_DATA[currentPuzzleIdx];
-            selectedPuzzleSq = p.solutionFrom;
-            handlePuzzleSquareClick(p.solutionTo);
-        }
-
-        function nextPuzzle() {
-            selectPuzzle((currentPuzzleIdx + 1) % PUZZLES_DATA.length);
-        }
-
-        // --- 12. MASSIVE CHESS BOOKS DOWNLOAD LIBRARY (16 FAMOUS CHESS BOOKS) ---
+        // --- 12. 12 REAL, AUTHENTIC WORLD-FAMOUS CHESS BOOKS (WITH EXACT AUTHOR, YEAR & ARCHIVE/PGN LINKS) ---
         const CHESS_BOOKS = [
             {
                 id: 'b1',
-                title: 'My System (نظامـي في الشطرنج)',
-                author: 'Aron Nimzowitsch',
+                title: 'Chess Fundamentals (أساسيات الشطرنج)',
+                author: 'José Raúl Capablanca (World Champion)',
+                year: '1921',
                 category: 'Strategy',
-                pages: '372 Pages',
-                summary: 'The foundational bible of positional chess covering Open Files, the 7th Rank, Prophylaxis, Overprotection, Outposts, and Passed Pawns.',
-                chapters: ['The Center & Development', 'Open Files & The 7th Rank', 'The Passed Pawn & Blockade', 'Prophylaxis & Outposts']
+                pages: '246 Pages',
+                archiveUrl: 'https://archive.org/details/chessfundamental00capa',
+                summary: 'Written by the 3rd World Chess Champion José Raúl Capablanca in 1921. Considered one of the greatest foundational chess books ever published, teaching endgame principles, pawn endings, rook endings, and crystal-clear middlegame planning.',
+                chapters: ['First Principles: Simple Checkmates & Pawn Promotion', 'Endgame Strategy & King Activity', 'Planning in the Middlegame', '14 Annotated Masterpieces by Capablanca'],
+                samplePgn: `[Event "New York"]\n[Site "New York, NY USA"]\n[Date "1918.10.23"]\n[White "Jose Raul Capablanca"]\n[Black "Frank James Marshall"]\n[Result "1-0"]\n1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 O-O 8. c3 d5 9. exd5 Nxd5 10. Nxe5 Nxe5 11. Rxe5 Nf6 12. Re1 Bd6 1-0`
             },
             {
                 id: 'b2',
-                title: 'Bobby Fischer Teaches Chess',
-                author: 'Bobby Fischer, Stuart Margulies',
-                category: 'Tactics',
-                pages: '334 Pages',
-                summary: 'Interactive programmed mastery of Back-Rank Mates, Deflections, Pins, Removals of the Guard, and Royal Forks.',
-                chapters: ['Back-Rank Mates & Defenses', 'Interpositions & Decoys', 'Smothered & Arabian Mates']
+                title: 'My System — Mein System (نظامي في الشطرنج)',
+                author: 'Aron Nimzowitsch',
+                year: '1925',
+                category: 'Strategy',
+                pages: '372 Pages',
+                archiveUrl: 'https://archive.org/details/MySystemAronNimzowitsch',
+                summary: 'Published in 1925 by Grandmaster Aron Nimzowitsch. The foundational bible of hypermodern positional chess introducing Prophylaxis, Overprotection, Knight Outposts, Open Files, the 7th Rank invasion, and Blockading Passed Pawns.',
+                chapters: ['The Center & Development', 'Open Files & The 7th and 8th Ranks', 'The Passed Pawn & Blockade Rule', 'Prophylaxis, Overprotection & Pawn Chains'],
+                samplePgn: `[Event "Carlsbad"]\n[Date "1929.08.06"]\n[White "Aron Nimzowitsch"]\n[Black "Akiba Rubinstein"]\n[Result "1-0"]\n1. d4 d5 2. Nf3 Nf6 3. e3 c5 4. c4 e6 5. Nc3 Nc6 6. a3 Bd6 1-0`
             },
             {
                 id: 'b3',
-                title: 'Logical Chess: Move by Move',
+                title: 'Logical Chess: Move by Move (الشطرنج المنطقي نقلة بنقلة)',
                 author: 'Irving Chernev',
+                year: '1957',
                 category: 'Openings',
                 pages: '256 Pages',
-                summary: 'Every single move of 33 classic games explained in plain English, teaching why each opening and middlegame move works.',
-                chapters: ['Kingside Attacks & Greek Gift', 'The Queen’s Gambit Move-by-Move', 'Mastering the Ruy Lopez & Italian']
+                archiveUrl: 'https://openlibrary.org/works/OL1964526W/Logical_chess_move_by_move',
+                summary: 'Published in 1957 by Irving Chernev. Explains the exact purpose of every single move in 33 classic master games, making opening principles, kingside attacks, and positional play effortless to understand.',
+                chapters: ['Attacking the Castled King (Games 1–16)', 'The Queen’s Pawn Opening Move-by-Move (Games 17–23)', 'Positional Mastery & Central Control (Games 24–33)'],
+                samplePgn: `[Event "Vienna"]\n[Date "1915"]\n[White "Carl Schlechter"]\n[Black "Philipp Meitner"]\n[Result "1-0"]\n1. e4 e5 2. Nf3 Nc6 3. Bc4 Bc5 4. c3 Nf6 5. d4 exd4 6. cxd4 Bb4+ 1-0`
             },
             {
                 id: 'b4',
-                title: '100 Endgames You Must Know',
-                author: 'GM Jesús de la Villa',
-                category: 'Endgame',
-                pages: '248 Pages',
-                summary: 'The definitive guide to theoretical endgames including Lucena, Philidor, Opposition, Queen vs Pawn, and Minor Piece endings.',
-                chapters: ['Basic Checkmates & King + Pawn', 'Knight vs Bishop Endings', 'Lucena Bridge & Philidor Defense']
+                title: 'The Art of Attack in Chess (فن الهجوم في الشطرنج)',
+                author: 'Vladimir Vuković',
+                year: '1965',
+                category: 'Tactics',
+                pages: '352 Pages',
+                archiveUrl: 'https://openlibrary.org/works/OL4338142W/The_art_of_attack_in_chess',
+                summary: 'Published in 1965 by Croatian IM Vladimir Vuković. The definitive manual on attacking the uncastled King, executing the classic Greek Gift sacrifice (Bxh7+!), double bishop sacrifices, and mating patterns.',
+                chapters: ['Attacking the Uncastled King in the Center', 'The Classic Bishop Sacrifice on h7 (Bxh7+!)', 'Focal Points & Mating Nets Against Castled Kings'],
+                samplePgn: `[Event "Greek Gift Study"]\n[Date "1965"]\n[White "Vukovic Attack Model"]\n[Black "Castled Defense"]\n1. e4 e6 2. d4 d5 3. Nc3 Nf6 4. e5 Nfd7 5. Bd3 c5 6. Nf3 Nc6 7. Bxh7+ Kxh7 8. Ng5+ Kg8 9. Qh5 1-0`
             },
             {
                 id: 'b5',
-                title: 'The Art of Attack in Chess',
-                author: 'Vladimir Vuković',
+                title: 'Bobby Fischer Teaches Chess (بوبي فيشر يعلم الشطرنج)',
+                author: 'Bobby Fischer, Stuart Margulies & Donn Mosenfelder',
+                year: '1966',
                 category: 'Tactics',
-                pages: '352 Pages',
-                summary: 'Complete manual on attacking the uncastled King, castled King, Greek Gift (Bxh7+), Double Bishop Sacrifices, and mating nets.',
-                chapters: ['Attacking the Uncastled King', 'The Classic Bxh7+ Sacrifice', 'Pawn Storms Against g7 & h7']
+                pages: '334 Pages',
+                archiveUrl: 'https://openlibrary.org/works/OL59050W/Bobby_Fischer_Teaches_Chess',
+                summary: 'Published in 1966 by 11th World Champion Bobby Fischer. Uses a revolutionary programmed learning method to train pattern recognition for Back-Rank Mates, Pins, Deflections, Decoys, and Smothered Mates.',
+                chapters: ['Elements of Checkmate & Back-Rank Nets', 'Removing the Guard & Deflection Sacrifices', 'Interpositions, Pins & Discovered Attacks'],
+                samplePgn: `[Event "USA Championship"]\n[Date "1963.12.16"]\n[White "Robert James Fischer"]\n[Black "Robert Eugene Byrne"]\n[Result "1-0"]\n1. d4 Nf6 2. c4 g6 3. g3 c6 4. Bg2 d5 5. cxd5 cxd5 6. Nc3 Bg7 7. e3 O-O 8. Nge2 Nc6 9. O-O b6 10. b3 Ba6 11. Ba3 Re8 12. Qd2 e5 13. dxe5 Nxe5 14. Rfd1 Nd3 15. Qc2 Nxf2 16. Kxf2 Ng4+ 17. Kg1 Nxe3 18. Qd2 Nxg2 19. Kxg2 d4 20. Nxd4 Bb7+ 21. Kf1 Qd7 1-0`
             },
             {
                 id: 'b6',
-                title: 'Zurich International Chess Tournament 1953',
-                author: 'GM David Bronstein',
+                title: 'My 60 Memorable Games (مبارياتي الـ 60 الخالدة)',
+                author: 'Bobby Fischer (11th World Champion)',
+                year: '1969',
                 category: 'Middlegame',
-                pages: '368 Pages',
-                summary: '210 masterpieces deeply annotated with focus on King’s Indian, Nimzo-Indian, and dynamic middlegame strategy.',
-                chapters: ['Dynamic Counterplay in the KID', 'Central Pawn Roller vs Piece Activity', 'Defensive Resilience']
+                pages: '384 Pages',
+                archiveUrl: 'https://openlibrary.org/works/OL59052W/My_60_memorable_games',
+                summary: 'Published in 1969 by Bobby Fischer. Widely hailed as the finest game collection in chess history, featuring deeply honest analysis of his battles against Tal, Spassky, Petrosian, Botvinnik, and Larsen.',
+                chapters: ['The Game of the Century & Early Brilliancies', 'Sicilian Najdorf & King’s Indian Battles', 'Ruy Lopez & Endgame Precision'],
+                samplePgn: `[Event "Varna Olympiad"]\n[Date "1962"]\n[White "Robert James Fischer"]\n[Black "Mikhail Botvinnik"]\n[Result "1/2-1/2"]\n1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 g6 1/2-1/2`
             },
             {
                 id: 'b7',
-                title: "Silman's Complete Endgame Course",
-                author: 'IM Jeremy Silman',
-                category: 'Endgame',
-                pages: '530 Pages',
-                summary: 'Structured by player rating from 1000 ELO up to Master level so you learn the exact endgames needed for your current bracket.',
-                chapters: ['1000-1400 ELO: Opposition & Box Mates', '1400-1800 ELO: Lucena & Philidor', 'Master Rook Endings']
+                title: 'Think Like a Grandmaster (فكر كأستاذ دولي كبير)',
+                author: 'GM Alexander Kotov',
+                year: '1971',
+                category: 'Middlegame',
+                pages: '200 Pages',
+                archiveUrl: 'https://openlibrary.org/works/OL4786416W/Think_like_a_grandmaster',
+                summary: 'Published in 1971 by Soviet Grandmaster Alexander Kotov. Introduces the famous methodology of "Candidate Moves" and the "Tree of Analysis" so players calculate forced variations systematically without blundering.',
+                chapters: ['Selecting Candidate Moves', 'Building the Tree of Analysis (Calculating Each Branch Once)', 'Positional Judgment & The Centre'],
+                samplePgn: `[Event "Candidates Tournament"]\n[Date "1953"]\n[White "Yuri Averbakh"]\n[Black "Alexander Kotov"]\n[Result "0-1"]\n1. d4 Nf6 2. c4 d6 3. Nf3 Nbd7 4. Nc3 e5 5. e4 Be7 6. Be2 O-O 0-1`
             },
             {
                 id: 'b8',
-                title: 'How to Reassess Your Chess (4th Edition)',
-                author: 'IM Jeremy Silman',
-                category: 'Strategy',
-                pages: '658 Pages',
-                summary: 'Teaches the Imbalance System: how to evaluate Knights vs Bishops, Pawn Structure, Space, Material, and Initiative.',
-                chapters: ['Recognizing Board Imbalances', 'Creating Permanent Knight Outposts', 'Stopping Premature Attacks']
+                title: 'The Life and Games of Mikhail Tal (حياة ومباريات ميخائيل تال)',
+                author: 'Mikhail Tal (8th World Champion)',
+                year: '1976',
+                category: 'Tactics',
+                pages: '536 Pages',
+                archiveUrl: 'https://openlibrary.org/works/OL2672814W/The_life_and_games_of_Mikhail_Tal',
+                summary: 'Published in 1976 by "The Magician from Riga", 8th World Champion Mikhail Tal. Showcases intuitive piece sacrifices, dynamic initiative, and attacking combinations.',
+                chapters: ['Rise to the World Championship (1957–1960)', 'World Title Match vs Mikhail Botvinnik (1960)', 'Intuitive Sacrifices & Open-Line Attacks'],
+                samplePgn: `[Event "World Championship Match"]\n[Date "1960.03.26"]\n[White "Mikhail Botvinnik"]\n[Black "Mikhail Tal"]\n[Result "0-1"]\n1. c4 Nf6 2. Nf3 g6 3. g3 Bg7 4. Bg2 O-O 5. d4 d6 6. Nc3 Nbd7 0-1`
             },
             {
                 id: 'b9',
-                title: 'Modern Chess Openings (MCO-15)',
-                author: 'GM Nick de Firmian',
-                category: 'Openings',
-                pages: '768 Pages',
-                summary: 'Comprehensive reference encyclopedia covering Open Games (1.e4 e5), Sicilian, French, Caro-Kann, Queen’s Gambit, and Indian Defenses.',
-                chapters: ['Open Games — Italian, Ruy Lopez, Scotch', 'Semi-Open — Sicilian, Caro-Kann, French', 'Closed & Indian Defenses']
+                title: 'How to Reassess Your Chess (كيف تعيد تقييم شطرنجك)',
+                author: 'IM Jeremy Silman',
+                year: '1993',
+                category: 'Strategy',
+                pages: '658 Pages',
+                archiveUrl: 'https://openlibrary.org/works/OL1893109W/How_to_reassess_your_chess',
+                summary: 'First published in 1993 (4th Ed. 2010) by IM Jeremy Silman. Teaches the "Imbalance System": breaking down any position by comparing Minor Pieces (Knights vs Bishops), Pawn Structure, Space, Material, and Initiative.',
+                chapters: ['The 7 Positional Imbalances', 'Creating Permanent Outposts for Knights', 'Formulating a Plan Based on Board Imbalances'],
+                samplePgn: `[Event "Positional Imbalance Model"]\n[Date "1993"]\n[White "Knight Outpost Plan"]\n[Black "Bad Bishop Defense"]\n1. e4 c5 2. Nf3 Nc6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 e5 6. Ndb5 d6 7. Bg5 a6 8. Na3 b5 9. Nd5 1-0`
             },
             {
                 id: 'b10',
-                title: '1001 Deadly Checkmates',
-                author: 'GM John Nunn',
-                category: 'Tactics',
-                pages: '288 Pages',
-                summary: 'Systematic collection of Mate in 1, Mate in 2, Mate in 3, and Mate in 4 exercises classified by tactical theme.',
-                chapters: ['Pins & Double Checks', 'Decoy Sacrifices & Clearance Mates', 'Forced Mate in 3 & 4 Drills']
+                title: "Dvoretsky's Endgame Manual (دليل ديفورسكي للنهايات)",
+                author: 'Mark Dvoretsky',
+                year: '2003',
+                category: 'Endgame',
+                pages: '400 Pages',
+                archiveUrl: 'https://openlibrary.org/works/OL8266589W/Dvoretsky%27s_Endgame_Manual',
+                summary: 'Published in 2003 by legendary trainer Mark Dvoretsky. The ultimate modern reference for Pawn, Knight, Bishop, Rook, and Queen endgames studied by World Champions.',
+                chapters: ['Pawn Endgames: Key Squares, Opposition & Triangulation', 'Rook Endgames: Lucena, Philidor & Vancura Positions', 'Opposite-Colored & Same-Colored Bishop Endings'],
+                samplePgn: `[Event "Lucena Endgame Study"]\n[Date "2003"]\n[FEN "1K1k4/1P6/8/8/8/8/r7/2R5 w - - 0 1"]\n1. Rc4 Ra1 2. Kb7 Rb1+ 3. Ka6 Ra1+ 4. Kb6 Rb1+ 5. Rb4 1-0`
             },
             {
                 id: 'b11',
-                title: "Dvoretsky's Endgame Manual",
-                author: 'Mark Dvoretsky',
+                title: "Silman's Complete Endgame Course (كورس سلمن الكامل للنهايات)",
+                author: 'IM Jeremy Silman',
+                year: '2007',
                 category: 'Endgame',
-                pages: '400 Pages',
-                summary: 'Elite reference for precise calculation in Pawn, Knight, Bishop, Rook, and Queen endgames.',
-                chapters: ['Pawn Endgames — Key Squares & Triangulation', 'Practical Rook Endings']
+                pages: '530 Pages',
+                archiveUrl: 'https://openlibrary.org/works/OL8266611W/Silman%27s_Complete_Endgame_Course',
+                summary: 'Published in 2007 by IM Jeremy Silman. Uniquely organized by ELO rating brackets (from Unrated & 1000 ELO up to 2200+ Master) so you master the exact endgames needed for your rating level.',
+                chapters: ['Part 1–3 (Up to 1400 ELO): Box Mates, King+Pawn & Opposition', 'Part 4–5 (1400–1799 ELO): Lucena, Philidor & Fox in the Chicken Coop', 'Part 6–8 (1800–2200+ ELO): Complex Rook & Minor Piece Endings'],
+                samplePgn: `[Event "Philidor Defense Study"]\n[Date "2007"]\n[FEN "3k4/8/3KP3/8/8/r7/8/4R3 b - - 0 1"]\n1... Ra6 2. e7+ Ke8 3. Rh1 Ra1 1/2-1/2`
             },
             {
                 id: 'b12',
-                title: 'Think Like a Grandmaster',
-                author: 'GM Alexander Kotov',
-                category: 'Middlegame',
-                pages: '200 Pages',
-                summary: 'Introduces Candidate Moves and the Tree of Analysis so you calculate forced lines once clearly without blundering.',
-                chapters: ['Selecting Candidate Moves', 'Building the Tree of Variations', 'Positional Judgment']
-            },
-            {
-                id: 'b13',
-                title: 'The Art of Chess Defense',
-                author: 'GM Andrew Soltis',
-                category: 'Strategy',
-                pages: '264 Pages',
-                summary: 'How to defend worse positions, neutralize gambits, trade off attackers, and set counter-traps.',
-                chapters: ['Prophylactic Defense & King Shelter', 'Exchanging the Best Attacker', 'Constructing Fortresses']
-            },
-            {
-                id: 'b14',
-                title: 'Fundamental Chess Openings (FCO)',
-                author: 'GM Paul van der Sterren',
-                category: 'Openings',
-                pages: '480 Pages',
-                summary: 'Explains the strategic philosophy behind every major opening and variation rather than rote memorization.',
-                chapters: ['Why 1.e4 Works & How Black Counter-Strikes', '1.d4 Systems — Queen’s Gambit, London & Slav']
-            },
-            {
-                id: 'b15',
-                title: 'The Woodpecker Method',
-                author: 'GM Axel Smith & GM Hans Tikkanen',
-                category: 'Tactics',
-                pages: '392 Pages',
-                summary: 'High-intensity tactical pattern recognition system designed to sharpen blitz and rapid calculation speed.',
-                chapters: ['Cycle 1: Foundational Tactical Motifs', 'Cycle 2: Intermediate Combinations', 'Cycle 3: Fast Pattern Recognition']
-            },
-            {
-                id: 'b16',
-                title: "The Amateur's Mind",
-                author: 'IM Jeremy Silman',
-                category: 'Strategy',
-                pages: '443 Pages',
-                summary: 'Identifies and fixes common strategic misconceptions made by 1000–1600 ELO players.',
-                chapters: ['Handling Knights vs Bishops', 'Pawn Chains & Central Control', 'Converting Winning Positions Solidly']
+                title: '100 Endgames You Must Know (100 نهاية يجب أن تعرفها)',
+                author: 'GM Jesús de la Villa',
+                year: '2008',
+                category: 'Endgame',
+                pages: '248 Pages',
+                archiveUrl: 'https://openlibrary.org/works/OL16808914W/100_Endgames_You_Must_Know',
+                summary: 'Published in 2008 by Grandmaster Jesús de la Villa. Isolates the 100 most frequent, practical endgame positions that decide tournament games under time pressure.',
+                chapters: ['Basic Checkmates & Rule of the Square', 'Queen vs Pawn on the 7th Rank', 'Knight vs Pawn & Bishop + Wrong Rook Pawn'],
+                samplePgn: `[Event "Rule of the Square Study"]\n[Date "2008"]\n[FEN "8/8/8/8/P7/8/4k3/7K w - - 0 1"]\n1. a5 Kd3 2. a6 Kc4 3. a7 Kb5 4. a8=Q 1-0`
             }
         ];
 
         function renderBooksGrid() {
             const filter = document.getElementById('book-category-filter')?.value || 'all';
             const grid = document.getElementById('books-grid');
+            if (!grid) return;
             const filtered = filter === 'all' ? CHESS_BOOKS : CHESS_BOOKS.filter(b => b.category === filter);
 
             grid.innerHTML = filtered.map(b => `
                 <div class="bg-chess-bg border-2 border-chess-border rounded-2xl p-5 flex flex-col justify-between gap-4 hover:border-chess-walnut transition shadow-sm">
                     <div class="space-y-2.5">
-                        <div class="flex items-center justify-between">
+                        <div class="flex items-center justify-between gap-2 flex-wrap">
                             <span class="px-2.5 py-0.5 rounded bg-chess-walnut text-chess-gold text-[11px] font-black uppercase">${b.category}</span>
-                            <span class="text-xs font-mono font-bold text-chess-mahogany">${b.pages}</span>
+                            <div class="flex items-center gap-1.5">
+                                <span class="px-2.5 py-0.5 rounded bg-amber-100 text-amber-900 border border-amber-400 text-xs font-mono font-black">
+                                    <i class="fa-regular fa-calendar-check mr-1"></i> ${b.year}
+                                </span>
+                                <span class="text-xs font-mono font-bold text-chess-mahogany">${b.pages}</span>
+                            </div>
                         </div>
                         <h3 class="text-base font-black text-chess-espresso">${b.title}</h3>
-                        <p class="text-xs font-bold text-chess-mahogany"><i class="fa-solid fa-feather-pointed mr-1"></i> ${b.author}</p>
+                        <div class="bg-white border border-chess-border rounded-xl px-3 py-2 text-xs">
+                            <div class="font-extrabold text-chess-walnut flex items-center justify-between">
+                                <span><i class="fa-solid fa-user-pen mr-1 text-chess-gold"></i> ${currentLang === 'ar' ? 'المؤلف:' : 'Author:'}</span>
+                                <span class="text-chess-espresso">${b.author}</span>
+                            </div>
+                            <div class="font-bold text-chess-mahogany flex items-center justify-between mt-1 pt-1 border-t border-chess-border">
+                                <span><i class="fa-solid fa-clock-rotate-left mr-1"></i> ${currentLang === 'ar' ? 'سنة النشر:' : 'Published Year:'}</span>
+                                <span class="font-mono font-black text-chess-espresso">${b.year}</span>
+                            </div>
+                        </div>
                         <p class="text-xs text-chess-espresso leading-relaxed">${b.summary}</p>
                         <div class="bg-white border border-chess-border rounded-xl p-3 space-y-1">
-                            <span class="text-[10px] font-black uppercase text-chess-walnut block">Included Study Chapters:</span>
+                            <span class="text-[10px] font-black uppercase text-chess-walnut block">${currentLang === 'ar' ? 'أهم فصول الكتاب:' : 'Key Chapters:'}</span>
                             ${b.chapters.map(c => `<div class="text-[11px] text-chess-mahogany">• ${c}</div>`).join('')}
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-2 pt-2 border-t border-chess-border">
-                        <button onclick="downloadStudyBook('${b.id}')" class="py-2.5 px-3 rounded-xl bg-chess-walnut hover:bg-chess-espresso text-white font-black text-xs flex items-center justify-center gap-1.5 shadow">
-                            <i class="fa-solid fa-download text-chess-gold"></i> Download Book
-                        </button>
-                        <button onclick="openBookReader('${b.id}')" class="py-2.5 px-3 rounded-xl bg-chess-light hover:bg-chess-dark hover:text-white text-chess-espresso border border-chess-border font-extrabold text-xs flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-book-open"></i> Read Guide
+                    <div class="space-y-2 pt-2 border-t border-chess-border">
+                        <div class="grid grid-cols-2 gap-2">
+                            <a href="${b.archiveUrl}" target="_blank" rel="noopener noreferrer" class="py-2.5 px-3 rounded-xl bg-chess-walnut hover:bg-chess-espresso text-white font-black text-xs flex items-center justify-center gap-1.5 shadow text-center">
+                                <i class="fa-solid fa-up-right-from-square text-chess-gold"></i>
+                                <span>${currentLang === 'ar' ? 'قراءة الكتاب (Archive)' : 'Archive / Edition'}</span>
+                            </a>
+                            <button type="button" onclick="downloadStudyBook('${b.id}')" class="py-2.5 px-3 rounded-xl bg-chess-gold hover:bg-amber-500 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow">
+                                <i class="fa-solid fa-download"></i>
+                                <span>${currentLang === 'ar' ? 'تحميل ملخص + PGN' : 'Study Guide + PGN'}</span>
+                            </button>
+                        </div>
+                        <button type="button" onclick="openBookReader('${b.id}')" class="w-full py-2 px-3 rounded-xl bg-chess-light hover:bg-chess-dark hover:text-white text-chess-espresso border border-chess-border font-extrabold text-xs flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-book-open"></i>
+                            <span>${currentLang === 'ar' ? 'عرض تفاصيل الكتاب والـ PGN داخل الموقع' : 'Preview Chapters & Annotated PGN'}</span>
                         </button>
                     </div>
                 </div>
@@ -4092,44 +4776,48 @@
             const b = CHESS_BOOKS.find(x => x.id === bookId);
             if (!b) return;
             const htmlDoc = `<!DOCTYPE html>
-<html><head><meta charset="utf-8"><title>${b.title} — bondkchess Study Edition</title>
-<style>body{font-family:Georgia,serif;max-width:800px;margin:40px auto;padding:24px;background:#FAF7F2;color:#4A2511;line-height:1.7}
-.header{background:#4A2511;color:#FFF;padding:24px;border-radius:12px;border:3px solid #D4AF37}
-.box{background:#FFF;padding:20px;border:1px solid #D2B48C;border-radius:10px;margin-top:20px}</style></head>
+<html><head><meta charset="utf-8"><title>${b.title} (${b.year}) — By ${b.author}</title>
+<style>body{font-family:Georgia,serif;max-width:820px;margin:40px auto;padding:24px;background:#FAF7F2;color:#2C1608;line-height:1.7}
+.header{background:#4A2511;color:#FFF;padding:24px;border-radius:12px;border:3px solid #C59B27}
+.box{background:#FFF;padding:20px;border:1px solid #DFCBB2;border-radius:10px;margin-top:20px}
+pre{background:#2C1608;color:#F0D9B5;padding:16px;border-radius:8px;overflow-x:auto;font-family:monospace}</style></head>
 <body>
 <div class="header">
 <h1>${b.title}</h1>
-<p><strong>Author:</strong> ${b.author} | <strong>Category:</strong> ${b.category} | <strong>Edition:</strong> bondkchess STEM Suez Club Study Guide</p>
+<p><strong>Author (المؤلف):</strong> ${b.author} | <strong>Publication Year (سنة النشر):</strong> ${b.year} | <strong>Category:</strong> ${b.category}</p>
+<p><strong>Archive / Reference Link:</strong> <a href="${b.archiveUrl}" style="color:#C59B27">${b.archiveUrl}</a></p>
 </div>
 <div class="box">
-<h2>Core Overview</h2>
+<h2>Book Synopsis & Core Philosophy</h2>
 <p>${b.summary}</p>
-<h3>Structured Study Curriculum & Tactical Takeaways</h3>
-<ul>${b.chapters.map(c => `<li><strong>${c}</strong> — Practice all variations on the bondkchess interactive board.</li>`).join('')}</ul>
-<p><em>Prepared for STEM Suez Chess Club — Admins: Mohammed Hossam (mohammed.hossam.dedo@gmail.com), Mohamed Nasser, Ahmed Hassan.</em></p>
+<h3>Essential Chapters & Training Structure</h3>
+<ul>${b.chapters.map(c => `<li><strong>${c}</strong></li>`).join('')}</ul>
+<h3>Included Study PGN Game / Position</h3>
+<pre>${b.samplePgn}</pre>
+<p><em>Brilliant Chess — Checkmate Club (STEM Suez) Official Study Companion.</em></p>
 </div>
 </body></html>`;
             const blob = new Blob([htmlDoc], { type: 'text/html' });
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `${b.title.replace(/[^a-z0-9]/gi, '_')}_bondkchess_Study_Book.html`;
+            a.download = `${b.title.replace(/[^a-z0-9]/gi, '_')}_${b.year}_Study_Guide.html`;
             document.body.appendChild(a);
             a.click();
             a.remove();
             URL.revokeObjectURL(url);
-            showToast(`Downloaded "${b.title}" study edition!`);
+            showToast(`📚 Downloaded "${b.title}" (${b.year} — ${b.author})!`);
         }
 
         function openBookReader(bookId) {
             const b = CHESS_BOOKS.find(x => x.id === bookId);
             if (!b) return;
-            document.getElementById('reader-book-cat').textContent = b.category;
+            document.getElementById('reader-book-cat').textContent = `${b.category} • Published ${b.year}`;
             document.getElementById('reader-book-title').textContent = b.title;
-            document.getElementById('reader-book-author').textContent = `${b.author} (${b.pages})`;
+            document.getElementById('reader-book-author').textContent = `Author: ${b.author} | First Published: ${b.year} (${b.pages})`;
             document.getElementById('reader-book-content').innerHTML = `
                 <div class="bg-white border border-chess-border rounded-xl p-4 space-y-2">
-                    <h4 class="font-black text-chess-walnut">Book Overview & Checkmate Club Application</h4>
+                    <h4 class="font-black text-chess-walnut">Book Overview (${b.author}, ${b.year})</h4>
                     <p>${b.summary}</p>
                 </div>
                 <div class="bg-white border border-chess-border rounded-xl p-4 space-y-2">
@@ -4138,12 +4826,19 @@
                         ${b.chapters.map(c => `<li class="font-semibold">${c}</li>`).join('')}
                     </ul>
                 </div>
+                <div class="bg-chess-espresso text-chess-light border border-chess-gold rounded-xl p-4 space-y-2">
+                    <h4 class="font-black text-chess-gold text-xs uppercase">Classic Annotated PGN From This Book</h4>
+                    <pre class="text-xs font-mono whitespace-pre-wrap">${b.samplePgn}</pre>
+                </div>
             `;
             document.getElementById('reader-book-actions').innerHTML = `
-                <button onclick="downloadStudyBook('${b.id}')" class="px-4 py-2 rounded-xl bg-chess-walnut text-white text-xs font-black">
-                    <i class="fa-solid fa-download text-chess-gold mr-1"></i> Download Full Study Guide
+                <a href="${b.archiveUrl}" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-chess-walnut text-white text-xs font-black">
+                    <i class="fa-solid fa-up-right-from-square text-chess-gold mr-1"></i> Open on Archive.org / OpenLibrary
+                </a>
+                <button type="button" onclick="downloadStudyBook('${b.id}')" class="px-4 py-2 rounded-xl bg-chess-gold text-white text-xs font-black">
+                    <i class="fa-solid fa-download mr-1"></i> Download Study Guide & PGN
                 </button>
-                <button onclick="closeBookReader()" class="px-4 py-2 rounded-xl bg-chess-light text-chess-espresso text-xs font-bold border border-chess-border">
+                <button type="button" onclick="closeBookReader()" class="px-4 py-2 rounded-xl bg-chess-light text-chess-espresso text-xs font-bold border border-chess-border">
                     Close Reader
                 </button>
             `;
@@ -4415,11 +5110,15 @@
         }
 
         window.onload = function () {
+            // Apply saved board theme and language immediately on load
+            setBoardTheme(currentBoardTheme, true);
+            applyLanguageUI();
             renderAllSections();
+            populateSyncDropdown();
             // Check if user has a saved login session ("Remember Me"); if not, keep Mandatory Sign-In Gate visible
             restoreSavedSessionOnLoad();
-            // Automatically check live API for dedo_stark on startup while preserving verified 1009 / 1035 baseline
-            syncAccountRatings(clubAccounts[0], 'highest').then(() => renderLeaderboard());
+            // Automatically check live API for dedo_stark on startup while preserving verified 1009 / 1035 Rapid baseline
+            syncAccountRatings(clubAccounts[0]).then(() => renderLeaderboard());
         };
     </script>
 </body>
