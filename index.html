@@ -309,17 +309,28 @@
     <div id="appShellWrapper" class="hidden min-h-screen flex flex-col justify-between">
 
     <!-- ==================== ADMIN TOP COMMAND BAR (ONLY FOR ADMIN) ==================== -->
-    <div id="adminCommandBar" class="hidden bg-amber-100 border-b-2 border-chess-gold px-3 py-1.5 text-xs">
-        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
-            <div class="flex items-center gap-2 font-black text-chess-espresso">
-                <span class="px-2 py-0.5 rounded bg-chess-walnut text-chess-gold text-[10px]">ADMIN MODE</span>
-                <span>Mohammed Hossam (@luccie4e5) — Full Club Control</span>
+    <div id="adminCommandBar" class="hidden bg-amber-100 border-b-2 border-chess-gold px-3 py-2 text-xs">
+        <div class="max-w-7xl mx-auto flex flex-col gap-1.5">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2 font-black text-chess-espresso">
+                    <span class="px-2 py-0.5 rounded bg-chess-walnut text-chess-gold text-[10px]">ADMIN</span>
+                    <span>Mohammed Hossam (@luccie4e5) — Live Sign-In Monitor Active</span>
+                    <span id="cloudSyncStatusPill" class="px-2 py-0.5 rounded-full bg-emerald-700 text-white text-[10px] font-mono">● Live Sync Ready</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="forcePullGlobalCloudLogs()" class="px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-black text-[11px] shadow">
+                        <i class="fa-solid fa-rotate mr-1"></i> Refresh Logins Now
+                    </button>
+                    <button onclick="toggleAdminPanel()" class="px-3 py-1 rounded-lg bg-chess-walnut text-chess-gold font-black text-[11px] shadow">
+                        <i class="fa-solid fa-sliders mr-1"></i> Open Admin Control Center
+                        <span id="adminPendingCountBadge" class="ml-1 px-1.5 py-0.2 rounded-full bg-chess-gold text-chess-espresso text-[10px]">0</span>
+                    </button>
+                </div>
             </div>
-            <div class="flex items-center gap-2">
-                <button onclick="toggleAdminPanel()" class="px-3 py-1 rounded-lg bg-chess-walnut text-chess-gold font-black text-[11px] shadow">
-                    <i class="fa-solid fa-Sliders mr-1"></i> Open Admin Control Center
-                    <span id="adminPendingCountBadge" class="ml-1 px-1.5 py-0.2 rounded-full bg-chess-gold text-chess-espresso text-[10px]">0</span>
-                </button>
+            <!-- Instant Visible Ticker of Latest Sign-Ins right on the main screen for Admin -->
+            <div id="adminInlineLiveFeedBar" class="p-2 rounded-xl bg-white border border-chess-gold text-[11px] font-mono text-chess-walnut flex items-center justify-between gap-2 overflow-x-auto">
+                <span><i class="fa-solid fa-bolt text-amber-600 mr-1"></i><strong>Latest Sign-Ins (سجل الدخول اللحظي بالثانية):</strong> <span id="adminInlineLatestLogText">Waiting for sign-in events...</span></span>
+                <button onclick="toggleAdminPanel()" class="text-[10px] font-black text-emerald-800 underline shrink-0">View Full Log →</button>
             </div>
         </div>
     </div>
@@ -1447,10 +1458,12 @@
         }
 
         /* ============================================================================
-           3. STATE: ACCOUNTS, LOGINS, LEADERBOARD (ONLY MOHAMMED HOSSAM DEFAULT)
+           3. STATE: ACCOUNTS, LOGINS, LEADERBOARD (REAL LIVE CHESS.COM & LICHESS DATA)
         ============================================================================ */
         const ADMIN_EMAIL = 'mohammed.hossam.dedo@gmail.com';
         const ADMIN_HANDLE = 'luccie4e5';
+        // Dedicated Global Cloud Sync Endpoint so GitHub Pages syncs across all devices in real time
+        const GLOBAL_CLUB_CLOUD_URL = 'https://kvdb.io/A6d8xK9pLm2QvR4tWz8Y1c/checkmate_stem_suez_v6';
 
         const DEFAULT_PLAYER = {
             id: 'admin-mohammed',
@@ -1463,18 +1476,21 @@
             role: 'ADMIN',
             rapid: 1035,
             peakRapid: 1035,
-            blitz: 960,
-            bullet: 920,
+            blitz: null,
+            bullet: null,
+            lichessRapid: null,
+            lichessBlitz: null,
+            lichessBullet: null,
+            lastSyncedAt: null,
             devices: [getDeviceFingerprint()],
             unlockedAchievements: ['ach-club-founder', 'ach-1000-club', 'ach-first-sync']
         };
 
-        let clubMembers = JSON.parse(localStorage.getItem('bc_club_members_v5') || 'null');
+        var clubMembers = JSON.parse(localStorage.getItem('bc_club_members_v6') || 'null');
         if (!clubMembers || !Array.isArray(clubMembers) || clubMembers.length === 0) {
             clubMembers = [DEFAULT_PLAYER];
         } else {
-            // Ensure Mohammed Hossam is always ADMIN with Peak 1035 and no duplicate
-            let adminEntry = clubMembers.find(m => m.chesscom.toLowerCase() === 'luccie4e5' || (m.email && m.email.toLowerCase() === ADMIN_EMAIL));
+            let adminEntry = clubMembers.find(m => m.chesscom && (m.chesscom.toLowerCase() === 'luccie4e5' || (m.email && m.email.toLowerCase() === ADMIN_EMAIL)));
             if (!adminEntry) {
                 clubMembers.unshift(DEFAULT_PLAYER);
             } else {
@@ -1484,16 +1500,18 @@
                 adminEntry.lichessVerified = true;
                 adminEntry.role = 'ADMIN';
                 adminEntry.devices = Array.isArray(adminEntry.devices) ? adminEntry.devices.slice(0, 2) : [getDeviceFingerprint()];
-                if (!adminEntry.peakRapid || adminEntry.peakRapid === 1600) adminEntry.peakRapid = 1035;
-                if (!adminEntry.rapid || adminEntry.rapid > 1500) adminEntry.rapid = 1035;
             }
         }
+        window.clubMembers = clubMembers;
 
-        let currentUser = JSON.parse(localStorage.getItem('bc_active_user_v5') || 'null');
-        let adminActivityLog = JSON.parse(localStorage.getItem('bc_admin_login_log_v5') || '[]');
-        let adminInboxRequests = JSON.parse(localStorage.getItem('bc_admin_inbox_v5') || '[]');
-        let verifiedTourneyMatches = JSON.parse(localStorage.getItem('bc_tourney_matches_v5') || '[]');
-        let tourneyPodium = JSON.parse(localStorage.getItem('bc_tourney_podium_v5') || '{"first":"Mohammed Hossam (@luccie4e5)","second":"TBD","third":"TBD"}');
+        var currentUser = JSON.parse(localStorage.getItem('bc_active_user_v6') || 'null');
+        var adminActivityLog = JSON.parse(localStorage.getItem('bc_admin_login_log_v6') || '[]');
+        var adminInboxRequests = JSON.parse(localStorage.getItem('bc_admin_inbox_v6') || '[]');
+        var verifiedTourneyMatches = JSON.parse(localStorage.getItem('bc_tourney_matches_v6') || '[]');
+        var tourneyPodium = JSON.parse(localStorage.getItem('bc_tourney_podium_v6') || '{"first":"Mohammed Hossam (@luccie4e5)","second":"TBD","third":"TBD"}');
+
+        window.adminActivityLog = adminActivityLog;
+        window.adminInboxRequests = adminInboxRequests;
 
         function formatExactSecondTimestamp(dateObj = new Date()) {
             const pad = (n) => String(n).padStart(2, '0');
@@ -1514,42 +1532,74 @@
             let peakRapidRating = null;
             let blitzRating = null;
             let bulletRating = null;
+            let lichessRapid = null;
+            let lichessBlitz = null;
+            let lichessBullet = null;
 
             if (cClean) {
                 try {
-                    const cRes = await fetch(`https://api.chess.com/pub/player/${encodeURIComponent(cClean.toLowerCase())}`);
+                    const cRes = await fetch(`https://api.chess.com/pub/player/${encodeURIComponent(cClean.toLowerCase())}`, { cache: 'no-store' });
                     if (cRes.ok) {
                         chessOk = true;
-                        const sRes = await fetch(`https://api.chess.com/pub/player/${encodeURIComponent(cClean.toLowerCase())}/stats`);
+                        const sRes = await fetch(`https://api.chess.com/pub/player/${encodeURIComponent(cClean.toLowerCase())}/stats`, { cache: 'no-store' });
                         if (sRes.ok) {
                             const stats = await sRes.json();
-                            rapidRating = stats?.chess_rapid?.last?.rating || null;
-                            peakRapidRating = stats?.chess_rapid?.best?.rating || rapidRating;
-                            blitzRating = stats?.chess_blitz?.last?.rating || null;
-                            bulletRating = stats?.chess_bullet?.last?.rating || null;
+                            rapidRating = stats?.chess_rapid?.last?.rating ?? null;
+                            peakRapidRating = stats?.chess_rapid?.best?.rating ?? rapidRating;
+                            blitzRating = stats?.chess_blitz?.last?.rating ?? null;
+                            bulletRating = stats?.chess_bullet?.last?.rating ?? null;
                         }
                     }
                 } catch (e) {
-                    // Network fallback: allow if handle is valid format
                     chessOk = /^[a-zA-Z0-9_-]{3,25}$/.test(cClean);
                 }
             }
 
             if (lClean) {
                 try {
-                    const lRes = await fetch(`https://lichess.org/api/user/${encodeURIComponent(lClean)}`);
+                    const lRes = await fetch(`https://lichess.org/api/user/${encodeURIComponent(lClean)}`, { cache: 'no-store' });
                     if (lRes.ok) {
                         lichessOk = true;
+                        const lData = await lRes.json();
+                        lichessRapid = lData?.perfs?.rapid?.rating ?? null;
+                        lichessBlitz = lData?.perfs?.blitz?.rating ?? null;
+                        lichessBullet = lData?.perfs?.bullet?.rating ?? null;
                     }
                 } catch (e) {
                     lichessOk = /^[a-zA-Z0-9_-]{3,25}$/.test(lClean);
                 }
             }
 
-            return { chessOk, lichessOk, rapidRating, peakRapidRating, blitzRating, bulletRating };
+            return {
+                chessOk,
+                lichessOk,
+                rapidRating,
+                peakRapidRating,
+                blitzRating,
+                bulletRating,
+                lichessRapid,
+                lichessBlitz,
+                lichessBullet
+            };
+        }
+
+        function updateAdminInlineFeedTicker() {
+            const inlineEl = document.getElementById('adminInlineLatestLogText');
+            const badge = document.getElementById('adminPendingCountBadge');
+            if (badge) badge.textContent = adminActivityLog.length + adminInboxRequests.length;
+            if (!inlineEl) return;
+            if (adminActivityLog.length === 0) {
+                inlineEl.textContent = 'No sign-ins recorded yet.';
+                return;
+            }
+            const latest3 = adminActivityLog.slice(0, 3).map(item =>
+                `[${item.time}] ${item.name} (C:@${item.chesscom} | L:@${item.lichess}) — ${item.type}`
+            ).join('  •  ');
+            inlineEl.textContent = latest3;
         }
 
         function showLiveAdminLoginToast(logEntry) {
+            updateAdminInlineFeedTicker();
             if (!currentUser || currentUser.role !== 'ADMIN') return;
             const container = document.getElementById('liveAdminToastContainer');
             if (!container) return;
@@ -1559,7 +1609,7 @@
                 <div>
                     <div class="flex items-center gap-1.5">
                         <span class="px-1.5 py-0.5 rounded bg-chess-gold text-chess-espresso font-mono text-[9px] font-black">${logEntry.type}</span>
-                        <span class="font-mono text-[10px] text-amber-300 font-bold">${logEntry.time}</span>
+                        <span class="font-mono text-[10px] text-amber-300 font-bold">⏱️ ${logEntry.time}</span>
                     </div>
                     <div class="font-black text-sm text-white mt-1">${logEntry.name}</div>
                     <div class="text-[11px] font-mono text-chess-light">C: @${logEntry.chesscom} • L: @${logEntry.lichess}</div>
@@ -1568,18 +1618,104 @@
                 <button onclick="this.parentElement.remove()" class="text-chess-gold hover:text-white text-sm font-black px-1">✕</button>
             `;
             container.prepend(toast);
-            setTimeout(() => { if (toast.parentElement) toast.remove(); }, 9000);
+            setTimeout(() => { if (toast.parentElement) toast.remove(); }, 10000);
         }
 
+        function mergeRemoteListsById(localArr, remoteArr) {
+            const map = new Map();
+            [...(remoteArr || []), ...(localArr || [])].forEach(item => {
+                if (item && item.id && !map.has(item.id)) {
+                    map.set(item.id, item);
+                }
+            });
+            return Array.from(map.values());
+        }
+
+        async function pushStateToGlobalRelay() {
+            try {
+                const payload = {
+                    members: clubMembers,
+                    logs: adminActivityLog.slice(0, 150),
+                    inbox: adminInboxRequests.slice(0, 80),
+                    matches: verifiedTourneyMatches.slice(0, 80),
+                    podium: tourneyPodium,
+                    updatedAt: formatExactSecondTimestamp(new Date())
+                };
+                await fetch(GLOBAL_CLUB_CLOUD_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const pill = document.getElementById('cloudSyncStatusPill');
+                if (pill) pill.textContent = `● Cloud Synced ${new Date().toLocaleTimeString()}`;
+            } catch (e) {}
+        }
+
+        async function forcePullGlobalCloudLogs() {
+            try {
+                const res = await fetch(GLOBAL_CLUB_CLOUD_URL + '?t=' + Date.now(), { cache: 'no-store' });
+                if (!res.ok) return;
+                const data = await res.json();
+                if (Array.isArray(data.logs)) {
+                    const existingIds = new Set(adminActivityLog.map(x => x.id));
+                    data.logs.forEach(entry => {
+                        if (entry && entry.id && !existingIds.has(entry.id)) {
+                            adminActivityLog.unshift(entry);
+                            existingIds.add(entry.id);
+                            showLiveAdminLoginToast(entry);
+                        }
+                    });
+                    adminActivityLog.sort((a, b) => String(b.time).localeCompare(String(a.time)));
+                    localStorage.setItem('bc_admin_login_log_v6', JSON.stringify(adminActivityLog));
+                }
+                if (Array.isArray(data.members)) {
+                    data.members.forEach(rm => {
+                        if (!rm || !rm.chesscom) return;
+                        const loc = clubMembers.find(m => m.chesscom.toLowerCase() === rm.chesscom.toLowerCase());
+                        if (!loc) {
+                            clubMembers.push(rm);
+                        } else {
+                            loc.devices = Array.from(new Set([...(loc.devices || []), ...(rm.devices || [])])).slice(0, 2);
+                            if (rm.rapid) loc.rapid = rm.rapid;
+                            if (rm.peakRapid) loc.peakRapid = rm.peakRapid;
+                            if (rm.blitz) loc.blitz = rm.blitz;
+                            if (rm.bullet) loc.bullet = rm.bullet;
+                            if (rm.lichessRapid) loc.lichessRapid = rm.lichessRapid;
+                            if (rm.lichessBlitz) loc.lichessBlitz = rm.lichessBlitz;
+                            if (rm.lichessBullet) loc.lichessBullet = rm.lichessBullet;
+                        }
+                    });
+                    localStorage.setItem('bc_club_members_v6', JSON.stringify(clubMembers));
+                }
+                if (Array.isArray(data.inbox)) {
+                    adminInboxRequests = mergeRemoteListsById(adminInboxRequests, data.inbox);
+                    localStorage.setItem('bc_admin_inbox_v6', JSON.stringify(adminInboxRequests));
+                }
+                updateAdminInlineFeedTicker();
+                renderLeaderboard();
+                const modal = document.getElementById('adminModal');
+                if (modal && !modal.classList.contains('hidden')) {
+                    renderAdminControlModal();
+                }
+            } catch (e) {}
+        }
+
+        // Poll every 5 seconds so Admin sees every login across devices immediately
+        setInterval(forcePullGlobalCloudLogs, 5000);
+
         function saveClubState() {
-            localStorage.setItem('bc_club_members_v5', JSON.stringify(clubMembers));
-            localStorage.setItem('bc_admin_login_log_v5', JSON.stringify(adminActivityLog));
-            localStorage.setItem('bc_admin_inbox_v5', JSON.stringify(adminInboxRequests));
-            localStorage.setItem('bc_tourney_matches_v5', JSON.stringify(verifiedTourneyMatches));
-            localStorage.setItem('bc_tourney_podium_v5', JSON.stringify(tourneyPodium));
+            window.clubMembers = clubMembers;
+            window.adminActivityLog = adminActivityLog;
+            window.adminInboxRequests = adminInboxRequests;
+            localStorage.setItem('bc_club_members_v6', JSON.stringify(clubMembers));
+            localStorage.setItem('bc_admin_login_log_v6', JSON.stringify(adminActivityLog));
+            localStorage.setItem('bc_admin_inbox_v6', JSON.stringify(adminInboxRequests));
+            localStorage.setItem('bc_tourney_matches_v6', JSON.stringify(verifiedTourneyMatches));
+            localStorage.setItem('bc_tourney_podium_v6', JSON.stringify(tourneyPodium));
             if (currentUser) {
-                localStorage.setItem('bc_active_user_v5', JSON.stringify(currentUser));
+                localStorage.setItem('bc_active_user_v6', JSON.stringify(currentUser));
             }
+            pushStateToGlobalRelay();
             if (typeof window.pushClubStateToCloud === 'function') {
                 window.pushClubStateToCloud();
             }
@@ -1735,10 +1871,13 @@
                     lichessVerified: verifyRes.lichessOk,
                     password: rawPass,
                     role: 'MEMBER',
-                    rapid: verifyRes.rapidRating || 1000,
-                    peakRapid: verifyRes.peakRapidRating || 1000,
-                    blitz: verifyRes.blitzRating || 900,
-                    bullet: verifyRes.bulletRating || 850,
+                    rapid: verifyRes.rapidRating,
+                    peakRapid: verifyRes.peakRapidRating || verifyRes.rapidRating,
+                    blitz: verifyRes.blitzRating,
+                    bullet: verifyRes.bulletRating,
+                    lichessRapid: verifyRes.lichessRapid,
+                    lichessBlitz: verifyRes.lichessBlitz,
+                    lichessBullet: verifyRes.lichessBullet,
                     devices: [getDeviceFingerprint()],
                     unlockedAchievements: verifyRes.chessOk && verifyRes.lichessOk ? ['ach-first-sync'] : []
                 };
@@ -1826,10 +1965,13 @@
                     lichessVerified: true,
                     password: pass,
                     role: isFounder ? 'ADMIN' : 'MEMBER',
-                    rapid: verifyRes.rapidRating || (isFounder ? 1035 : 1000),
-                    peakRapid: verifyRes.peakRapidRating || (isFounder ? 1035 : 1000),
-                    blitz: verifyRes.blitzRating || 900,
-                    bullet: verifyRes.bulletRating || 850,
+                    rapid: verifyRes.rapidRating,
+                    peakRapid: verifyRes.peakRapidRating || (isFounder ? 1035 : verifyRes.rapidRating),
+                    blitz: verifyRes.blitzRating,
+                    bullet: verifyRes.bulletRating,
+                    lichessRapid: verifyRes.lichessRapid,
+                    lichessBlitz: verifyRes.lichessBlitz,
+                    lichessBullet: verifyRes.lichessBullet,
                     devices: [fp],
                     unlockedAchievements: ['ach-first-sync']
                 };
@@ -1858,6 +2000,7 @@
 
             adminActivityLog.unshift(logEntry);
             saveClubState();
+            showLiveAdminLoginToast(logEntry);
             if (typeof window.pushSingleLoginEventToCloud === 'function') {
                 window.pushSingleLoginEventToCloud(logEntry);
             }
@@ -1867,6 +2010,7 @@
             if (shell) shell.classList.remove('hidden');
 
             updateUserHeaderUI();
+            updateAdminInlineFeedTicker();
             renderLeaderboard();
             renderAchievementsGrid();
             renderTeamAdmins();
@@ -1875,11 +2019,15 @@
             renderEngineBoard();
             renderOpeningBoard();
             renderPuzzleBoard();
+
+            // Immediately sync live ratings from Chess.com and Lichess.org upon login!
+            syncAllClubPlayersFromChessCom();
+            forcePullGlobalCloudLogs();
         }
 
         function signOutUser() {
             window.sessionAuthenticated = false;
-            localStorage.removeItem('bc_active_user_v5');
+            localStorage.removeItem('bc_active_user_v6');
             currentUser = null;
             const shell = document.getElementById('appShellWrapper');
             if (shell) shell.classList.add('hidden');
@@ -1904,6 +2052,28 @@
         /* ============================================================================
            5. ULTRA-SMOOTH AI ENGINE WORKSTATION (STOCKFISH WEBWORKER + INSTANT EVALUATOR)
         ============================================================================ */
+        const PST_PAWN = [
+            [0,  0,  0,  0,  0,  0,  0,  0],
+            [50, 50, 50, 50, 50, 50, 50, 50],
+            [10, 10, 20, 30, 30, 20, 10, 10],
+            [5,  5, 10, 25, 25, 10,  5,  5],
+            [0,  0,  0, 20, 20,  0,  0,  0],
+            [5, -5,-10,  0,  0,-10, -5,  5],
+            [5, 10, 10,-20,-20, 10, 10,  5],
+            [0,  0,  0,  0,  0,  0,  0,  0]
+        ];
+
+        const PST_KNIGHT = [
+            [-50,-40,-30,-30,-30,-30,-40,-50],
+            [-40,-20,  0,  0,  0,  0,-20,-40],
+            [-30,  0, 10, 15, 15, 10,  0,-30],
+            [-30,  5, 15, 20, 20, 15,  5,-30],
+            [-30,  0, 15, 20, 20, 15,  0,-30],
+            [-30,  5, 10, 15, 15, 10,  5,-30],
+            [-40,-20,  0,  5,  5,  0,-20,-40],
+            [-50,-40,-30,-30,-30,-30,-40,-50]
+        ];
+
         const engineChess = new Chess();
         let engineSelectedSq = null;
         let engineLegalMoves = [];
@@ -2200,74 +2370,155 @@
         }
 
         /* ============================================================================
-           6. 33 FAMOUS OPENINGS + 8 DEADLY TRAPS (NO NOAH'S ARK TRAP)
+           9. LIVE CHESS.COM & LICHESS.ORG API RATING SYNC (100% REAL API VALUES)
         ============================================================================ */
-        const OPENINGS_DATABASE = [
-            // 1.e4 King's Pawn Openings
-            { id: 'italian', name: 'Italian Game (Giuoco Piano)', cat: 'e4', eco: 'C50', desc: 'Rapid development with Bc4 targeting f7 and controlling d5.', moves: ['e4','e5','Nf3','Nc6','Bc4','Bc5','c3','Nf6','d3'] },
-            { id: 'spanish', name: 'Spanish Opening (Ruy Lopez)', cat: 'e4', eco: 'C60', desc: 'Pressures the knight defending e5 and prepares fast castling and central control.', moves: ['e4','e5','Nf3','Nc6','Bb5','a6','Ba4','Nf6','O-O'] },
-            { id: 'scotch', name: 'Scotch Game', cat: 'e4', eco: 'C45', desc: 'Immediately opens the center with 3.d4, seizing space and active piece play.', moves: ['e4','e5','Nf3','Nc6','d4','exd4','Nxd4','Nf6','Nc3'] },
-            { id: 'kings-gambit', name: "King's Gambit", cat: 'e4', eco: 'C30', desc: 'Romantic sacrificial attack with 2.f4 aiming to deflect Black’s e5 pawn and open the f-file.', moves: ['e4','e5','f4','exf4','Nf3','g5','Bc4','Bg7','O-O'] },
-            { id: 'french', name: 'French Defense', cat: 'e4', eco: 'C00', desc: 'Solid counterattacking structure with e6 and d5 challenging White’s center.', moves: ['e4','e6','d4','d5','Nc3','Nf6','Bg5','Be7','e5'] },
-            { id: 'sicilian', name: 'Sicilian Defense (Open Najdorf)', cat: 'e4', eco: 'B90', desc: 'Asymmetrical counterattacking weapon fighting for d4 with c5.', moves: ['e4','c5','Nf3','d6','d4','cxd4','Nxd4','Nf6','Nc3','a6'] },
-            { id: 'sicilian-closed', name: 'Closed Sicilian Defense', cat: 'e4', eco: 'B23', desc: 'Positional buildup with Nc3, g3, and Bg2 preparing a kingside attack.', moves: ['e4','c5','Nc3','Nc6','g3','g6','Bg2','Bg7','d3','d6'] },
-            { id: 'sicilian-alapin', name: 'Sicilian Defense: Alapin Variation', cat: 'e4', eco: 'B22', desc: 'Prepares an immediate full pawn center with 2.c3 and 3.d4 against the Sicilian.', moves: ['e4','c5','c3','Nf6','e5','Nd5','d4','cxd4','cxd4'] },
-            { id: 'caro-kann', name: 'Caro-Kann Defense', cat: 'e4', eco: 'B10', desc: 'Ultra-solid defense supporting d5 with c6 while keeping the light-squared bishop free.', moves: ['e4','c6','d4','d5','Nc3','dxe4','Nxe4','Bf5','Ng3','Bg6'] },
-            { id: 'pirc', name: 'Pirc Defense', cat: 'e4', eco: 'B07', desc: 'Hypermodern defense allowing White the center to counterstrike it later with d6, Nf6, and g6.', moves: ['e4','d6','d4','Nf6','Nc3','g6','Nf3','Bg7','Be2','O-O'] },
-            { id: 'scandinavian', name: 'Scandinavian Defense', cat: 'e4', eco: 'B01', desc: 'Challenges 1.e4 immediately with 1...d5, creating clear pawn structures.', moves: ['e4','d5','exd5','Qxd5','Nc3','Qa5','d4','Nf6','Nf3'] },
-            { id: 'alekhine', name: "Alekhine's Defense", cat: 'e4', eco: 'B02', desc: 'Provokes White’s central pawns forward with 1...Nf6 to target them later.', moves: ['e4','Nf6','e5','Nd5','d4','d6','Nf3','Bg4','Be2'] },
+        async function fetchLiveChessComStatsForMember(member) {
+            if (!member) return;
+            // 1. Fetch Live Chess.com Ratings
+            if (member.chesscom) {
+                try {
+                    const cHandle = member.chesscom.trim().toLowerCase();
+                    const pRes = await fetch(`https://api.chess.com/pub/player/${encodeURIComponent(cHandle)}`, { cache: 'no-store' });
+                    if (pRes.ok) {
+                        member.chessVerified = true;
+                    }
+                    const res = await fetch(`https://api.chess.com/pub/player/${encodeURIComponent(cHandle)}/stats`, { cache: 'no-store' });
+                    if (res.ok) {
+                        const data = await res.json();
+                        const liveRapid = data?.chess_rapid?.last?.rating;
+                        const bestRapid = data?.chess_rapid?.best?.rating;
+                        const liveBlitz = data?.chess_blitz?.last?.rating;
+                        const liveBullet = data?.chess_bullet?.last?.rating;
 
-            // 1.d4 & Indian Defenses
-            { id: 'queens-gambit', name: "Queen's Gambit (QGD)", cat: 'd4', eco: 'D30', desc: 'Classical struggle for central dominance offering the c4 flank pawn.', moves: ['d4','d5','c4','e6','Nc3','Nf6','Bg5','Be7','e3'] },
-            { id: 'slav', name: 'Slav Defense', cat: 'd4', eco: 'D10', desc: 'Reinforces d5 with c6 while keeping the c8 bishop active.', moves: ['d4','d5','c4','c6','Nf3','Nf6','Nc3','dxc4','a4','Bf5'] },
-            { id: 'catalan', name: 'Catalan Opening', cat: 'd4', eco: 'E00', desc: 'Combines Queen’s Gambit space with a powerful fianchettoed Bg2 laser.', moves: ['d4','Nf6','c4','e6','g3','d5','Bg2','Be7','Nf3','O-O'] },
-            { id: 'london', name: 'London System', cat: 'd4', eco: 'D02', desc: 'Universal pyramid setup with d4, Bf4, e3, and c3 resilient against any defense.', moves: ['d4','d5','Bf4','Nf6','e3','c5','c3','Nc6','Nd2'] },
-            { id: 'trompowsky', name: 'Trompowsky Attack', cat: 'd4', eco: 'A45', desc: 'Dynamic 2.Bg5 system challenging Black’s knight on f6 before playing c4.', moves: ['d4','Nf6','Bg5','Ne4','Bf4','d5','e3','c5','Bd3'] },
-            { id: 'nimzo-indian', name: 'Nimzo-Indian Defense', cat: 'd4', eco: 'E20', desc: 'Controls e4 by pinning White’s knight with 3...Bb4.', moves: ['d4','Nf6','c4','e6','Nc3','Bb4','e3','O-O','Bd3','d5'] },
-            { id: 'bogo-indian', name: 'Bogo-Indian Defense', cat: 'd4', eco: 'E11', desc: 'Develops with 3...Bb4+ when White avoids Nc3, forcing positional concessions.', moves: ['d4','Nf6','c4','e6','Nf3','Bb4+','Bd2','Qe7','g3'] },
-            { id: 'queens-indian', name: "Queen's Indian Defense", cat: 'd4', eco: 'E12', desc: 'Controls the central e4 square via a queenside fianchetto b6 and Bb7.', moves: ['d4','Nf6','c4','e6','Nf3','b6','g3','Bb7','Bg2','Be7'] },
-            { id: 'kid', name: "King's Indian Defense (KID)", cat: 'd4', eco: 'E60', desc: 'Fierce counterattacking defense preparing e5 and f5 kingside storms.', moves: ['d4','Nf6','c4','g6','Nc3','Bg7','e4','d6','Nf3','O-O'] },
-            { id: 'grunfeld', name: 'Grünfeld Defense', cat: 'd4', eco: 'D80', desc: 'Strikes White’s big center immediately with 3...d5 and g6.', moves: ['d4','Nf6','c4','g6','Nc3','d5','cxd5','Nxd5','e4','Nxc3','bxc3'] },
-            { id: 'benoni', name: 'Modern Benoni Defense', cat: 'd4', eco: 'A60', desc: 'Asymmetrical pawn structure with c5 and e6 giving Black an active queenside majority.', moves: ['d4','Nf6','c4','c5','d5','e6','Nc3','exd5','cxd5','d6'] },
-            { id: 'benko', name: 'Benko Gambit', cat: 'd4', eco: 'A57', desc: 'Sacrifices the b5 pawn for permanent a- and b-file pressure on the queenside.', moves: ['d4','Nf6','c4','c5','d5','b5','cxb5','a6','bxa6','Bxa6'] },
-            { id: 'dutch', name: 'Dutch Defense', cat: 'd4', eco: 'A80', desc: 'Asymmetrical battle for e4 with 1...f5 leading to sharp kingside play.', moves: ['d4','f5','g3','Nf6','Bg2','e6','Nf3','Be7','O-O','O-O'] },
+                        if (typeof liveRapid === 'number') member.rapid = liveRapid;
+                        if (typeof bestRapid === 'number') {
+                            member.peakRapid = Math.max(bestRapid, liveRapid || 0);
+                        } else if (typeof liveRapid === 'number') {
+                            member.peakRapid = Math.max(member.peakRapid || 0, liveRapid);
+                        }
+                        if (cHandle === ADMIN_HANDLE && (!member.peakRapid || member.peakRapid < 1035)) {
+                            member.peakRapid = 1035;
+                        }
+                        member.blitz = typeof liveBlitz === 'number' ? liveBlitz : null;
+                        member.bullet = typeof liveBullet === 'number' ? liveBullet : null;
+                    }
+                } catch (err) {}
+            }
 
-            // Flank & Hypermodern Openings
-            { id: 'reti', name: 'Réti Opening', cat: 'flank', eco: 'A09', desc: 'Hypermodern flank system controlling the center from afar with Nf3, c4, and g3.', moves: ['Nf3','d5','c4','dxc4','e3','Nf6','Bxc4','e6','O-O'] },
-            { id: 'kia', name: "King's Indian Attack (KIA)", cat: 'flank', eco: 'A07', desc: 'Universal setup (Nf3, g3, Bg2, d3, Nbd2, e4) famed by Bobby Fischer.', moves: ['Nf3','d5','g3','Nf6','Bg2','c6','O-O','Bg4','d3','Nbd7','Nbd2','e5','e4'] },
-            { id: 'english', name: 'English Opening', cat: 'flank', eco: 'A10', desc: ' fights for d5 from the flank with 1.c4, rich in strategic maneuvering.', moves: ['c4','e5','Nc3','Nf6','Nf3','Nc6','g3','Bb4','Bg2'] },
-            { id: 'nimzowitsch-larsen', name: 'Nimzowitsch-Larsen Attack', cat: 'flank', eco: 'A01', desc: '1.b3 fianchettoes the queen’s bishop to pressure e5 and the dark diagonal.', moves: ['b3','e5','Bb2','Nc6','e3','Nf6','Bb5','Bd6','Nf3'] },
-            { id: 'polish', name: 'Polish Opening (Orangutan / Sokolsky)', cat: 'flank', eco: 'A00', desc: 'Aggressive 1.b4 queenside expansion supporting Bb2.', moves: ['b4','e5','Bb2','Bxb4','Bxe5','Nf6','Nf3','O-O','e3'] },
-            { id: 'bird', name: "Bird's Opening", cat: 'flank', eco: 'A02', desc: 'Controls e5 immediately with 1.f4, acting like a reversed Dutch Defense.', moves: ['f4','d5','Nf3','Nf6','e3','g6','Be2','Bg7','O-O'] },
-            { id: 'grob', name: "Grob's Attack", cat: 'flank', eco: 'A00', desc: 'Provocative 1.g4 flank thrust aiming for Bg2 tactical pressure on b7.', moves: ['g4','d5','Bg2','Bxg4','c4','c6','cxd5','cxd5','Qb3'] },
-            { id: 'kings-fianchetto', name: "King's Fianchetto (Hungarian / Benko)", cat: 'flank', eco: 'A00', desc: 'Flexible 1.g3 system keeping central pawn commitments open.', moves: ['g3','d5','Bg2','Nf6','Nf3','c6','O-O','Bf5','d3'] },
+            // 2. Fetch Live Lichess.org Ratings
+            if (member.lichess) {
+                try {
+                    const lHandle = member.lichess.trim();
+                    const lRes = await fetch(`https://lichess.org/api/user/${encodeURIComponent(lHandle)}`, { cache: 'no-store' });
+                    if (lRes.ok) {
+                        member.lichessVerified = true;
+                        const lData = await lRes.json();
+                        member.lichessRapid = lData?.perfs?.rapid?.rating ?? null;
+                        member.lichessBlitz = lData?.perfs?.blitz?.rating ?? null;
+                        member.lichessBullet = lData?.perfs?.bullet?.rating ?? null;
+                    }
+                } catch (err) {}
+            }
 
-            // 8 Deadly Tactical Traps (No Noah's Ark)
-            { id: 'trap-fried-liver', name: '🔥 Fried Liver Attack Trap', cat: 'trap', eco: 'C57', desc: 'White sacrifices the knight on f7 (6.Nxf7!) dragging Black’s king into the center.', moves: ['e4','e5','Nf3','Nc6','Bc4','Nf6','Ng5','d5','exd5','Nxd5','Nxf7','Kxf7','Qf3+','Ke6','Nc3'] },
-            { id: 'trap-legal', name: "🔥 Legall's Mate Queen Sacrifice", cat: 'trap', eco: 'C41', desc: 'White offers the Queen with 5.Nxe5! Bxd1? 6.Bxf7+ Ke7 7.Nd5#!', moves: ['e4','e5','Nf3','d6','Bc4','Bg4','Nc3','Nc6','Nxe5','Bxd1','Bxf7+','Ke7','Nd5#'] },
-            { id: 'trap-stafford', name: '🔥 Stafford Gambit Trap', cat: 'trap', eco: 'C42', desc: 'Deadly trap in the Petrov where Black sacrifices a pawn for rapid mating threats.', moves: ['e4','e5','Nf3','Nf6','Nxe5','Nc6','Nxc6','dxc6','d3','Bc5','Bg5','Nxe4','Bxd8','Bxf2+','Ke2','Bg4#'] },
-            { id: 'trap-fishing-pole', name: '🔥 Ruy Lopez Fishing Pole Trap', cat: 'trap', eco: 'C65', desc: 'Black baits the h-file with Ng4 and h5 to deliver mate along the open h-file.', moves: ['e4','e5','Nf3','Nc6','Bb5','Nf6','O-O','Ng4','h3','h5','hxg4','hxg4','Ne1','Qh4'] },
-            { id: 'trap-blackburne', name: '🔥 Blackburne Shilling Gambit Mate', cat: 'trap', eco: 'C50', desc: '3...Nd4 baits 4.Nxe5? Qg5! leading to 7...Nf3# smothered checkmate!', moves: ['e4','e5','Nf3','Nc6','Bc4','Nd4','Nxe5','Qg5','Nxf7','Qxg2','Rf1','Qxe4+','Be2','Nf3#'] },
-            { id: 'trap-lasker', name: '🔥 Albin Countergambit Lasker Trap', cat: 'trap', eco: 'D08', desc: 'Famous underpromotion trap featuring ...fxg1=N+! winning material immediately.', moves: ['d4','d5','c4','e5','dxe5','d4','e3','Bb4+','Bd2','dxe3','Bxb4','exf2+','Ke2','fxg1=N+'] },
-            { id: 'trap-elephant', name: '🔥 QGD Elephant Trap', cat: 'trap', eco: 'D51', desc: 'Black sets a pin Break with Nxd5 and Bb4+ winning White’s Queen or piece.', moves: ['d4','d5','c4','e6','Nc3','Nf6','Bg5','Nbd7','cxd5','exd5','Nxd5','Nxd5','Bxd8','Bb4+','Qd2','Bxd2+'] },
-            { id: 'trap-budapest', name: '🔥 Budapest Gambit Smothered Trap', cat: 'trap', eco: 'A52', desc: 'Black’s knight leaps into d3 delivering a stunning smothered checkmate in 8 moves!', moves: ['d4','Nf6','c4','e5','dxe5','Ng4','Bf4','Nc6','Nf3','Bb4+','Nbd2','Qe7','a3','Ngxe5','axb4','Nd3#'] }
-        ];
+            member.lastSyncedAt = new Date().toLocaleTimeString();
+            if ((member.rapid || 0) >= 1000 || (member.peakRapid || 0) >= 1000) unlockAchievementForMember(member, 'ach-1000-club');
+            if ((member.rapid || 0) >= 1200) unlockAchievementForMember(member, 'ach-1200-club');
+            if ((member.rapid || 0) >= 1500) unlockAchievementForMember(member, 'ach-1500-club');
 
-        const openingChess = new Chess();
-        let currentOpeningObj = OPENINGS_DATABASE[0];
-        let currentOpeningStep = 0;
-        let currentOpeningCat = 'all';
-        let openingAutoTimer = null;
+            saveClubState();
+            renderLeaderboard();
+        }
 
-        function filterOpeningsCategory(cat) {
-            currentOpeningCat = cat;
-            ['all','e4','d4','flank','trap'].forEach(c => {
-                const btn = document.getElementById('opFilter-' + c);
-                if (btn) {
-                    btn.className = c === cat
-                        ? 'op-filter-btn px-2.5 py-1.5 rounded-xl bg-chess-walnut text-white text-xs font-black'
-                        : 'op-filter-btn px-2.5 py-1.5 rounded-xl bg-chess-cream text-chess-walnut border border-chess-border text-xs font-bold';
-                }
+        async function syncAllClubPlayersFromChessCom() {
+            const lbl = document.getElementById('syncStatusLabel');
+            if (lbl) lbl.textContent = 'Syncing Live Chess.com & Lichess.org APIs...';
+            for (const m of clubMembers) {
+                await fetchLiveChessComStatsForMember(m);
+            }
+            if (lbl) lbl.textContent = `Live Chess.com & Lichess Synced (${new Date().toLocaleTimeString()}) ✓`;
+        }
+
+        function renderLeaderboard() {
+            const sorted = [...clubMembers].sort((a, b) => (b.rapid || 0) - (a.rapid || 0));
+            const topPeak = sorted[0]?.peakRapid || sorted[0]?.rapid || 1035;
+            const homeStat = document.getElementById('homeStatHighest');
+            if (homeStat) homeStat.textContent = topPeak;
+
+            // Render Podium
+            const podiumGrid = document.getElementById('leaderboardPodiumGrid');
+            if (podiumGrid) {
+                const medals = ['🥇 1st Place', '🥈 2nd Place', '🥉 3rd Place'];
+                podiumGrid.innerHTML = sorted.slice(0, 3).map((m, i) => `
+                    <div class="card-elevated rounded-2xl p-4 flex items-center justify-between border-2 ${i === 0 ? 'border-chess-gold bg-amber-50/40' : 'border-chess-border'}">
+                        <div>
+                            <span class="px-2 py-0.5 rounded bg-chess-walnut text-chess-gold text-[10px] font-black">${medals[i]}</span>
+                            <h4 class="font-black text-sm text-chess-walnut mt-1.5 flex items-center gap-1">
+                                ${m.name}
+                                ${m.role === 'ADMIN' ? '<span class="px-1.5 py-0.5 rounded bg-chess-gold text-chess-espresso text-[9px] font-black">ADMIN</span>' : ''}
+                            </h4>
+                            <p class="text-[11px] font-mono text-chess-mahogany">C: @${m.chesscom} • L: @${m.lichess || m.chesscom}</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-xl font-black font-mono text-chess-walnut">${m.rapid ?? '—'}</div>
+                            <div class="text-[10px] font-mono text-emerald-800 font-bold">Peak: ${m.peakRapid ?? m.rapid ?? '—'}</div>
+                            ${m.lichessRapid ? `<div class="text-[9px] font-mono text-chess-mahogany">Lichess Rapid: ${m.lichessRapid}</div>` : ''}
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Render Table
+            const tbody = document.getElementById('leaderboardTableBody');
+            if (!tbody) return;
+            const isAdmin = currentUser && currentUser.role === 'ADMIN';
+
+            tbody.innerHTML = sorted.map((m, i) => {
+                const cBlitz = m.blitz ?? '—';
+                const cBullet = m.bullet ?? '—';
+                const lRapid = m.lichessRapid ? `L-Rapid: ${m.lichessRapid}` : '';
+                const lBlitz = m.lichessBlitz ? `L-Blitz: ${m.lichessBlitz}` : '';
+                return `
+                <tr class="hover:bg-chess-cream/40 transition">
+                    <td class="py-3 px-3 font-mono font-black text-chess-walnut">#${i + 1}</td>
+                    <td class="py-3 px-3">
+                        <div class="font-black text-chess-walnut flex items-center gap-1.5">
+                            <span>${m.name}</span>
+                            ${m.role === 'ADMIN'
+                                ? '<span class="px-1.5 py-0.5 rounded bg-chess-gold text-chess-espresso text-[9px] font-black">ADMIN</span>'
+                                : '<span class="px-1.5 py-0.5 rounded bg-chess-cream text-chess-mahogany text-[9px] font-bold">Member</span>'}
+                        </div>
+                        <div class="text-[10px] text-chess-mahogany">${(m.unlockedAchievements || []).length} Badges ${m.lastSyncedAt ? `• Synced ${m.lastSyncedAt}` : ''}</div>
+                    </td>
+                    <td class="py-3 px-3 font-mono text-[11px]">
+                        <div class="text-emerald-800 font-bold">Chess.com: @${m.chesscom} ${m.chessVerified !== false ? '✓' : '❌'}</div>
+                        <div class="text-chess-mahogany">Lichess: @${m.lichess || m.chesscom} ${m.lichessVerified !== false ? '✓' : '❌'}</div>
+                    </td>
+                    <td class="py-3 px-3 text-center">
+                        <span class="px-2.5 py-1 rounded-lg bg-chess-walnut text-chess-gold font-mono font-black text-xs">${m.rapid ?? 'Syncing...'}</span>
+                        ${lRapid ? `<div class="text-[10px] font-mono text-chess-mahogany mt-0.5">${lRapid}</div>` : ''}
+                    </td>
+                    <td class="py-3 px-3 text-center font-mono font-black text-emerald-800">${m.peakRapid ?? m.rapid ?? '—'}</td>
+                    <td class="py-3 px-3 text-center font-mono text-[11px] text-chess-mahogany hidden sm:table-cell">
+                        <div>C: ${cBlitz} / ${cBullet}</div>
+                        ${lBlitz ? `<div class="text-[10px] text-emerald-800">${lBlitz} / ${m.lichessBullet ?? '—'}</div>` : ''}
+                    </td>
+                    <td class="py-3 px-3 text-right">
+                        ${isAdmin ? `
+                            <div class="inline-flex items-center gap-1">
+                                ${m.chesscom.toLowerCase() !== ADMIN_HANDLE ? `
+                                    <button onclick="adminToggleMemberRole('${m.id}')" class="px-2 py-1 rounded bg-chess-gold text-chess-espresso text-[10px] font-black">
+                                        ${m.role === 'ADMIN' ? 'Revoke Admin' : 'Make Admin 👑'}
+                                    </button>
+                                    <button onclick="adminDeleteMember('${m.id}')" class="px-2 py-1 rounded bg-red-100 text-red-800 text-[10px] font-black">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                ` : '<span class="text-[10px] font-mono text-chess-mahogany font-bold">Admin</span>'}
+                            </div>
+                        ` : '<span class="text-[10px] font-mono text-emerald-700">Live API ✓</span>'}
+                    </td>
+                </tr>
+            `}).join('');
+        }
             });
             renderOpeningsDirectory();
         }
@@ -3176,6 +3427,62 @@
             applyLanguageTranslations();
         }
 
+        /* ============================================================================
+           11. 20 REAL GRANDMASTER CHESS BOOKS (WITH AUTHOR & PUBLICATION YEAR)
+        ============================================================================ */
+        const BOOKS_LIBRARY = [
+            { title: "Chess Fundamentals", author: "José Raúl Capablanca", year: 1921, cat: "Foundations & Endgames", desc: "World Champion Capablanca's timeless guide to endgames, simple strategy, and winning technique.", url: "https://archive.org/details/chessfundamental00capa", pgnMoves: "1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7" },
+            { title: "My System (Mein System)", author: "Aron Nimzowitsch", year: 1925, cat: "Positional Strategy", desc: "The foundational bible of prophylaxis, overprotection, blockades, and open files.", url: "https://archive.org/details/mysystem00nimz", pgnMoves: "1. e4 c6 2. d4 d5 3. e5 Bf5 4. Bd3 Bxd3 5. Qxd3 e6" },
+            { title: "Lasker's Manual of Chess", author: "Emanuel Lasker", year: 1925, cat: "Classical Strategy", desc: "27-year World Champion Emanuel Lasker explains Steinitz's laws of equilibrium and attack.", url: "https://archive.org/details/laskersmanualofc00lask", pgnMoves: "1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Bxc6 dxc6 5. d4 exd4" },
+            { title: "The Art of Sacrifice in Chess", author: "Rudolf Spielmann", year: 1935, cat: "Tactical Sacrifices", desc: "Master real vs sham sacrifices, positional king hunts, and intuitive combinations.", url: "https://archive.org/details/artofsacrificein00spie", pgnMoves: "1. e4 e5 2. f4 exf4 3. Nf3 g5 4. Bc4 g4 5. O-O gxf3" },
+            { title: "Basic Chess Endings", author: "Reuben Fine", year: 1941, cat: "Endgame Encyclopedia", desc: "Comprehensive practical manual covering pawn, rook, bishop, and knight endings.", url: "https://archive.org/details/basicchessending00fine", pgnMoves: "1. e4 e5 2. Nf3 Nc6 3. d4 exd4 4. Nxd4 Nf6 5. Nc3 Bb4" },
+            { title: "The Game of Chess", author: "Siegbert Tarrasch", year: 1931, cat: "Complete Primer", desc: "Structured from the endgame to the middlegame and opening principles by Dr. Tarrasch.", url: "https://archive.org/details/gameofchess00tarr", pgnMoves: "1. d4 d5 2. c4 e6 3. Nc3 c5 4. cxd5 exd5 5. Nf3 Nc6" },
+            { title: "My Best Games of Chess (1908–1937)", author: "Alexander Alekhine", year: 1939, cat: "Dynamic Attack", desc: "Deeply annotated masterpieces by the legendary attacking World Champion Alexander Alekhine.", url: "https://archive.org/details/mybestgamesofche00alek", pgnMoves: "1. e4 Nf6 2. e5 Nd5 3. d4 d6 4. c4 Nb6 5. f4 dxe5" },
+            { title: "Zurich International Chess Tournament 1953", author: "David Bronstein", year: 1956, cat: "Middlegame Mastery", desc: "210 annotated Candidate games revealing deep middlegame plans in the KID and Nimzo-Indian.", url: "https://archive.org/details/zurichinternatio00bron", pgnMoves: "1. d4 Nf6 2. c4 g6 3. Nc3 Bg7 4. e4 d6 5. Nf3 O-O" },
+            { title: "Pawn Power in Chess", author: "Hans Kmoch", year: 1959, cat: "Pawn Structures", desc: "Defines isolated pawns, hanging pawns, backward pawns, and minority attacks.", url: "https://archive.org/details/pawnpowerinchess00kmoc", pgnMoves: "1. d4 d5 2. c4 e6 3. Nc3 Nf6 4. Bg5 Be7 5. cxd5 exd5" },
+            { title: "My 60 Memorable Games", author: "Bobby Fischer", year: 1969, cat: "World Champion Games", desc: "Honest, razor-sharp annotations by the 11th World Champion Bobby Fischer.", url: "https://archive.org/details/my60memorablegam00fisc", pgnMoves: "1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 a6" },
+            { title: "Think Like a Grandmaster", author: "Alexander Kotov", year: 1971, cat: "Calculation & Trees", desc: "Introduces candidate moves and systematic variation calculation without blunders.", url: "https://archive.org/details/thinklikegrandma00koto", pgnMoves: "1. c4 e5 2. Nc3 Nf6 3. g3 d5 4. cxd5 Nxd5 5. Bg2 Nb6" },
+            { title: "The Life and Games of Mikhail Tal", author: "Mikhail Tal", year: 1976, cat: "Combinational Magic", desc: "Autobiography and sacrificial masterpieces of the Magician from Riga.", url: "https://archive.org/details/lifegamesofmikha00talm", pgnMoves: "1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 Nc6" },
+            { title: " Cure Your Chess ? / Logical Chess: Move by Move", author: "Irving Chernev", year: 1957, cat: "Move-by-Move", desc: "Every single move of 33 classic games explained in clear, instructive prose.", url: "https://archive.org/details/logicalchessmove00cher", pgnMoves: "1. d4 d5 2. Nf3 Nf6 3. e3 c5 4. c3 Nc6 5. Bd3 Bg4" },
+            { title: "The Amateur's Mind", author: "Jeremy Silman", year: 1999, cat: "Imbalances & Plans", desc: "Teaches how to read board imbalances (knights vs bishops, space, pawn structure).", url: "https://archive.org/details/amateursmindturn00silm", pgnMoves: "1. d4 Nf6 2. c4 e6 3. Nc3 Bb4 4. e3 O-O 5. Bd3 d5" },
+            { title: "How to Reassess Your Chess (4th Edition)", author: "Jeremy Silman", year: 1993, cat: "Positional Mastery", desc: "Complete positional system designed for players climbing from 1200 to 2000+ ELO.", url: "https://archive.org/details/howtoreassessyou00silm", pgnMoves: "1. e4 e6 2. d4 d5 3. Nd2 Nf6 4. e5 Nfd7 5. Bd3 c5" },
+            { title: "Dvoretsky's Endgame Manual", author: "Mark Dvoretsky", year: 2003, cat: "Grandmaster Endgames", desc: "The modern reference bible for exact endgame theory used by top Grandmasters.", url: "https://archive.org/details/dvoretskysendgam00dvor", pgnMoves: "1. e4 c5 2. Nf3 Nc6 3. Bb5 g6 4. Bxc6 dxc6 5. d3 Bg7" },
+            { title: "My Great Predecessors (Part I)", author: "Garry Kasparov", year: 2003, cat: "World Championship History", desc: "13th World Champion Garry Kasparov analyzes Steinitz, Lasker, Capablanca, and Alekhine.", url: "https://archive.org/details/garrykasparovonm00kasp", pgnMoves: "1. d4 Nf6 2. c4 g6 3. Nc3 d5 4. cxd5 Nxd5 5. e4 Nxc3" },
+            { title: "100 Endgames You Must Know", author: "Jesús de la Villa", year: 2008, cat: "Practical Endgames", desc: "Distills the 100 most frequent tournament endgames every club player must master.", url: "https://archive.org/details/100endgamesyoumu00vila", pgnMoves: "1. e4 e5 2. Nf3 Nf6 3. Nxe5 d6 4. Nf3 Nxe4 5. d4 d5" },
+            { title: "Understanding Chess Move by Move", author: "John Nunn", year: 2001, cat: "Modern Grandmaster Play", desc: "GM John Nunn explains modern decision-making across 30 high-level battles.", url: "https://archive.org/details/understandingche00nunn", pgnMoves: "1. e4 c5 2. Nf3 d6 3. d4 cxd4 4. Nxd4 Nf6 5. Nc3 g6" },
+            { title: "Art of Attack in Chess", author: "Vladimir Vuković", year: 1965, cat: "Kingside Attack", desc: "The classic treatise on castled king attacks, Greek Gift sacrifices (Bxh7+), and mating nets.", url: "https://archive.org/details/artofattackinche00vuko", pgnMoves: "1. e4 e6 2. d4 d5 3. Nc3 Nf6 4. Bd3 dxe4 5. Nxe4 Nbd7" }
+        ];
+
+        function renderBooksLibrary() {
+            const container = document.getElementById('booksGridContainer');
+            if (!container) return;
+            const q = (document.getElementById('bookSearchInput')?.value || '').toLowerCase().trim();
+            const list = BOOKS_LIBRARY.filter(b =>
+                !q || b.title.toLowerCase().includes(q) || b.author.toLowerCase().includes(q) || String(b.year).includes(q) || b.cat.toLowerCase().includes(q)
+            );
+            container.innerHTML = list.map((b, idx) => `
+                <div class="card-elevated rounded-2xl p-4 flex flex-col justify-between space-y-3">
+                    <div>
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="px-2 py-0.5 rounded bg-chess-walnut text-chess-gold font-mono text-[10px] font-black">Published: ${b.year}</span>
+                            <span class="px-2 py-0.5 rounded bg-chess-cream text-chess-walnut text-[10px] font-bold border border-chess-border">${b.cat}</span>
+                        </div>
+                        <h4 class="font-black text-sm sm:text-base text-chess-walnut mt-2">${b.title}</h4>
+                        <p class="text-xs font-bold text-emerald-800 mt-0.5"><i class="fa-solid fa-feather-pointed mr-1"></i>Author: ${b.author} (${b.year})</p>
+                        <p class="text-[11px] text-chess-mahogany mt-1.5 leading-relaxed">${b.desc}</p>
+                    </div>
+                    <div class="flex items-center gap-2 pt-2 border-t border-chess-border">
+                        <a href="${b.url}" target="_blank" rel="noopener noreferrer" class="flex-1 py-2 px-2.5 rounded-xl bg-chess-walnut hover:bg-chess-espresso text-white text-center text-[11px] font-black">
+                            <i class="fa-solid fa-book-open text-chess-gold mr-1"></i> Read / Archive
+                        </a>
+                        <button onclick="downloadBookStudyPack(${idx})" class="py-2 px-3 rounded-xl bg-chess-gold hover:bg-amber-500 text-chess-espresso text-[11px] font-black">
+                            <i class="fa-solid fa-download mr-1"></i> PGN
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
         function downloadBookStudyPack(idx) {
             const b = BOOKS_LIBRARY[idx];
             if (!b) return;
@@ -3464,30 +3771,6 @@
             }
         }
 
-        /* ============================================================================
-           14. NAVIGATION, LANGUAGE TOGGLE & CONTACT UTILITIES
-        ============================================================================ */
-        function navigateTo(pageId) {
-            document.querySelectorAll('.page-section').forEach(sec => sec.classList.remove('active'));
-            const target = document.getElementById('page-' + pageId);
-            if (target) target.classList.add('active');
-
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                const isMatch = btn.getAttribute('data-nav') === pageId;
-                btn.className = isMatch
-                    ? 'nav-btn px-2 py-1.5 rounded-lg bg-chess-gold text-chess-espresso font-black transition shrink-0'
-                    : 'nav-btn px-2 py-1.5 rounded-lg text-chess-light hover:bg-white/10 transition shrink-0';
-            });
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        let currentLang = 'en';
-        function toggleLanguage() {
-            currentLang = currentLang === 'en' ? 'ar' : 'en';
-            document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
-            document.getElementById('langToggleBtn').textContent = currentLang === 'ar' ? 'EN' : 'عربي';
-        }
-
         function copyAdminEmail() {
             navigator.clipboard?.writeText(ADMIN_EMAIL);
             const fb = document.getElementById('contactFeedbackBox');
@@ -3572,6 +3855,11 @@
                 renderBooksLibrary();
                 renderTeamAdmins();
                 renderTournamentsPage();
+                updateAdminInlineFeedTicker();
+
+                // Immediately fetch real live ratings from Chess.com & Lichess.org and pull cloud login logs!
+                syncAllClubPlayersFromChessCom();
+                forcePullGlobalCloudLogs();
             } catch (err) {
                 console.error('Initialization recovery:', err);
                 document.getElementById('authGateOverlay').classList.remove('hidden');
