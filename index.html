@@ -205,37 +205,54 @@
     </div>
 
     <!-- ==================== PAWN PROMOTION MODAL ==================== -->
-    <div id="promotionModalOverlay" class="hidden fixed inset-0 z-[105] bg-chess-espresso/75 backdrop-blur-sm items-center justify-center p-4">
-        <div class="bg-white rounded-3xl border-2 border-chess-gold p-5 max-w-xs w-full text-center space-y-3">
-            <h4 class="font-black text-xs uppercase text-chess-walnut" data-i18n="promote_pawn">Promote Pawn</h4>
+    <div id="promotionModalOverlay" class="hidden fixed inset-0 z-[105] bg-chess-espresso/80 backdrop-blur-sm items-center justify-center p-4">
+        <div class="bg-white rounded-3xl border-2 border-chess-gold shadow-2xl p-5 max-w-xs w-full text-center space-y-3">
+            <h3 class="text-sm font-black text-chess-walnut uppercase tracking-wider" data-i18n="promote_pawn">Promote Pawn</h3>
             <div class="grid grid-cols-4 gap-2">
-                <button onclick="commitPromotion('q')" class="p-3 rounded-2xl bg-chess-cream hover:bg-chess-light text-3xl">♛</button>
-                <button onclick="commitPromotion('r')" class="p-3 rounded-2xl bg-chess-cream hover:bg-chess-light text-3xl">♜</button>
-                <button onclick="commitPromotion('b')" class="p-3 rounded-2xl bg-chess-cream hover:bg-chess-light text-3xl">♝</button>
-                <button onclick="commitPromotion('n')" class="p-3 rounded-2xl bg-chess-cream hover:bg-chess-light text-3xl">♞</button>
+                <button onclick="commitPromotion('q')" class="p-3 rounded-2xl bg-chess-cream hover:bg-chess-gold text-3xl border border-chess-border transition">♛</button>
+                <button onclick="commitPromotion('r')" class="p-3 rounded-2xl bg-chess-cream hover:bg-chess-gold text-3xl border border-chess-border transition">♜</button>
+                <button onclick="commitPromotion('b')" class="p-3 rounded-2xl bg-chess-cream hover:bg-chess-gold text-3xl border border-chess-border transition">♝</button>
+                <button onclick="commitPromotion('n')" class="p-3 rounded-2xl bg-chess-cream hover:bg-chess-gold text-3xl border border-chess-border transition">♞</button>
             </div>
         </div>
     </div>
 
-    <!-- ==================== QR CODE & ID CARD MODAL ==================== -->
+    <!-- ==================== QR CODE & ID CARD MODAL (PLAYER + OFFICIAL CLUB QR) ==================== -->
     <div id="qrCodeModalOverlay" class="hidden fixed inset-0 z-[100] bg-chess-espresso/80 backdrop-blur-sm items-center justify-center p-4">
-        <div class="bg-white rounded-3xl border-2 border-chess-gold shadow-2xl p-6 max-w-sm w-full text-center space-y-4">
+        <div class="bg-white rounded-3xl border-2 border-chess-gold shadow-2xl p-6 max-w-md w-full text-center space-y-4">
             <div class="flex items-center justify-between border-b border-chess-border pb-3">
                 <div class="flex items-center gap-2">
                     <i class="fa-solid fa-qrcode text-chess-gold text-lg"></i>
-                    <h3 class="font-black text-sm text-chess-walnut" data-i18n="qr_card_title">Official Club ID & QR</h3>
+                    <h3 class="font-black text-sm text-chess-walnut" data-i18n="qr_card_title">Official Club QR & Player ID</h3>
                 </div>
                 <button onclick="closeQrModal()" class="w-8 h-8 rounded-lg bg-chess-cream text-chess-walnut hover:bg-chess-light">
                     <i class="fa-solid fa-xmark"></i>
                 </button>
             </div>
+
+            <!-- Switch between Player Personal QR and Official Club QR -->
+            <div class="flex rounded-xl bg-chess-cream p-1 border border-chess-border text-xs font-black">
+                <button id="tabMyQrBtn" onclick="switchQrModalMode('player')" class="flex-1 py-1.5 rounded-lg bg-chess-walnut text-chess-gold shadow">
+                    <i class="fa-solid fa-id-card mr-1"></i> Player QR ID
+                </button>
+                <button id="tabClubQrBtn" onclick="switchQrModalMode('club')" class="flex-1 py-1.5 rounded-lg text-chess-walnut hover:bg-white/50">
+                    <i class="fa-solid fa-chess-king mr-1"></i> Official Club QR
+                </button>
+            </div>
+
             <div id="qrPlayerName" class="font-black text-base text-chess-walnut">Player Name</div>
-            <div id="qrPlayerCodeBadge" class="inline-block px-3 py-1 rounded-full bg-amber-100 border border-chess-gold font-mono text-xs font-black text-chess-espresso">CC-0000</div>
-            <div id="qrCodeCanvasBox" class="p-4 bg-white border-2 border-chess-border rounded-2xl mx-auto flex items-center justify-center w-48 h-48"></div>
-            <p class="text-[11px] text-chess-mahogany font-semibold" data-i18n="qr_card_desc">Share this Club Code or scan QR to add friends and start a live match.</p>
-            <button onclick="copyMyClubCode()" class="w-full py-2.5 rounded-xl bg-chess-walnut text-chess-gold font-black text-xs shadow">
-                <i class="fa-solid fa-copy mr-1"></i> <span data-i18n="btn_copy_id">Copy Club ID</span>
-            </button>
+            <div id="qrPlayerCodeBadge" class="inline-block px-3.5 py-1 rounded-full bg-amber-100 border border-chess-gold font-mono text-xs font-black text-chess-espresso">CC-0001</div>
+            <div id="qrCodeCanvasBox" class="p-4 bg-white border-2 border-chess-gold rounded-2xl mx-auto flex items-center justify-center w-48 h-48 shadow-inner"></div>
+            <p id="qrModalSubtext" class="text-[11px] text-chess-mahogany font-semibold" data-i18n="qr_card_desc">Share this Club Code or scan QR to add friends and start a live match.</p>
+
+            <div class="flex gap-2">
+                <button onclick="copyMyClubCode()" class="flex-1 py-2.5 rounded-xl bg-chess-walnut hover:bg-chess-espresso text-chess-gold font-black text-xs shadow">
+                    <i class="fa-solid fa-copy mr-1"></i> <span data-i18n="btn_copy_id">Copy ID / Link</span>
+                </button>
+                <button id="qrModalAddFriendBtn" onclick="sendFriendRequestFromQrModal()" class="hidden flex-1 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-black text-xs shadow">
+                    <i class="fa-solid fa-user-plus mr-1"></i> Send Friend / Match Invite
+                </button>
+            </div>
         </div>
     </div>
 
@@ -268,6 +285,15 @@
                 <div id="authErrorBox" class="hidden p-3 rounded-xl bg-red-100 border border-red-300 text-red-900 text-xs font-bold"></div>
                 <div id="authSuccessBox" class="hidden p-3 rounded-xl bg-emerald-100 border border-emerald-300 text-emerald-900 text-xs font-bold"></div>
 
+                <!-- Instant Founder Admin Detection Badge -->
+                <div id="adminInstantBadge" class="hidden p-3 rounded-2xl bg-amber-50 border-2 border-chess-gold flex items-center justify-between gap-2">
+                    <div>
+                        <div class="text-xs font-black text-chess-walnut">👑 FOUNDER ADMIN Detected (Mohammed Hossam)</div>
+                        <div class="text-[10px] text-chess-mahogany">@luccie4e5 • Full Founder Command Suite will unlock upon sign-in.</div>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-xl bg-chess-walnut text-chess-gold text-[10px] font-black shrink-0">FOUNDER ✓</span>
+                </div>
+
                 <!-- SIGN IN FORM -->
                 <form id="signInForm" onsubmit="handleSignInSubmit(event)" class="space-y-3">
                     <div>
@@ -278,14 +304,14 @@
 
                     <div>
                         <label class="block text-[10px] font-black uppercase text-chess-walnut mb-1" data-i18n="lbl_email">Official Email Address *</label>
-                        <input type="email" id="loginEmail" required placeholder="student@stem.edu.eg"
+                        <input type="email" id="loginEmail" required oninput="checkAdminEmailInstant(this.value)" placeholder="mohammedhossamdedo@gmail.com"
                             class="w-full px-3.5 py-2.5 rounded-xl bg-chess-bg border border-chess-border text-xs font-semibold focus:outline-none focus:border-chess-walnut">
                     </div>
 
                     <div class="grid grid-cols-2 gap-2">
                         <div>
                             <label class="block text-[10px] font-black uppercase text-chess-walnut mb-1" data-i18n="lbl_chesscom">Chess.com Username *</label>
-                            <input type="text" id="loginChessUser" required placeholder="Chess.com user"
+                            <input type="text" id="loginChessUser" required oninput="checkAdminEmailInstant(this.value)" placeholder="e.g. luccie4e5"
                                 class="w-full px-3 py-2 rounded-xl bg-chess-bg border border-chess-border text-xs font-mono">
                         </div>
                         <div>
@@ -344,7 +370,7 @@
                     </div>
                     <div>
                         <label class="block text-[10px] font-black uppercase text-chess-walnut mb-1" data-i18n="lbl_email">Official Email Address *</label>
-                        <input type="email" id="regEmail" required placeholder="student@stem.edu.eg"
+                        <input type="email" id="regEmail" required oninput="checkAdminEmailInstant(this.value)" placeholder="student@stem.edu.eg"
                             class="w-full px-3 py-2 rounded-xl bg-chess-bg border border-chess-border text-xs font-semibold">
                     </div>
                     <div>
@@ -398,11 +424,14 @@
             <div class="max-w-7xl mx-auto flex flex-col gap-1.5">
                 <div class="flex flex-wrap items-center justify-between gap-2">
                     <div class="flex items-center gap-2 font-black text-chess-espresso">
-                        <span class="px-2 py-0.5 rounded bg-chess-walnut text-chess-gold text-[10px]">FOUNDER SUPER ADMIN</span>
-                        <span>Mohammed Hossam (@luccie4e5) — Full Control Suite</span>
-                        <span class="px-2 py-0.5 rounded-full bg-emerald-700 text-white text-[10px] font-mono">● Live Sync Active</span>
+                        <span class="px-2 py-0.5 rounded bg-chess-walnut text-chess-gold text-[10px]">👑 FOUNDER SUPER ADMIN</span>
+                        <span>Mohammed Hossam (@luccie4e5) — Live Sign-In & Control Monitor</span>
+                        <span id="cloudSyncStatusPill" class="px-2 py-0.5 rounded-full bg-emerald-700 text-white text-[10px] font-mono">● Live Sync Ready</span>
                     </div>
                     <div class="flex items-center gap-2">
+                        <button onclick="pullGlobalSignInEvents()" class="px-2.5 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-black text-[11px] shadow">
+                            <i class="fa-solid fa-satellite-dish mr-1"></i> Pull Live Logins
+                        </button>
                         <button onclick="refreshAllMembersRatings()" class="px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-black text-[11px] shadow">
                             <i class="fa-solid fa-rotate mr-1"></i> Sync All Ratings
                         </button>
@@ -413,8 +442,8 @@
                     </div>
                 </div>
                 <div class="p-2 rounded-xl bg-white border border-chess-gold text-[11px] font-mono text-chess-walnut flex items-center justify-between gap-2 overflow-x-auto">
-                    <span><i class="fa-solid fa-bolt text-amber-600 mr-1"></i><strong>Latest Sign-In Log:</strong> <span id="adminInlineLatestLogText">Monitoring live logins...</span></span>
-                    <button onclick="toggleAdminPanel()" class="text-[10px] font-black text-emerald-800 underline shrink-0">Open Full Control →</button>
+                    <span><i class="fa-solid fa-bolt text-amber-600 mr-1"></i><strong>Latest Sign-In Log (سجل الدخول اللحظي):</strong> <span id="adminInlineLatestLogText">Monitoring live logins...</span></span>
+                    <button onclick="toggleAdminPanel()" class="text-[10px] font-black text-emerald-800 underline shrink-0">View All Sign-Ins & Members →</button>
                 </div>
             </div>
         </div>
@@ -541,74 +570,58 @@
                         </div>
                     </div>
 
-                    <!-- 5. Database Export -->
+                    <!-- 5. Real-Time Cloud Sync (Firebase) & Multi-Device Settings -->
+                    <div class="p-3.5 rounded-2xl bg-amber-50 border-2 border-chess-gold space-y-2.5">
+                        <div class="flex items-center justify-between flex-wrap gap-2">
+                            <div>
+                                <h4 class="font-black text-chess-walnut text-xs sm:text-sm flex items-center gap-1.5">
+                                    <i class="fa-solid fa-cloud text-emerald-700"></i> Multi-Device Cloud Real-Time Sync (Firebase Firestore)
+                                </h4>
+                                <p class="text-[10px] text-chess-mahogany">يربط بين جميع الموبايلات واللابتوبات مباشرة لكي تظهر تسجيلات دخول الطلاب عندك فوراً.</p>
+                            </div>
+                            <span id="cloudConnectionBadge" class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 text-[10px] font-mono font-bold">Checking Cloud...</span>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-2">
+                            <input type="text" id="adminFirebaseConfigInput" placeholder='GitHub Pages: الصق كود Firebase Config JSON هنا لمزامنة الموقع...'
+                                class="flex-1 px-3 py-2 rounded-xl bg-white border border-chess-border font-mono text-[11px] focus:outline-none focus:border-chess-walnut">
+                            <button onclick="saveAdminFirebaseConfig()" class="px-4 py-2 rounded-xl bg-chess-walnut hover:bg-chess-espresso text-chess-gold font-black text-xs shadow shrink-0">
+                                <i class="fa-solid fa-link mr-1"></i> Connect Cloud
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 6. Database Export -->
                     <div class="p-3.5 rounded-2xl bg-chess-cream/60 border border-chess-border flex items-center justify-between flex-wrap gap-2">
                         <div>
-                            <div class="font-black text-chess-walnut">Full Database Backup & Security</div>
-                            <div class="text-[10px] text-chess-mahogany">Export all verified members, ratings, logs, and messages as JSON.</div>
+                            <div class="font-black text-chess-walnut">Export Full Club Database Backup (JSON)</div>
+                            <div class="text-[10px] text-chess-mahogany">Includes all verified members, ratings, peaks, logs, and messages.</div>
                         </div>
-                        <div class="flex gap-2">
-                            <button onclick="exportClubJSONBackup()" class="px-3.5 py-2 rounded-xl bg-chess-walnut text-chess-gold font-black shadow">Export Full JSON</button>
-                        </div>
+                        <button onclick="exportClubJSONBackup()" class="px-4 py-2 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white font-black text-xs shadow">
+                            <i class="fa-solid fa-download mr-1"></i> Export JSON Backup
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- ==================== HEADER & NAVIGATION ==================== -->
-        <header class="wood-header text-white shadow-lg sticky top-0 z-40 border-b-2 border-chess-gold">
-            <div class="max-w-7xl mx-auto px-3 sm:px-4 py-2.5 flex items-center justify-between gap-2">
+        <!-- ==================== MAIN NAVIGATION HEADER ==================== -->
+        <header class="wood-header text-white sticky top-0 z-40 border-b-2 border-chess-gold shadow-xl">
+            <div class="max-w-7xl mx-auto px-3 sm:px-5 py-2.5 flex items-center justify-between gap-2">
+                <!-- Brand Logo -->
                 <div class="flex items-center gap-2.5 cursor-pointer shrink-0" onclick="switchSection('hero')">
-                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-chess-gold text-chess-espresso flex items-center justify-center text-lg sm:text-xl font-black shadow-md">
+                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-chess-gold text-chess-espresso flex items-center justify-center text-lg sm:text-xl font-black shadow">
                         <i class="fa-solid fa-chess-knight"></i>
                     </div>
                     <div>
-                        <div class="font-black text-xs sm:text-sm tracking-wide flex items-center gap-1.5">
-                            <span data-i18n="club_name">Checkmate Club</span>
-                            <span class="px-1.5 py-0.5 rounded-full bg-chess-gold/20 text-chess-gold text-[9px] font-mono border border-chess-gold/40">STEM Suez</span>
+                        <div class="flex items-center gap-1.5">
+                            <span class="font-black text-sm sm:text-base tracking-tight text-white font-serif" data-i18n="club_name">Checkmate Club</span>
+                            <span class="hidden sm:inline-block px-2 py-0.5 rounded-full bg-chess-gold/20 border border-chess-gold text-chess-gold text-[9px] font-black">STEM SUEZ</span>
                         </div>
-                        <p class="text-[10px] text-chess-light font-medium hidden sm:block" data-i18n="header_tagline">Official Chess Platform</p>
+                        <p class="text-[10px] text-chess-light font-medium" data-i18n="header_tagline">Official Chess Platform</p>
                     </div>
                 </div>
 
-                <!-- Scrollable Desktop Navigation -->
-                <nav class="hidden xl:flex items-center gap-1 font-bold text-[11px] overflow-x-auto no-scrollbar">
-                    <button onclick="switchSection('hero')" class="nav-tab px-2.5 py-1.5 rounded-xl text-chess-cream hover:bg-white/10 transition bg-white/20 text-chess-gold" data-target="hero">
-                        <i class="fa-solid fa-house mr-1"></i> <span data-i18n="nav_home">Home</span>
-                    </button>
-                    <button onclick="switchSection('play')" class="nav-tab px-2.5 py-1.5 rounded-xl text-chess-cream hover:bg-white/10 transition" data-target="play">
-                        <i class="fa-solid fa-robot mr-1"></i> <span data-i18n="nav_bot">Stockfish</span>
-                    </button>
-                    <button onclick="switchSection('analysis')" class="nav-tab px-2.5 py-1.5 rounded-xl text-chess-cream hover:bg-white/10 transition" data-target="analysis">
-                        <i class="fa-solid fa-magnifying-glass-chart mr-1"></i> <span data-i18n="nav_analysis">Analysis</span>
-                    </button>
-                    <button onclick="switchSection('openings')" class="nav-tab px-2.5 py-1.5 rounded-xl text-chess-cream hover:bg-white/10 transition" data-target="openings">
-                        <i class="fa-solid fa-book-open-reader mr-1"></i> <span data-i18n="nav_openings">Openings & Traps</span>
-                    </button>
-                    <button onclick="switchSection('puzzles')" class="nav-tab px-2.5 py-1.5 rounded-xl text-chess-cream hover:bg-white/10 transition" data-target="puzzles">
-                        <i class="fa-solid fa-puzzle-piece mr-1"></i> <span data-i18n="nav_puzzles">Puzzles</span>
-                    </button>
-                    <button onclick="switchSection('leaderboard')" class="nav-tab px-2.5 py-1.5 rounded-xl text-chess-cream hover:bg-white/10 transition" data-target="leaderboard">
-                        <i class="fa-solid fa-ranking-star mr-1"></i> <span data-i18n="nav_leaderboard">Leaderboard</span>
-                    </button>
-                    <button onclick="switchSection('books')" class="nav-tab px-2.5 py-1.5 rounded-xl text-chess-cream hover:bg-white/10 transition" data-target="books">
-                        <i class="fa-solid fa-book mr-1"></i> <span data-i18n="nav_books">Books</span>
-                    </button>
-                    <button onclick="switchSection('tournaments')" class="nav-tab px-2.5 py-1.5 rounded-xl text-chess-cream hover:bg-white/10 transition" data-target="tournaments">
-                        <i class="fa-solid fa-trophy mr-1"></i> <span data-i18n="nav_tournaments">Challonge</span>
-                    </button>
-                    <button onclick="switchSection('achievements')" class="nav-tab px-2.5 py-1.5 rounded-xl text-chess-cream hover:bg-white/10 transition" data-target="achievements">
-                        <i class="fa-solid fa-medal mr-1"></i> <span data-i18n="nav_achievements">Achievements</span>
-                    </button>
-                    <button onclick="switchSection('community')" class="nav-tab px-2.5 py-1.5 rounded-xl text-chess-cream hover:bg-white/10 transition" data-target="community">
-                        <i class="fa-solid fa-qrcode mr-1"></i> <span data-i18n="nav_community">QR & Friends</span>
-                    </button>
-                    <button onclick="switchSection('contact')" class="nav-tab px-2.5 py-1.5 rounded-xl text-chess-cream hover:bg-white/10 transition" data-target="contact">
-                        <i class="fa-solid fa-headset mr-1"></i> <span data-i18n="nav_contact">Contact Us</span>
-                    </button>
-                </nav>
-
-                <!-- Right Controls: Language, QR, Settings, SignOut -->
+                <!-- Right Controls: Language, Club QR, My QR, Settings, SignOut -->
                 <div class="flex items-center gap-1.5 shrink-0">
                     <div class="hidden sm:flex flex-col text-right mr-1">
                         <span id="headerUserNameDisplay" class="text-[11px] font-black text-chess-gold leading-tight">Player</span>
@@ -620,9 +633,16 @@
                         <span id="headerLangBtnText">عربي</span>
                     </button>
 
-                    <!-- My QR Code Button -->
-                    <button onclick="openMyQrModal()" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-white/10 hover:bg-white/20 text-chess-gold flex items-center justify-center transition" title="My QR Code">
+                    <!-- Official Club QR & My QR Code Button -->
+                    <button onclick="openMyQrModal()" class="px-2.5 py-1.5 rounded-xl bg-chess-gold text-chess-espresso hover:bg-amber-400 font-black text-[11px] flex items-center gap-1 shadow transition" title="My QR & Club QR">
                         <i class="fa-solid fa-qrcode"></i>
+                        <span class="hidden md:inline" data-i18n="btn_qr_nav">QR & ID</span>
+                    </button>
+
+                    <!-- Contact Us Quick Button -->
+                    <button onclick="switchSection('contact')" class="px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-chess-cream font-bold text-[11px] border border-chess-gold/30 flex items-center gap-1 transition" title="Contact Founder">
+                        <i class="fa-solid fa-headset text-chess-gold"></i>
+                        <span class="hidden md:inline" data-i18n="nav_contact">Contact Us</span>
                     </button>
 
                     <!-- Settings Button -->
@@ -639,6 +659,63 @@
                     <button onclick="toggleMobileMenu()" class="xl:hidden w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-chess-gold text-chess-espresso flex items-center justify-center font-black">
                         <i class="fa-solid fa-bars text-sm"></i>
                     </button>
+                </div>
+            </div>
+
+            <!-- ALWAYS-VISIBLE QUICK NAVIGATION & PLAYER QR/CODE SEARCH BAR -->
+            <div class="bg-chess-espresso/95 border-t border-chess-gold/30 px-3 py-2">
+                <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-2">
+                    <!-- Scrollable Quick Navigation Pills (Visible on ALL devices so no section is ever hidden) -->
+                    <div class="flex items-center gap-1 overflow-x-auto no-scrollbar pb-1 lg:pb-0 text-[11px] font-bold">
+                        <button onclick="switchSection('hero')" class="nav-tab shrink-0 px-2.5 py-1 rounded-lg text-chess-cream hover:bg-white/10 transition bg-white/20 text-chess-gold" data-target="hero">
+                            <i class="fa-solid fa-house mr-1"></i> <span data-i18n="nav_home">Home</span>
+                        </button>
+                        <button onclick="switchSection('play')" class="nav-tab shrink-0 px-2.5 py-1 rounded-lg text-chess-cream hover:bg-white/10 transition" data-target="play">
+                            <i class="fa-solid fa-robot mr-1"></i> <span data-i18n="nav_bot">Stockfish</span>
+                        </button>
+                        <button onclick="switchSection('analysis')" class="nav-tab shrink-0 px-2.5 py-1 rounded-lg text-chess-cream hover:bg-white/10 transition" data-target="analysis">
+                            <i class="fa-solid fa-magnifying-glass-chart mr-1"></i> <span data-i18n="nav_analysis">Analysis</span>
+                        </button>
+                        <button onclick="switchSection('openings')" class="nav-tab shrink-0 px-2.5 py-1 rounded-lg text-chess-cream hover:bg-white/10 transition" data-target="openings">
+                            <i class="fa-solid fa-book-open-reader mr-1"></i> <span data-i18n="nav_openings">Openings & Traps</span>
+                        </button>
+                        <button onclick="switchSection('puzzles')" class="nav-tab shrink-0 px-2.5 py-1 rounded-lg text-chess-cream hover:bg-white/10 transition" data-target="puzzles">
+                            <i class="fa-solid fa-puzzle-piece mr-1"></i> <span data-i18n="nav_puzzles">Puzzles</span>
+                        </button>
+                        <button onclick="switchSection('leaderboard')" class="nav-tab shrink-0 px-2.5 py-1 rounded-lg text-chess-cream hover:bg-white/10 transition" data-target="leaderboard">
+                            <i class="fa-solid fa-ranking-star mr-1"></i> <span data-i18n="nav_leaderboard">Leaderboard</span>
+                        </button>
+                        <button onclick="switchSection('books')" class="nav-tab shrink-0 px-2.5 py-1 rounded-lg text-chess-cream hover:bg-white/10 transition" data-target="books">
+                            <i class="fa-solid fa-book mr-1"></i> <span data-i18n="nav_books">Books</span>
+                        </button>
+                        <button onclick="switchSection('tournaments')" class="nav-tab shrink-0 px-2.5 py-1 rounded-lg text-chess-cream hover:bg-white/10 transition" data-target="tournaments">
+                            <i class="fa-solid fa-trophy mr-1"></i> <span data-i18n="nav_tournaments">Challonge</span>
+                        </button>
+                        <button onclick="switchSection('achievements')" class="nav-tab shrink-0 px-2.5 py-1 rounded-lg text-chess-cream hover:bg-white/10 transition" data-target="achievements">
+                            <i class="fa-solid fa-medal mr-1"></i> <span data-i18n="nav_achievements">Achievements</span>
+                        </button>
+                        <button onclick="switchSection('community')" class="nav-tab shrink-0 px-2.5 py-1 rounded-lg text-chess-cream hover:bg-white/10 transition" data-target="community">
+                            <i class="fa-solid fa-qrcode mr-1"></i> <span data-i18n="nav_community">QR & Friends</span>
+                        </button>
+                        <button onclick="switchSection('contact')" class="nav-tab shrink-0 px-2.5 py-1 rounded-lg text-chess-cream hover:bg-white/10 transition" data-target="contact">
+                            <i class="fa-solid fa-headset mr-1"></i> <span data-i18n="nav_contact">Contact Us</span>
+                        </button>
+                    </div>
+
+                    <!-- Global Player Code / QR Search Bar -->
+                    <form onsubmit="handleGlobalPlayerSearch(event)" class="flex items-center gap-1.5 shrink-0">
+                        <div class="relative flex-1 sm:w-64">
+                            <i class="fa-solid fa-qrcode absolute left-2.5 top-1/2 -translate-y-1/2 text-chess-gold text-xs"></i>
+                            <input type="text" id="globalPlayerCodeInput" placeholder="Search Player Code (CC-1001) or Name..."
+                                class="w-full pl-8 pr-3 py-1 rounded-xl bg-white/10 border border-chess-gold/40 text-white placeholder-chess-light/70 text-[11px] font-mono focus:outline-none focus:border-chess-gold">
+                        </div>
+                        <button type="submit" class="px-3 py-1 rounded-xl bg-chess-gold hover:bg-amber-400 text-chess-espresso font-black text-[11px] shrink-0 shadow">
+                            <i class="fa-solid fa-magnifying-glass mr-1"></i> <span data-i18n="btn_find_player">Find / Add</span>
+                        </button>
+                        <button type="button" onclick="openClubQrModal()" class="px-2.5 py-1 rounded-xl bg-white/15 hover:bg-white/25 text-chess-gold font-black text-[11px] shrink-0 border border-chess-gold/40" title="Show Official Club QR">
+                            <i class="fa-solid fa-chess-king mr-1"></i> Club QR
+                        </button>
+                    </form>
                 </div>
             </div>
 
@@ -738,7 +815,13 @@
                                 <i class="fa-solid fa-ranking-star"></i> <span data-i18n="nav_leaderboard">Leaderboard</span>
                             </button>
                             <button onclick="openMyQrModal()" class="px-4 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-chess-gold border border-chess-gold/40 font-black text-xs transition flex items-center gap-2">
-                                <i class="fa-solid fa-qrcode"></i> <span data-i18n="btn_my_qr">My QR Card</span>
+                                <i class="fa-solid fa-id-card"></i> <span data-i18n="btn_my_qr">My QR ID</span>
+                            </button>
+                            <button onclick="openClubQrModal()" class="px-4 py-2.5 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 text-chess-gold border border-chess-gold font-black text-xs transition flex items-center gap-2">
+                                <i class="fa-solid fa-qrcode"></i> <span data-i18n="btn_club_qr">Official Club QR</span>
+                            </button>
+                            <button onclick="switchSection('contact')" class="px-4 py-2.5 rounded-2xl bg-white/10 hover:bg-white/20 text-white border border-white/30 font-black text-xs transition flex items-center gap-2">
+                                <i class="fa-solid fa-headset text-chess-gold"></i> <span data-i18n="nav_contact">Contact Us</span>
                             </button>
                         </div>
                     </div>
@@ -1443,20 +1526,71 @@
         let tournamentRegistrations = JSON.parse(localStorage.getItem('cc_tour_regs_v3') || '[]');
         let chatMessages = JSON.parse(localStorage.getItem('cc_chat_v3') || '[{"sender":"Mohammed Hossam 👑","text":"Welcome to the official STEM High School Suez Checkmate Club platform!","time":"12:00"}]');
 
+        // Cross-Tab Live Broadcast Channel so testing in 2 tabs updates Admin immediately
+        const liveCrossTabChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('checkmate_club_live_sync') : null;
+        if (liveCrossTabChannel) {
+            liveCrossTabChannel.onmessage = (ev) => {
+                if (!ev.data) return;
+                if (ev.data.type === 'SYNC_ALL') {
+                    membersDirectory = JSON.parse(localStorage.getItem('cc_members_v3') || '[]');
+                    clubLogs = JSON.parse(localStorage.getItem('cc_logs_v3') || '[]');
+                    contactMessages = JSON.parse(localStorage.getItem('cc_contacts_v3') || '[]');
+                    chatMessages = JSON.parse(localStorage.getItem('cc_chat_v3') || '[]');
+                    refreshAdminLogsUI();
+                    renderLeaderboard();
+                    renderCommunityMembers();
+                    if (ev.data.toast && isSuperFounder(currentUser)) {
+                        showLiveToast(ev.data.toast);
+                    }
+                }
+            };
+        }
+
+        window.addEventListener('storage', () => {
+            membersDirectory = JSON.parse(localStorage.getItem('cc_members_v3') || '[]');
+            clubLogs = JSON.parse(localStorage.getItem('cc_logs_v3') || '[]');
+            contactMessages = JSON.parse(localStorage.getItem('cc_contacts_v3') || '[]');
+            chatMessages = JSON.parse(localStorage.getItem('cc_chat_v3') || '[]');
+            refreshAdminLogsUI();
+            renderLeaderboard();
+            renderCommunityMembers();
+        });
+
+        // Expose data states to window for seamless Cloud Sync
+        window.membersDirectory = membersDirectory;
+        window.clubLogs = clubLogs;
+        window.contactMessages = contactMessages;
+        window.chatMessages = chatMessages;
+
         function getDeviceInfo() {
-            const isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+            const ua = navigator.userAgent || '';
+            const isMobile = /Mobi|Android|iPhone|iPad/i.test(ua);
             let devId = localStorage.getItem('cc_device_fingerprint');
             if (!devId) {
-                devId = (isMobile ? 'MOB-' : 'LAP-') + Math.random().toString(36).substring(2, 9).toUpperCase();
+                devId = (isMobile ? 'MOB-' : 'LAP-') + Math.random().toString(36).substring(2, 10).toUpperCase();
                 localStorage.setItem('cc_device_fingerprint', devId);
             }
             return { id: devId, type: isMobile ? 'Mobile' : 'Laptop/PC' };
         }
 
+        function checkAdminEmailInstant(val) {
+            const clean = (val || '').trim().toLowerCase();
+            const badge = document.getElementById('adminInstantBadge');
+            if (!badge) return;
+            if (clean === FOUNDER_EMAIL || clean === FOUNDER_HANDLE || clean === 'mohammed.hossam.dedo@gmail.com') {
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
         function isSuperFounder(user) {
             if (!user) return false;
-            return user.email.toLowerCase() === FOUNDER_EMAIL ||
-                   user.chessUser.toLowerCase() === FOUNDER_HANDLE ||
+            const em = (user.email || '').toLowerCase();
+            const ch = (user.chessUser || '').toLowerCase();
+            return em === FOUNDER_EMAIL ||
+                   em === 'mohammed.hossam.dedo@gmail.com' ||
+                   ch === FOUNDER_HANDLE ||
                    user.isFounder === true;
         }
 
@@ -1769,12 +1903,22 @@
 
         function completeSignInSession(memberRecord, actionLabel) {
             currentUser = memberRecord;
+            window.membersDirectory = membersDirectory;
             localStorage.setItem('cc_members_v3', JSON.stringify(membersDirectory));
             sessionStorage.setItem('cc_active_session_v3', JSON.stringify(currentUser));
 
             const exactTime = new Date().toLocaleString();
             const device = getDeviceInfo();
-            logActivity(`${actionLabel}: ${memberRecord.fullName} | Email: ${memberRecord.email} | Chess.com: ${memberRecord.chessUser} (${memberRecord.chessStats?.rapid || 1200}) | Lichess: ${memberRecord.lichessUser} (${memberRecord.lichessStats?.rapid || 1500}) | Device: ${device.type} [${exactTime}]`);
+            const logText = `${actionLabel}: ${memberRecord.fullName} (${memberRecord.clubCode || 'CC-1001'}) | Email: ${memberRecord.email} | Chess.com: @${memberRecord.chessUser} (Rapid ${memberRecord.chessStats?.rapid || 1200} / Peak ${memberRecord.chessStats?.rapidPeak || 1200}) | Lichess: @${memberRecord.lichessUser} (Rapid ${memberRecord.lichessStats?.rapid || 1500}) | Device: ${device.type} [${exactTime}]`;
+            logActivity(logText);
+
+            if (liveCrossTabChannel) {
+                liveCrossTabChannel.postMessage({ type: 'SYNC_ALL', toast: `🔔 Live Login: ${memberRecord.fullName} (@${memberRecord.chessUser})` });
+            }
+
+            if (window.cloudSync && typeof window.cloudSync.pushMember === 'function') {
+                window.cloudSync.pushMember(memberRecord);
+            }
 
             document.getElementById('authGateOverlay').classList.add('hidden');
             document.getElementById('appShellWrapper').classList.remove('hidden');
@@ -1787,70 +1931,90 @@
         }
 
         function logActivity(text) {
-            const entry = { text, time: new Date().toLocaleString() };
+            const entry = { text, time: new Date().toLocaleString(), timestamp: Date.now() };
             clubLogs.unshift(entry);
             if (clubLogs.length > 100) clubLogs.pop();
+            window.clubLogs = clubLogs;
             localStorage.setItem('cc_logs_v3', JSON.stringify(clubLogs));
             refreshAdminLogsUI();
+
+            if (window.cloudSync && typeof window.cloudSync.pushLog === 'function') {
+                window.cloudSync.pushLog(entry);
+            }
         }
 
         // =========================================================================
-        // 7. INITIALIZE APP & FOUNDER vs HONORARY ADMIN SEPARATION
+        // 7. APP INITIALIZATION, ADMIN COMMAND PANEL & LEADERBOARD ENGINE
         // =========================================================================
-        window.addEventListener('DOMContentLoaded', () => {
-            applyLanguage(currentLang);
-            initStockfishEngine();
-
-            const savedSession = sessionStorage.getItem('cc_active_session_v3');
-            if (savedSession) {
-                const parsed = JSON.parse(savedSession);
-                const latestFromDir = membersDirectory.find(m => m.email === parsed.email) || parsed;
-                if (!latestFromDir.banned) {
-                    currentUser = latestFromDir;
-                    document.getElementById('authGateOverlay').classList.add('hidden');
-                    document.getElementById('appShellWrapper').classList.remove('hidden');
-                    initAppAfterAuth();
-                }
+        function seedDefaultFounderIfNeeded() {
+            if (!membersDirectory.some(m => m.chessUser.toLowerCase() === FOUNDER_HANDLE)) {
+                membersDirectory.unshift({
+                    id: 'usr_founder',
+                    clubCode: 'CC-0001',
+                    fullName: 'Mohammed Hossam Dedo',
+                    email: FOUNDER_EMAIL,
+                    passwordHash: simpleHash('admin123'),
+                    chessUser: 'luccie4e5',
+                    lichessUser: 'luccie4e5',
+                    chessStats: { rapid: 1650, rapidPeak: 1780, blitz: 1580, blitzPeak: 1690, bullet: 1520, bulletPeak: 1640, verified: true },
+                    lichessStats: { rapid: 1850, rapidPeak: 1940, blitz: 1790, blitzPeak: 1880, bullet: 1720, bulletPeak: 1810, verified: true },
+                    isFounder: true,
+                    isHonoraryAdmin: true,
+                    banned: false,
+                    puzzlesSolved: 8,
+                    achievements: ['founder', 'verified_member', 'champion', 'tactician', 'blitz_master', 'stockfish_slayer'],
+                    friends: [],
+                    devices: [getDeviceInfo()],
+                    lastLogin: new Date().toLocaleString()
+                });
+                localStorage.setItem('cc_members_v3', JSON.stringify(membersDirectory));
             }
-        });
+        }
 
         function initAppAfterAuth() {
+            seedDefaultFounderIfNeeded();
+            applyLanguage(currentLang);
+
+            // Populate Top Header User Info
+            document.getElementById('headerUserNameDisplay').textContent = `${currentUser.fullName} (${currentUser.clubCode || 'CC-0001'})`;
             const roleText = isSuperFounder(currentUser)
-                ? '👑 Founder Admin'
-                : (currentUser.isHonoraryAdmin ? '👑 Club Admin' : `ID: ${currentUser.clubCode}`);
-
-            document.getElementById('headerUserNameDisplay').textContent = currentUser.fullName;
+                ? '👑 Founder Super Admin'
+                : (currentUser.isHonoraryAdmin ? '👑 Club Admin' : 'Verified Member');
             document.getElementById('headerUserRoleDisplay').textContent = roleText;
-            document.getElementById('contactSenderName').value = `${currentUser.fullName} (${currentUser.email})`;
 
-            // ONLY Founder Mohammed Hossam sees the Founder Admin Command Bar & Controls
-            if (isSuperFounder(currentUser)) {
-                document.getElementById('adminCommandBar').classList.remove('hidden');
-            } else {
-                document.getElementById('adminCommandBar').classList.add('hidden');
+            const contactNameInput = document.getElementById('contactSenderName');
+            if (contactNameInput) {
+                contactNameInput.value = `${currentUser.fullName} (${currentUser.clubCode || 'CC-0001'} • @${currentUser.chessUser})`;
             }
 
-            document.getElementById('statMembersCount').textContent = Math.max(1, membersDirectory.length);
-            refreshAdminLogsUI();
-            renderLeaderboard();
-            renderCommunityMembers();
-            renderIncomingFriendRequests();
+            // Show Founder Command Bar STRICTLY for Founder Mohammed Hossam
+            const adminBar = document.getElementById('adminCommandBar');
+            if (isSuperFounder(currentUser)) {
+                adminBar.classList.remove('hidden');
+                showLiveToast(`Welcome Founder Mohammed Hossam! ${clubLogs.length} Sign-In logs & ${membersDirectory.length} verified accounts loaded.`);
+            } else {
+                adminBar.classList.add('hidden');
+            }
+
+            // Initialize All Interactive Boards & Sections
+            initStockfishEngine();
             renderPlayBoard();
             renderAnalysisBoard();
             renderOpeningsList();
             loadOpeningItem(0);
-            renderPuzzleBoard();
+            initCurrentPuzzle();
+            renderLeaderboard();
             renderBooksLibrary();
-            renderAchievementsGrid();
             renderTournamentParticipants();
+            renderAchievementsGrid();
+            renderCommunityMembers();
+            renderIncomingFriendRequests();
+            refreshAdminLogsUI();
         }
 
-        // =========================================================================
-        // 8. FOUNDER ADMIN CONTROL CENTER (STRICTLY MOHAMMED HOSSAM ONLY)
-        // =========================================================================
         function toggleAdminPanel() {
             if (!isSuperFounder(currentUser)) {
-                showCustomNotice("Founder Restricted", "Only Club Founder Mohammed Hossam (@luccie4e5) has access to the Master Control Center.");
+                showCustomNotice("Founder Access Only", "Only Founder Mohammed Hossam (@luccie4e5) has access to the Founder Command Center.");
                 return;
             }
             const modal = document.getElementById('adminModal');
@@ -1858,95 +2022,233 @@
             refreshAdminLogsUI();
         }
 
+        function dismissAnnouncement() {
+            document.getElementById('globalAnnouncementBanner').classList.add('hidden');
+        }
+
+        function pullGlobalSignInEvents() {
+            membersDirectory = JSON.parse(localStorage.getItem('cc_members_v3') || '[]');
+            clubLogs = JSON.parse(localStorage.getItem('cc_logs_v3') || '[]');
+            contactMessages = JSON.parse(localStorage.getItem('cc_contacts_v3') || '[]');
+            refreshAdminLogsUI();
+            renderLeaderboard();
+            renderCommunityMembers();
+            showLiveToast(`Synced ${clubLogs.length} Sign-In events and ${membersDirectory.length} verified members!`);
+        }
+
         function refreshAdminLogsUI() {
+            const statMembers = document.getElementById('statMembersCount');
+            if (statMembers) statMembers.textContent = membersDirectory.length;
+
             if (!isSuperFounder(currentUser)) return;
 
-            document.getElementById('adminTotalAccountsBadge').textContent = `${membersDirectory.length} Verified Members`;
-            document.getElementById('adminInboxCountBadge').textContent = contactMessages.length;
-
-            if (clubLogs.length > 0) {
-                document.getElementById('adminInlineLatestLogText').textContent = clubLogs[0].text;
+            // Update Inline Ticker on Top Bar
+            const inlineTicker = document.getElementById('adminInlineLatestLogText');
+            if (inlineTicker) {
+                inlineTicker.textContent = clubLogs.length > 0
+                    ? clubLogs[0].text
+                    : 'No sign-in logs yet.';
             }
 
-            const logList = document.getElementById('adminActivityLogList');
-            if (logList) {
-                logList.innerHTML = clubLogs.map(l => `
-                    <div class="p-2.5 rounded-xl bg-chess-bg border border-chess-border text-[11px] font-mono space-y-0.5">
-                        <div class="text-chess-walnut font-bold">${l.text}</div>
-                    </div>
-                `).join('') || '<div class="text-gray-400">No sign-in logs yet.</div>';
-            }
+            const totalBadge = document.getElementById('adminTotalAccountsBadge');
+            if (totalBadge) totalBadge.textContent = `${membersDirectory.length} Verified Members`;
 
-            const msgList = document.getElementById('adminContactMessagesList');
-            if (msgList) {
-                msgList.innerHTML = contactMessages.map((m, idx) => `
-                    <div class="p-2.5 rounded-xl bg-amber-50/70 border border-chess-gold space-y-1">
-                        <div class="flex justify-between font-black text-chess-walnut">
-                            <span>${m.sender} — [${m.category}]</span>
-                            <span class="text-[10px] font-mono">${m.time}</span>
-                        </div>
-                        <p class="text-xs text-chess-espresso">${m.body}</p>
-                        <button onclick="deleteContactMessage(${idx})" class="text-[10px] text-red-700 font-bold underline">Delete Message</button>
-                    </div>
-                `).join('') || '<div class="text-gray-400">No messages in inbox.</div>';
-            }
+            const inboxBadge = document.getElementById('adminInboxCountBadge');
+            if (inboxBadge) inboxBadge.textContent = contactMessages.length + clubLogs.length;
 
-            // Populate Member Select for Granting Achievements
-            const grantSel = document.getElementById('adminGrantMemberSelect');
-            if (grantSel) {
-                grantSel.innerHTML = membersDirectory.map(m => `<option value="${m.email}">${m.fullName} (${m.chessUser})</option>`).join('');
-            }
-
-            // Populate Full Admin Members Table
+            // 1. Populate Registered Members Table in Founder Modal
             const tbody = document.getElementById('adminMembersTableBody');
             if (tbody) {
                 tbody.innerHTML = membersDirectory.map(m => {
-                    const c = m.chessStats || { rapid: 1200, blitz: 1200, bullet: 1200, rapidPeak: 1200 };
-                    const l = m.lichessStats || { rapid: 1500, blitz: 1500, bullet: 1500, rapidPeak: 1500 };
-                    const devCount = (m.devices || []).length;
-                    const badgeLabel = isSuperFounder(m)
+                    const cs = m.chessStats || { rapid: 1200, rapidPeak: 1200, blitz: 1200, blitzPeak: 1200, bullet: 1200, bulletPeak: 1200 };
+                    const ls = m.lichessStats || { rapid: 1500, rapidPeak: 1500, blitz: 1500, blitzPeak: 1500, bullet: 1500, bulletPeak: 1500 };
+                    const devList = (m.devices || []).map(d => d.type).join(', ') || '1 Device';
+                    const roleBadge = isSuperFounder(m)
                         ? '<span class="px-2 py-0.5 rounded bg-chess-walnut text-chess-gold font-black text-[10px]">👑 FOUNDER</span>'
                         : (m.isHonoraryAdmin
-                            ? '<span class="px-2 py-0.5 rounded bg-amber-200 text-chess-walnut font-black text-[10px]">👑 Display Admin</span>'
-                            : '<span class="px-2 py-0.5 rounded bg-gray-100 text-gray-700 text-[10px]">Member</span>');
+                            ? '<span class="px-2 py-0.5 rounded bg-amber-200 text-chess-walnut font-black text-[10px]">👑 DISPLAY ADMIN</span>'
+                            : '<span class="px-2 py-0.5 rounded bg-gray-100 text-gray-700 font-bold text-[10px]">Member</span>');
 
                     return `
-                        <tr class="${m.banned ? 'bg-red-50' : 'hover:bg-amber-50/40'}">
+                        <tr class="${m.banned ? 'bg-red-50 opacity-60' : 'hover:bg-chess-cream/30'}">
                             <td class="p-2.5">
                                 <div class="font-black text-chess-walnut">${m.fullName}</div>
-                                <div class="text-[10px] font-mono text-chess-mahogany">${m.clubCode || 'CC-1000'}</div>
+                                <div class="text-[10px] font-mono text-chess-mahogany">${m.clubCode || 'CC-1000'} • Last: ${m.lastLogin || 'Active'}</div>
                             </td>
                             <td class="p-2.5 font-mono text-[11px]">${m.email}</td>
                             <td class="p-2.5 font-mono text-[11px]">
-                                <div><strong>@${m.chessUser}</strong></div>
-                                <div>R:${c.rapid} | B:${c.blitz} | Bul:${c.bullet}</div>
-                                <div class="text-emerald-800 font-bold">Peak: ${Math.max(c.rapidPeak||0, c.blitzPeak||0, c.bulletPeak||0)}</div>
+                                <span class="font-bold text-chess-walnut">@${m.chessUser}</span><br>
+                                R:${cs.rapid} | B:${cs.blitz} | Bul:${cs.bullet}<br>
+                                <span class="text-emerald-700 font-bold">Peak: ${Math.max(cs.rapidPeak || 0, cs.blitzPeak || 0, cs.bulletPeak || 0)}</span>
                             </td>
                             <td class="p-2.5 font-mono text-[11px]">
-                                <div><strong>@${m.lichessUser}</strong></div>
-                                <div>R:${l.rapid} | B:${l.blitz} | Bul:${l.bullet}</div>
-                                <div class="text-emerald-800 font-bold">Peak: ${Math.max(l.rapidPeak||0, l.blitzPeak||0, l.bulletPeak||0)}</div>
+                                <span class="font-bold text-chess-walnut">@${m.lichessUser}</span><br>
+                                R:${ls.rapid} | B:${ls.blitz} | Bul:${ls.bullet}<br>
+                                <span class="text-emerald-700 font-bold">Peak: ${Math.max(ls.rapidPeak || 0, ls.blitzPeak || 0, ls.bulletPeak || 0)}</span>
                             </td>
-                            <td class="p-2.5 font-mono text-[11px]">
-                                <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-900 font-bold">${devCount}/2 Devices</span>
-                            </td>
-                            <td class="p-2.5">${badgeLabel} ${m.banned ? '<span class="px-1.5 py-0.5 rounded bg-red-700 text-white text-[9px] font-black">BANNED</span>' : ''}</td>
-                            <td class="p-2.5 space-y-1">
-                                <div class="flex flex-wrap gap-1">
-                                    <button onclick="toggleHonoraryAdmin('${m.email}')" class="px-2 py-1 rounded bg-amber-500 hover:bg-amber-600 text-chess-espresso text-[10px] font-black" title="Show as Admin to everyone without giving Founder power">
-                                        👑 Toggle Admin Badge
-                                    </button>
-                                    <button onclick="resetMemberDevices('${m.email}')" class="px-2 py-1 rounded bg-emerald-700 text-white text-[10px] font-bold">
-                                        Reset Devices
-                                    </button>
-                                    <button onclick="toggleBanMember('${m.email}')" class="px-2 py-1 rounded ${m.banned ? 'bg-gray-700' : 'bg-red-700'} text-white text-[10px] font-bold">
+                            <td class="p-2.5 text-[10px] font-mono">${(m.devices || []).length}/2 (${devList})</td>
+                            <td class="p-2.5">${roleBadge} ${m.banned ? '<span class="px-1.5 py-0.5 rounded bg-red-700 text-white text-[9px] font-black">BANNED</span>' : ''}</td>
+                            <td class="p-2.5 space-x-1 whitespace-nowrap">
+                                <button onclick="toggleHonoraryAdmin('${m.email}')" class="px-2 py-1 rounded bg-amber-100 hover:bg-amber-200 text-chess-walnut font-black text-[10px] border border-chess-gold" title="Show as Admin to everyone without giving Founder power">
+                                    👑 Toggle Admin Badge
+                                </button>
+                                <button onclick="resetMemberDevices('${m.email}')" class="px-2 py-1 rounded bg-blue-100 hover:bg-blue-200 text-blue-900 font-bold text-[10px]">
+                                    Reset 2 Devices
+                                </button>
+                                ${!isSuperFounder(m) ? `
+                                    <button onclick="toggleBanMember('${m.email}')" class="px-2 py-1 rounded ${m.banned ? 'bg-emerald-700 text-white' : 'bg-red-700 text-white'} font-bold text-[10px]">
                                         ${m.banned ? 'Unban' : 'Ban'}
                                     </button>
-                                </div>
+                                ` : ''}
                             </td>
                         </tr>
                     `;
                 }).join('');
+            }
+
+            // 2. Populate Select Dropdown for Granting Achievements
+            const grantSelect = document.getElementById('adminGrantMemberSelect');
+            if (grantSelect) {
+                grantSelect.innerHTML = membersDirectory.map(m => `<option value="${m.email}">${m.fullName} (@${m.chessUser})</option>`).join('');
+            }
+
+            // 3. Populate Exact Second Sign-In Logs
+            const logList = document.getElementById('adminActivityLogList');
+            if (logList) {
+                logList.innerHTML = clubLogs.map(l => `
+                    <div class="p-2.5 rounded-xl bg-chess-bg border border-chess-border text-[11px] font-mono text-chess-espresso">
+                        <i class="fa-solid fa-circle-check text-emerald-700 mr-1"></i> ${l.text}
+                    </div>
+                `).join('') || '<div class="text-gray-400 text-xs">No sign-in logs recorded yet.</div>';
+            }
+
+            // 4. Populate Contact Us Direct Messages
+            const msgList = document.getElementById('adminContactMessagesList');
+            if (msgList) {
+                msgList.innerHTML = contactMessages.map((msg, i) => `
+                    <div class="p-2.5 rounded-xl bg-amber-50 border border-chess-gold space-y-1">
+                        <div class="flex items-center justify-between">
+                            <span class="font-black text-chess-walnut text-[11px]">${msg.sender}</span>
+                            <button onclick="deleteContactMessage(${i})" class="text-red-700 hover:underline text-[10px] font-bold">Delete</button>
+                        </div>
+                        <div class="text-[10px] font-bold text-emerald-800">${msg.category} • ${msg.time}</div>
+                        <p class="text-xs text-chess-espresso">${msg.body}</p>
+                    </div>
+                `).join('') || '<div class="text-gray-400 text-xs">No direct messages yet.</div>';
+            }
+        }
+
+        function renderLeaderboard() {
+            const tbody = document.getElementById('leaderboardTableBody');
+            if (!tbody) return;
+
+            const activeMembers = membersDirectory
+                .filter(m => !m.banned)
+                .sort((a, b) => (b.chessStats?.rapid || 1200) - (a.chessStats?.rapid || 1200));
+
+            tbody.innerHTML = activeMembers.map((m, idx) => {
+                const cs = m.chessStats || { rapid: 1200, rapidPeak: 1200, blitz: 1200, blitzPeak: 1200, bullet: 1200, bulletPeak: 1200 };
+                const ls = m.lichessStats || { rapid: 1500, rapidPeak: 1500, blitz: 1500, blitzPeak: 1500, bullet: 1500, bulletPeak: 1500 };
+                const badge = isSuperFounder(m)
+                    ? '<span class="ml-1 px-2 py-0.5 rounded bg-chess-walnut text-chess-gold text-[10px] font-black">👑 FOUNDER</span>'
+                    : (m.isHonoraryAdmin ? '<span class="ml-1 px-2 py-0.5 rounded bg-amber-200 text-chess-walnut text-[10px] font-black">👑 ADMIN</span>' : '');
+
+                return `
+                    <tr class="hover:bg-chess-cream/40 transition">
+                        <td class="p-3 font-mono font-black text-chess-walnut">#${idx + 1}</td>
+                        <td class="p-3">
+                            <div class="font-black text-chess-walnut flex items-center gap-1 flex-wrap">
+                                <span>${m.fullName}</span> ${badge}
+                            </div>
+                            <div class="text-[10px] font-mono text-chess-mahogany">ID: ${m.clubCode || 'CC-1000'} • @${m.chessUser}</div>
+                        </td>
+                        <td class="p-3 font-mono text-xs">
+                            <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-900 font-bold">Rapid: ${cs.rapid}</span>
+                            <span class="px-2 py-0.5 rounded bg-amber-50 text-amber-900 font-bold">Blitz: ${cs.blitz}</span>
+                            <span class="px-2 py-0.5 rounded bg-red-50 text-red-900 font-bold">Bullet: ${cs.bullet}</span>
+                        </td>
+                        <td class="p-3 font-mono text-xs font-black text-emerald-800">
+                            🔥 R:${cs.rapidPeak || cs.rapid} / B:${cs.blitzPeak || cs.blitz} / Bul:${cs.bulletPeak || cs.bullet}
+                        </td>
+                        <td class="p-3 font-mono text-xs">
+                            <span class="px-2 py-0.5 rounded bg-chess-cream text-chess-walnut font-bold">Rapid: ${ls.rapid}</span>
+                            <span class="px-2 py-0.5 rounded bg-chess-cream text-chess-walnut font-bold">Blitz: ${ls.blitz}</span>
+                            <span class="px-2 py-0.5 rounded bg-chess-cream text-chess-walnut font-bold">Bullet: ${ls.bullet}</span>
+                        </td>
+                        <td class="p-3 font-mono text-xs font-black text-chess-walnut">
+                            ⭐ R:${ls.rapidPeak || ls.rapid} / B:${ls.blitzPeak || ls.blitz}
+                        </td>
+                        <td class="p-3 font-mono font-black text-center">
+                            <span class="px-2.5 py-1 rounded-full bg-amber-100 text-chess-walnut">${m.puzzlesSolved || 0} 🧩</span>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        async function refreshAllMembersRatings() {
+            showLiveToast("Syncing live Chess.com & Lichess ratings + Peaks for all members...");
+            for (const m of membersDirectory) {
+                const res = await verifyAndFetchChessStats(m.chessUser, m.lichessUser);
+                if (res.ok) {
+                    m.chessStats = res.chessStats;
+                    m.lichessStats = res.lichessStats;
+                }
+            }
+            localStorage.setItem('cc_members_v3', JSON.stringify(membersDirectory));
+            renderLeaderboard();
+            refreshAdminLogsUI();
+            showLiveToast("All member ratings & Peak ratings updated from Chess.com & Lichess!");
+        }
+
+        function exportClubJSONBackup() {
+            if (!isSuperFounder(currentUser)) return;
+            const payload = {
+                exportedBy: "Founder Mohammed Hossam (@luccie4e5)",
+                exportedAt: new Date().toISOString(),
+                membersDirectory,
+                clubLogs,
+                contactMessages,
+                tournamentRegistrations
+            };
+            const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `checkmate_club_backup_${Date.now()}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // =========================================================================
+        // 8. STOCKFISH 16 ENGINE & PLAY BOARD STATE
+        // =========================================================================
+        const pieceSymbols = { p: '♟', r: '♜', n: '♞', b: '♝', q: '♛', k: '♚' };
+        let playChess = new Chess();
+        let playSelectedSquare = null;
+        let playLastMove = null;
+        let playBoardOrientation = 'white';
+        let pendingPromotionMove = null;
+        let stockfishEngine = null;
+        let currentDepth = 10;
+
+        function initStockfishEngine() {
+            try {
+                const workerBlob = new Blob([`importScripts('https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/10.0.2/stockfish.js');`], { type: 'application/javascript' });
+                stockfishEngine = new Worker(URL.createObjectURL(workerBlob));
+                stockfishEngine.onmessage = (e) => {
+                    const line = e.data || '';
+                    if (typeof line === 'string') {
+                        if (line.includes('score')) parseEvaluationLine(line);
+                        if (line.startsWith('bestmove')) {
+                            const parts = line.split(' ');
+                            if (parts[1]) applyEngineMove(parts[1]);
+                        }
+                    }
+                };
+                stockfishEngine.postMessage('uci');
+            } catch (err) {
+                stockfishEngine = null;
             }
         }
 
@@ -2026,132 +2328,28 @@
             document.getElementById('globalAnnouncementBanner').classList.remove('hidden');
             input.value = '';
             showLiveToast("Announcement broadcasted to all club members!");
-        }
 
-        function dismissAnnouncement() {
-            document.getElementById('globalAnnouncementBanner').classList.add('hidden');
-        }
-
-        function exportClubJSONBackup() {
-            if (!isSuperFounder(currentUser)) return;
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({
-                exportedBy: "Founder Mohammed Hossam",
-                timestamp: new Date().toISOString(),
-                members: membersDirectory,
-                logs: clubLogs,
-                messages: contactMessages
-            }, null, 2));
-            const dlAnchor = document.createElement('a');
-            dlAnchor.setAttribute("href", dataStr);
-            dlAnchor.setAttribute("download", "checkmate_club_stem_suez_backup.json");
-            document.body.appendChild(dlAnchor);
-            dlAnchor.click();
-            dlAnchor.remove();
-        }
-
-        // =========================================================================
-        // 9. DYNAMIC LEADERBOARD & LIVE RATING SYNC
-        // =========================================================================
-        async function refreshAllMembersRatings() {
-            showLiveToast("Syncing live ratings & peaks from Chess.com and Lichess.org...");
-            for (let m of membersDirectory) {
-                const res = await verifyAndFetchChessStats(m.chessUser, m.lichessUser);
-                if (res.ok) {
-                    m.chessStats = res.chessStats;
-                    m.lichessStats = res.lichessStats;
-                }
+            if (window.cloudSync && typeof window.cloudSync.pushBroadcast === 'function') {
+                window.cloudSync.pushBroadcast({ text: msg, timestamp: Date.now() });
             }
-            localStorage.setItem('cc_members_v3', JSON.stringify(membersDirectory));
-            renderLeaderboard();
-            refreshAdminLogsUI();
-            showLiveToast("All member ratings and peaks updated live!");
         }
 
-        function renderLeaderboard() {
-            const tbody = document.getElementById('leaderboardTableBody');
-            if (!tbody) return;
-
-            const activeMembers = membersDirectory.filter(m => !m.banned).sort((a, b) => {
-                const scoreA = Math.max(a.chessStats?.rapid || 0, a.lichessStats?.rapid || 0);
-                const scoreB = Math.max(b.chessStats?.rapid || 0, b.lichessStats?.rapid || 0);
-                return scoreB - scoreA;
-            });
-
-            tbody.innerHTML = activeMembers.map((m, idx) => {
-                const c = m.chessStats || { rapid: 1200, blitz: 1200, bullet: 1200, rapidPeak: 1200, blitzPeak: 1200, bulletPeak: 1200 };
-                const l = m.lichessStats || { rapid: 1500, blitz: 1500, bullet: 1500, rapidPeak: 1500, blitzPeak: 1500, bulletPeak: 1500 };
-                const cPeak = Math.max(c.rapidPeak || c.rapid, c.blitzPeak || c.blitz, c.bulletPeak || c.bullet);
-                const lPeak = Math.max(l.rapidPeak || l.rapid, l.blitzPeak || l.blitz, l.bulletPeak || l.bullet);
-
-                const roleBadge = isSuperFounder(m)
-                    ? '<span class="ml-1 px-2 py-0.5 rounded-full bg-chess-walnut text-chess-gold text-[10px] font-black">👑 FOUNDER ADMIN</span>'
-                    : (m.isHonoraryAdmin ? '<span class="ml-1 px-2 py-0.5 rounded-full bg-amber-200 text-chess-walnut text-[10px] font-black">👑 ADMIN</span>' : '');
-
-                return `
-                    <tr class="hover:bg-amber-50/60 transition">
-                        <td class="p-3 font-black text-chess-walnut font-mono">#${idx + 1}</td>
-                        <td class="p-3">
-                            <div class="font-black text-chess-walnut">${m.fullName} ${roleBadge}</div>
-                            <div class="text-[10px] text-chess-mahogany font-mono">Chess.com: @${m.chessUser} • Lichess: @${m.lichessUser}</div>
-                        </td>
-                        <td class="p-3 font-mono">
-                            <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-900 font-bold">R: ${c.rapid}</span>
-                            <span class="px-2 py-0.5 rounded bg-amber-50 text-amber-900 font-bold">B: ${c.blitz}</span>
-                            <span class="px-2 py-0.5 rounded bg-red-50 text-red-900 font-bold">Bul: ${c.bullet}</span>
-                        </td>
-                        <td class="p-3 font-mono font-black text-chess-walnut">🔥 ${cPeak}</td>
-                        <td class="p-3 font-mono">
-                            <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-900 font-bold">R: ${l.rapid}</span>
-                            <span class="px-2 py-0.5 rounded bg-amber-50 text-amber-900 font-bold">B: ${l.blitz}</span>
-                            <span class="px-2 py-0.5 rounded bg-red-50 text-red-900 font-bold">Bul: ${l.bullet}</span>
-                        </td>
-                        <td class="p-3 font-mono font-black text-chess-walnut">🔥 ${lPeak}</td>
-                        <td class="p-3 font-mono font-bold text-emerald-800">🧩 ${m.puzzlesSolved || 0}</td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        // =========================================================================
-        // 10. SMART STOCKFISH ENGINE + TACTICAL MINIMAX FALLBACK
-        // =========================================================================
-        let stockfishEngine = null;
-        let currentDepth = 10;
-        let playChess = new Chess();
-        let playSelectedSquare = null;
-        let playLastMove = null;
-        let playBoardOrientation = 'white';
-        let pendingPromotionMove = null;
-
-        const pieceSymbols = {
-            'p': '♟', 'n': '♞', 'b': '♝', 'r': '♜', 'q': '♛', 'k': '♚',
-            'P': '♙', 'N': '♘', 'B': '♗', 'R': '♖', 'Q': '♕', 'K': '♔'
-        };
-
-        function initStockfishEngine() {
+        function saveAdminFirebaseConfig() {
+            if (!isSuperFounder(currentUser)) return;
+            const input = document.getElementById('adminFirebaseConfigInput');
+            const val = input.value.trim();
+            if (!val) {
+                showCustomNotice("Configuration Required", "Please paste your Firebase Project Config JSON.");
+                return;
+            }
             try {
-                const blobCode = `importScripts('https://cdnjs.cloudflare.com/ajax/libs/stockfish.js/10.0.2/stockfish.js');`;
-                const blob = new Blob([blobCode], { type: 'application/javascript' });
-                stockfishEngine = new Worker(URL.createObjectURL(blob));
-                stockfishEngine.onmessage = function(event) {
-                    const line = typeof event.data === 'string' ? event.data : '';
-                    if (!line) return;
-                    if (line.startsWith('bestmove')) {
-                        const bestMove = line.split(' ')[1];
-                        document.getElementById('botEngineStatusPill').textContent = 'Ready';
-                        document.getElementById('botBestMoveSuggestion').textContent = bestMove || '—';
-                        if (bestMove && playChess.turn() === 'b' && !playChess.game_over()) {
-                            applyEngineMove(bestMove);
-                        }
-                    }
-                    if (line.includes('score cp') || line.includes('score mate')) {
-                        parseEvaluationLine(line);
-                    }
-                };
-                stockfishEngine.postMessage('uci');
-                stockfishEngine.postMessage('isready');
-            } catch (e) {
-                stockfishEngine = null;
+                JSON.parse(val);
+                localStorage.setItem('cc_custom_firebase_config', val);
+                showCustomNotice("Cloud Config Saved!", "Firebase config saved. Reloading page to connect all devices live...", false, () => {
+                    window.location.reload();
+                });
+            } catch (err) {
+                showCustomNotice("Invalid JSON Format", "The text you pasted is not valid JSON. Ensure you copy the exact firebaseConfig object.");
             }
         }
 
@@ -2447,7 +2645,134 @@
         }
 
         // =========================================================================
-        // 11. ANALYSIS BOARD
+        // 17. QR CODE (PLAYER + OFFICIAL CLUB QR), GLOBAL SEARCH & FRIEND REQUESTS
+        // =========================================================================
+        let activeQrModalPlayer = null;
+        const OFFICIAL_CLUB_URL = "https://mohammedhossamdedo.github.io/checkmate-club/";
+
+        function openMyQrModal() {
+            if (!currentUser) return;
+            showPlayerQrModal(currentUser);
+        }
+
+        function openClubQrModal() {
+            const overlay = document.getElementById('qrCodeModalOverlay');
+            overlay.classList.remove('hidden');
+            overlay.classList.add('modal-active');
+            switchQrModalMode('club');
+        }
+
+        function switchQrModalMode(mode) {
+            const myBtn = document.getElementById('tabMyQrBtn');
+            const clubBtn = document.getElementById('tabClubQrBtn');
+            const addBtn = document.getElementById('qrModalAddFriendBtn');
+            const box = document.getElementById('qrCodeCanvasBox');
+            box.innerHTML = '';
+
+            if (mode === 'club') {
+                myBtn.className = 'flex-1 py-1.5 rounded-lg text-chess-walnut hover:bg-white/50';
+                clubBtn.className = 'flex-1 py-1.5 rounded-lg bg-chess-walnut text-chess-gold shadow';
+                document.getElementById('qrPlayerName').textContent = "Checkmate Club — STEM High School Suez";
+                document.getElementById('qrPlayerCodeBadge').textContent = OFFICIAL_CLUB_URL;
+                document.getElementById('qrModalSubtext').textContent = "Scan this Official Club QR Code to open the Checkmate Club platform on any phone or laptop!";
+                if (addBtn) addBtn.classList.add('hidden');
+                new QRCode(box, {
+                    text: OFFICIAL_CLUB_URL,
+                    width: 155,
+                    height: 155,
+                    colorDark: "#2C1508",
+                    colorLight: "#FFFFFF"
+                });
+            } else {
+                const p = activeQrModalPlayer || currentUser;
+                if (!p) return;
+                myBtn.className = 'flex-1 py-1.5 rounded-lg bg-chess-walnut text-chess-gold shadow';
+                clubBtn.className = 'flex-1 py-1.5 rounded-lg text-chess-walnut hover:bg-white/50';
+                document.getElementById('qrPlayerName').textContent = p.fullName;
+                document.getElementById('qrPlayerCodeBadge').textContent = p.clubCode || 'CC-0001';
+                document.getElementById('qrModalSubtext').textContent = `Chess.com: @${p.chessUser} • Share this ID or scan QR to add friend & play!`;
+                if (addBtn) {
+                    const isOtherPlayer = currentUser && p.email && p.email !== currentUser.email;
+                    addBtn.classList.toggle('hidden', !isOtherPlayer);
+                }
+                new QRCode(box, {
+                    text: `${p.clubCode || 'CC-0001'}|${p.fullName}|${p.chessUser}`,
+                    width: 155,
+                    height: 155,
+                    colorDark: "#2C1508",
+                    colorLight: "#FFFFFF"
+                });
+            }
+        }
+
+        function showPlayerQrModal(player) {
+            activeQrModalPlayer = player;
+            const overlay = document.getElementById('qrCodeModalOverlay');
+            overlay.classList.remove('hidden');
+            overlay.classList.add('modal-active');
+            switchQrModalMode('player');
+        }
+
+        function sendFriendRequestFromQrModal() {
+            if (activeQrModalPlayer && activeQrModalPlayer.email) {
+                closeQrModal();
+                sendFriendRequest(activeQrModalPlayer.email);
+            }
+        }
+
+        function handleGlobalPlayerSearch(e) {
+            e.preventDefault();
+            const q = (document.getElementById('globalPlayerCodeInput').value || '').trim().toLowerCase();
+            if (!q) return;
+
+            const found = membersDirectory.find(m =>
+                (m.clubCode && m.clubCode.toLowerCase() === q) ||
+                m.fullName.toLowerCase().includes(q) ||
+                m.chessUser.toLowerCase().includes(q) ||
+                m.lichessUser.toLowerCase().includes(q)
+            );
+
+            if (found) {
+                showPlayerQrModal(found);
+                showLiveToast(`Found Player: ${found.fullName} (${found.clubCode})`);
+            } else {
+                switchSection('community');
+                const commInput = document.getElementById('friendSearchInput');
+                if (commInput) {
+                    commInput.value = q;
+                    renderCommunityMembers();
+                }
+                showCustomNotice("Player Search", `No exact match for "${q}" yet. Switched to Community Directory.`);
+            }
+        }
+
+        function closeQrModal() {
+            const overlay = document.getElementById('qrCodeModalOverlay');
+            overlay.classList.remove('modal-active');
+            overlay.classList.add('hidden');
+        }
+
+        function copyTextSafe(text) {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).catch(() => {});
+            } else {
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                document.body.appendChild(ta);
+                ta.select();
+                document.execCommand('copy');
+                ta.remove();
+            }
+        }
+
+        function copyMyClubCode() {
+            const code = document.getElementById('qrPlayerCodeBadge').textContent;
+            copyTextSafe(code);
+            showLiveToast(`Copied: ${code}`);
+        }
+
+        // =========================================================================
+        // 11. INTERACTIVE ANALYSIS BOARD & FEN ENGINE
         // =========================================================================
         let analysisChess = new Chess();
         let analysisSelectedSquare = null;
@@ -2456,9 +2781,10 @@
             const grid = document.getElementById('analysisBoardGrid');
             if (!grid) return;
             grid.innerHTML = '';
-            const board = analysisChess.board();
-            document.getElementById('analysisFenInput').value = analysisChess.fen();
+            const fenInput = document.getElementById('analysisFenInput');
+            if (fenInput) fenInput.value = analysisChess.fen();
 
+            const board = analysisChess.board();
             board.forEach((row, r) => {
                 row.forEach((piece, c) => {
                     const sqName = String.fromCharCode(97 + c) + (8 - r);
@@ -2472,6 +2798,15 @@
                         pSpan.className = `piece-glyph ${piece.color === 'w' ? 'piece-white' : 'piece-black'}`;
                         pSpan.textContent = pieceSymbols[piece.type];
                         sqDiv.appendChild(pSpan);
+                    }
+
+                    if (analysisSelectedSquare) {
+                        const legalMoves = analysisChess.moves({ square: analysisSelectedSquare, verbose: true });
+                        if (legalMoves.some(m => m.to === sqName)) {
+                            const dot = document.createElement('div');
+                            dot.className = piece ? 'absolute legal-capture-ring' : 'absolute legal-dot';
+                            sqDiv.appendChild(dot);
+                        }
                     }
 
                     sqDiv.onclick = () => {
@@ -2515,7 +2850,7 @@
 
         function copyCurrentFen() {
             const fen = analysisChess.fen();
-            navigator.clipboard.writeText(fen);
+            copyTextSafe(fen);
             showLiveToast("FEN copied to clipboard!");
         }
 
@@ -2527,497 +2862,8 @@
         }
 
         // =========================================================================
-        // 12. INTERACTIVE OPENINGS & TRAPS EXPLORER
+        // 17. FRIEND REQUESTS & COMMUNITY CHAT
         // =========================================================================
-        let openingChess = new Chess();
-        let activeOpeningIndex = 0;
-        let currentOpeningStep = 0;
-
-        const openingsCatalog = [
-            {
-                title: "Legal's Mate Trap (فخ ليغال الشهير)",
-                type: "TRAP",
-                desc: "White sacrifices the Queen on move 5 to deliver a stunning minor-piece checkmate in the center!",
-                moves: ["e4", "e5", "Nf3", "Nc6", "Bc4", "d6", "Nc3", "Bg4", "h3", "Bh5", "Nxe5", "Bxd1", "Bxf7+", "Ke7", "Nd5#"]
-            },
-            {
-                title: "Fried Liver Attack (هجوم الكبد المقلي)",
-                type: "TRAP",
-                desc: "In the Two Knights Defense, White sacrifices the Knight on f7 to drag the Black King into the open board.",
-                moves: ["e4", "e5", "Nf3", "Nc6", "Bc4", "Nf6", "Ng5", "d5", "exd5", "Nxd5", "Nxf7", "Kxf7", "Qf3+", "Ke6", "Nc3"]
-            },
-            {
-                title: "Stafford Gambit Trap (فخ ستافورد غامبيت)",
-                type: "TRAP",
-                desc: "A lethal blitz trap for Black where sacrificing a pawn leads to immediate mate threats on f2 and d1.",
-                moves: ["e4", "e5", "Nf3", "Nf6", "Nxe5", "Nc6", "Nxc6", "dxc6", "d3", "Bc5", "Bg5", "Nxe4", "Bxd8", "Bxf2+", "Ke2", "Bg4#"]
-            },
-            {
-                title: "Italian Game — Giuoco Piano (الطابق الإيطالي)",
-                type: "OPENING",
-                desc: "Rapid control of the center and pressure against f7, preparing c3 and d4.",
-                moves: ["e4", "e5", "Nf3", "Nc6", "Bc4", "Bc5", "c3", "Nf6", "d4", "exd4", "cxd4", "Bb4+"]
-            },
-            {
-                title: "Sicilian Defense — Najdorf Variation (الدفاع الصقلي)",
-                type: "OPENING",
-                desc: "The sharpest counter-attacking defense favored by Kasparov and Fischer.",
-                moves: ["e4", "c5", "Nf3", "d6", "d4", "cxd4", "Nxd4", "Nf6", "Nc3", "a6", "Be3", "e5"]
-            },
-            {
-                title: "Queen's Gambit — Orthodox Line (غامبيت الوزير)",
-                type: "OPENING",
-                desc: "Classical strategic control of the center with d4 and c4.",
-                moves: ["d4", "d5", "c4", "e6", "Nc3", "Nf6", "Bg5", "Be7", "e3", "O-O", "Nf3", "Nbd7"]
-            }
-        ];
-
-        function renderOpeningsList() {
-            const container = document.getElementById('openingsListContainer');
-            if (!container) return;
-            container.innerHTML = openingsCatalog.map((op, i) => `
-                <div onclick="loadOpeningItem(${i})" class="p-3 rounded-2xl border cursor-pointer transition flex items-center justify-between ${i === activeOpeningIndex ? 'bg-amber-100 border-chess-gold' : 'bg-white border-chess-border hover:bg-chess-cream/40'}">
-                    <div>
-                        <div class="font-black text-xs text-chess-walnut">${op.title}</div>
-                        <div class="text-[10px] text-chess-mahogany">${op.moves.slice(0, 6).join(' ')}...</div>
-                    </div>
-                    <span class="px-2 py-0.5 rounded text-[9px] font-black ${op.type === 'TRAP' ? 'bg-red-700 text-white' : 'bg-chess-walnut text-chess-gold'}">${op.type}</span>
-                </div>
-            `).join('');
-        }
-
-        function loadOpeningItem(index) {
-            activeOpeningIndex = index;
-            currentOpeningStep = 0;
-            openingChess = new Chess();
-            const op = openingsCatalog[index];
-            document.getElementById('activeOpeningTitle').textContent = op.title;
-            document.getElementById('activeOpeningTypeBadge').textContent = op.type;
-            document.getElementById('activeOpeningDesc').textContent = op.desc;
-            renderOpeningsList();
-            renderOpeningBoard();
-        }
-
-        function stepOpeningMove(delta) {
-            const op = openingsCatalog[activeOpeningIndex];
-            const targetStep = Math.max(0, Math.min(op.moves.length, currentOpeningStep + delta));
-            if (targetStep === currentOpeningStep) return;
-
-            openingChess = new Chess();
-            for (let i = 0; i < targetStep; i++) {
-                openingChess.move(op.moves[i]);
-            }
-            currentOpeningStep = targetStep;
-            playChessSound('move');
-            renderOpeningBoard();
-        }
-
-        function renderOpeningBoard() {
-            const grid = document.getElementById('openingBoardGrid');
-            if (!grid) return;
-            grid.innerHTML = '';
-            const op = openingsCatalog[activeOpeningIndex];
-            document.getElementById('openingStepCounter').textContent = `${currentOpeningStep} / ${op.moves.length}`;
-
-            const board = openingChess.board();
-            board.forEach((row, r) => {
-                row.forEach((piece, c) => {
-                    const isLight = (r + c) % 2 === 0;
-                    const sqDiv = document.createElement('div');
-                    sqDiv.className = `relative flex items-center justify-center ${isLight ? 'sq-light' : 'sq-dark'}`;
-                    if (piece) {
-                        const pSpan = document.createElement('span');
-                        pSpan.className = `piece-glyph ${piece.color === 'w' ? 'piece-white' : 'piece-black'}`;
-                        pSpan.textContent = pieceSymbols[piece.type];
-                        sqDiv.appendChild(pSpan);
-                    }
-                    grid.appendChild(sqDiv);
-                });
-            });
-        }
-
-        // =========================================================================
-        // 13. 100% VERIFIED MULTI-MOVE TACTICAL PUZZLES
-        // =========================================================================
-        let puzzleChess = new Chess();
-        let puzzleSelectedSquare = null;
-        let currentPuzzleIndex = 0;
-        let currentPuzzleMoveStep = 0;
-
-        const verifiedPuzzlesList = [
-            {
-                title: "Paul Morphy's Opera House Mate (Mate in 2)",
-                fen: "4kb1r/p2n1ppp/4q3/4p1B1/4P3/1Q6/PPP2PPP/2KR4 w k - 1 16",
-                solution: ["b3b8", "d7b8", "d1d8"],
-                hint: "Sacrifice the Queen on b8 to deflect the Knight, then deliver Rd8#!"
-            },
-            {
-                title: "Queen Sacrifice into Back-Rank Mate (Mate in 2)",
-                fen: "3r2k1/5ppp/8/8/8/8/4QPPP/4R1K1 w - - 0 1",
-                solution: ["e2e8", "d8e8", "e1e8"],
-                hint: "Sacrifice the Queen on e8 (Qe8+), forcing Rxe8, followed by Rxe8#!"
-            },
-            {
-                title: "Legal's Mate Final Combination (Mate in 2)",
-                fen: "r2qkbnr/ppp2ppp/2np4/4N3/2B1P1b1/2N5/PPPP1PPP/R1BbK2R w KQkq - 0 6",
-                solution: ["c4f7", "e8e7", "c3d5"],
-                hint: "Play Bxf7+ first to force the Black King to e7, then jump with Nd5#!"
-            },
-            {
-                title: "Philidor Smothered Mate (Mate in 1)",
-                fen: "6rk/6pp/7N/8/8/8/6PP/6K1 w - - 0 1",
-                solution: ["h6f7"],
-                hint: "Black's King is trapped by its own pieces. Deliver Smothered Mate with Nf7#!"
-            },
-            {
-                title: "Arabian Mate Pattern (Mate in 1)",
-                fen: "7k/2R5/5N2/8/8/8/6PP/6K1 w - - 0 1",
-                solution: ["c7h7"],
-                hint: "The Knight on f6 guards both h7 and g8. Play Rh7#!"
-            },
-            {
-                title: "Royal Knight Fork (Win the Rook)",
-                fen: "r1b1k2r/pppp1ppp/8/3N4/1q6/8/PPPP1PPP/R1BQK2R w KQkq - 0 1",
-                solution: ["d5c7", "e8d8", "c7a8"],
-                hint: "Jump with the Knight to c7 (Nxc7+), forking the King and the a8 Rook!"
-            },
-            {
-                title: "Classic Scholar's Tactical Blow (Mate in 1)",
-                fen: "r1bqkbnr/pppp1ppp/2n5/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 3 3",
-                solution: ["h5f7"],
-                hint: "The f7 square is attacked by both your Queen and Bishop. Play Qxf7#!"
-            },
-            {
-                title: "Back Rank Corridor Strike (Mate in 1)",
-                fen: "3r2k1/5ppp/8/8/8/8/5PPP/2R3K1 w - - 0 1",
-                solution: ["c1c8"],
-                hint: "Wait—if c1c8, d8 captures. Look closely: play nothing else—let's check the open file!"
-            }
-        ];
-        // Fix Puzzle 8 to an undisputed Mate in 1 on open file:
-        verifiedPuzzlesList[7] = {
-            title: "Back Rank Corridor Strike (Mate in 1)",
-            fen: "6k1/5ppp/8/8/8/8/5PPP/3R2K1 w - - 0 1",
-            solution: ["d1d8"],
-            hint: "Black has no back-rank defense. Play Rd8#!"
-        };
-
-        function initCurrentPuzzle() {
-            const p = verifiedPuzzlesList[currentPuzzleIndex];
-            puzzleChess.load(p.fen);
-            currentPuzzleMoveStep = 0;
-            puzzleSelectedSquare = null;
-            document.getElementById('puzzleIdDisplay').textContent = currentPuzzleIndex + 1;
-            document.getElementById('puzzleTotalDisplay').textContent = verifiedPuzzlesList.length;
-            document.getElementById('puzzleTitleText').textContent = p.title;
-            document.getElementById('puzzleInstructionText').textContent = "White to move — Find the exact winning sequence!";
-            document.getElementById('puzzleFeedbackBox').classList.add('hidden');
-            renderPuzzleGridOnly();
-        }
-
-        function renderPuzzleBoard() {
-            initCurrentPuzzle();
-        }
-
-        function renderPuzzleGridOnly() {
-            const grid = document.getElementById('puzzleBoardGrid');
-            if (!grid) return;
-            grid.innerHTML = '';
-            const board = puzzleChess.board();
-
-            board.forEach((row, r) => {
-                row.forEach((piece, c) => {
-                    const sqName = String.fromCharCode(97 + c) + (8 - r);
-                    const isLight = (r + c) % 2 === 0;
-                    const sqDiv = document.createElement('div');
-                    sqDiv.className = `relative flex items-center justify-center cursor-pointer ${isLight ? 'sq-light' : 'sq-dark'}`;
-                    if (puzzleSelectedSquare === sqName) sqDiv.classList.add('sq-selected');
-
-                    if (piece) {
-                        const pSpan = document.createElement('span');
-                        pSpan.className = `piece-glyph ${piece.color === 'w' ? 'piece-white' : 'piece-black'}`;
-                        pSpan.textContent = pieceSymbols[piece.type];
-                        sqDiv.appendChild(pSpan);
-                    }
-
-                    if (puzzleSelectedSquare) {
-                        const legal = puzzleChess.moves({ square: puzzleSelectedSquare, verbose: true });
-                        if (legal.some(m => m.to === sqName)) {
-                            const dot = document.createElement('div');
-                            dot.className = piece ? 'absolute legal-capture-ring' : 'absolute legal-dot';
-                            sqDiv.appendChild(dot);
-                        }
-                    }
-
-                    sqDiv.onclick = () => handlePuzzleSquareClick(sqName);
-                    grid.appendChild(sqDiv);
-                });
-            });
-        }
-
-        function handlePuzzleSquareClick(sqName) {
-            const p = verifiedPuzzlesList[currentPuzzleIndex];
-            if (currentPuzzleMoveStep >= p.solution.length) return;
-
-            if (puzzleSelectedSquare === sqName) {
-                puzzleSelectedSquare = null;
-                renderPuzzleGridOnly();
-                return;
-            }
-
-            if (puzzleSelectedSquare) {
-                const expectedUci = p.solution[currentPuzzleMoveStep];
-                const attemptedUci = puzzleSelectedSquare + sqName;
-
-                const legal = puzzleChess.moves({ square: puzzleSelectedSquare, verbose: true });
-                if (legal.some(m => m.to === sqName)) {
-                    const box = document.getElementById('puzzleFeedbackBox');
-                    box.classList.remove('hidden');
-
-                    if (attemptedUci === expectedUci) {
-                        const move = puzzleChess.move({ from: puzzleSelectedSquare, to: sqName, promotion: 'q' });
-                        playChessSound(puzzleChess.in_check() ? 'check' : (move.captured ? 'capture' : 'move'));
-                        currentPuzzleMoveStep++;
-                        puzzleSelectedSquare = null;
-                        renderPuzzleGridOnly();
-
-                        if (currentPuzzleMoveStep >= p.solution.length) {
-                            playChessSound('win');
-                            box.className = 'p-3 rounded-2xl bg-emerald-100 border border-emerald-400 text-emerald-900 font-black text-xs';
-                            box.textContent = "Brilliant !! Puzzle Solved Perfectly!";
-                            if (currentUser) {
-                                currentUser.puzzlesSolved = (currentUser.puzzlesSolved || 0) + 1;
-                                const m = membersDirectory.find(x => x.email === currentUser.email);
-                                if (m) m.puzzlesSolved = currentUser.puzzlesSolved;
-                                localStorage.setItem('cc_members_v3', JSON.stringify(membersDirectory));
-                                renderLeaderboard();
-                            }
-                        } else {
-                            box.className = 'p-3 rounded-2xl bg-amber-100 border border-chess-gold text-chess-walnut font-bold text-xs';
-                            box.textContent = "Great first move! Now find the finishing blow...";
-                            setTimeout(() => {
-                                const oppUci = p.solution[currentPuzzleMoveStep];
-                                puzzleChess.move({ from: oppUci.substring(0, 2), to: oppUci.substring(2, 4), promotion: 'q' });
-                                currentPuzzleMoveStep++;
-                                playChessSound('move');
-                                renderPuzzleGridOnly();
-                            }, 450);
-                        }
-                    } else {
-                        box.className = 'p-3 rounded-2xl bg-red-100 border border-red-300 text-red-900 font-bold text-xs';
-                        box.textContent = "Not the best tactical move! Look for checks, captures, or sacrifices.";
-                        puzzleSelectedSquare = null;
-                        renderPuzzleGridOnly();
-                    }
-                    return;
-                }
-            }
-
-            const piece = puzzleChess.get(sqName);
-            if (piece && piece.color === puzzleChess.turn()) {
-                puzzleSelectedSquare = sqName;
-                renderPuzzleGridOnly();
-            }
-        }
-
-        function restartCurrentPuzzle() {
-            initCurrentPuzzle();
-        }
-
-        function loadNextPuzzle() {
-            currentPuzzleIndex = (currentPuzzleIndex + 1) % verifiedPuzzlesList.length;
-            initCurrentPuzzle();
-        }
-
-        function showPuzzleHint() {
-            const p = verifiedPuzzlesList[currentPuzzleIndex];
-            showCustomNotice("Tactical Hint", p.hint);
-        }
-
-        // =========================================================================
-        // 14. CHESS BOOKS LIBRARY
-        // =========================================================================
-        let clubBooks = JSON.parse(localStorage.getItem('cc_books_v3') || 'null') || [
-            { title: "My System (نظامـي)", author: "Aron Nimzowitsch", level: "Intermediate / Master", summary: "The foundation of positional chess: open files, outposts, prophylaxis, and pawn chains." },
-            { title: "Bobby Fischer Teaches Chess", author: "Bobby Fischer", level: "All Levels", summary: "Programmed tactical instruction on back-rank mates, pins, forks, and discovered attacks." },
-            { title: "Silman's Complete Endgame Course", author: "Jeremy Silman", level: "Beginner to Master", summary: "Structured endgame mastery arranged by rating band—from King & Pawn to complex Rook endings." },
-            { title: "The Art of Attack in Chess", author: "Vladimir Vukovic", level: "Advanced", summary: "Deep study of mating patterns, Greek Gift sacrifices, and attacking the castled King." },
-            { title: "Zurich International Chess Tournament 1953", author: "David Bronstein", level: "Master", summary: "150 deeply annotated Grandmaster games teaching dynamic middlegame planning." },
-            { title: "100 Endgames You Must Know", author: "Jesus de la Villa", level: "Club Player", summary: "Practical theoretical endgames including the Lucena and Philidor positions." }
-        ];
-
-        function renderBooksLibrary() {
-            const container = document.getElementById('booksGridContainer');
-            if (!container) return;
-            document.getElementById('statBooksCount').textContent = `${clubBooks.length} Books`;
-
-            container.innerHTML = clubBooks.map((b, idx) => `
-                <div class="p-4 rounded-2xl bg-chess-cream/40 border border-chess-border flex flex-col justify-between space-y-3">
-                    <div class="space-y-1.5">
-                        <div class="flex items-center justify-between">
-                            <span class="px-2 py-0.5 rounded bg-chess-walnut text-chess-gold text-[10px] font-black">${b.level}</span>
-                            <i class="fa-solid fa-book-bookmark text-chess-gold"></i>
-                        </div>
-                        <h3 class="font-black text-sm text-chess-walnut">${b.title}</h3>
-                        <div class="text-[11px] font-bold text-chess-mahogany">By ${b.author}</div>
-                        <p class="text-xs text-chess-espresso leading-relaxed">${b.summary}</p>
-                    </div>
-                    <button onclick="showCustomNotice('${b.title}', 'Key Study Lesson: ${b.summary}')" class="w-full py-2 rounded-xl bg-chess-walnut text-chess-gold font-black text-xs">
-                        <i class="fa-solid fa-glasses mr-1"></i> Read Key Takeaways
-                    </button>
-                </div>
-            `).join('');
-        }
-
-        function adminAddBook() {
-            if (!isSuperFounder(currentUser)) return;
-            const title = document.getElementById('adminBookTitle').value.trim();
-            const author = document.getElementById('adminBookAuthor').value.trim();
-            const summary = document.getElementById('adminBookSummary').value.trim();
-            if (!title || !author || !summary) return;
-            clubBooks.push({ title, author, level: "Club Pick", summary });
-            localStorage.setItem('cc_books_v3', JSON.stringify(clubBooks));
-            renderBooksLibrary();
-            document.getElementById('adminBookTitle').value = '';
-            document.getElementById('adminBookAuthor').value = '';
-            document.getElementById('adminBookSummary').value = '';
-            showLiveToast(`Added book "${title}" to Club Library!`);
-        }
-
-        // =========================================================================
-        // 15. ACHIEVEMENTS SYSTEM
-        // =========================================================================
-        const achievementsCatalog = [
-            { id: 'founder', icon: 'fa-crown', title: 'Club Founder & Head Admin', desc: 'Exclusive badge for Checkmate Club Founder Mohammed Hossam.' },
-            { id: 'verified_member', icon: 'fa-shield-check', title: 'Verified STEM Knight', desc: 'Verified English Triple Name, Chess.com, and Lichess accounts.' },
-            { id: 'champion', icon: 'fa-trophy', title: 'Tournament Champion', desc: 'Winner of an official STEM Suez Rapid or Blitz Championship.' },
-            { id: 'tactician', icon: 'fa-puzzle-piece', title: 'Tactical Genius', desc: 'Solved verified multi-move tactical club puzzles.' },
-            { id: 'blitz_master', icon: 'fa-bolt', title: 'Blitz Demon (1500+)', desc: 'Achieved 1500+ Blitz rating on Chess.com or Lichess.' },
-            { id: 'stockfish_slayer', icon: 'fa-robot', title: 'Stockfish Challenger', desc: 'Played and analyzed tactical games against Stockfish.' }
-        ];
-
-        function renderAchievementsGrid() {
-            const grid = document.getElementById('achievementsGrid');
-            if (!grid || !currentUser) return;
-
-            const userBadges = new Set(currentUser.achievements || ['verified_member']);
-            if ((currentUser.puzzlesSolved || 0) >= 1) userBadges.add('tactician');
-            if ((currentUser.chessStats?.blitz || 0) >= 1500 || (currentUser.lichessStats?.blitz || 0) >= 1500) userBadges.add('blitz_master');
-            if (isSuperFounder(currentUser)) {
-                achievementsCatalog.forEach(a => userBadges.add(a.id));
-            }
-
-            grid.innerHTML = achievementsCatalog.map(a => {
-                const unlocked = userBadges.has(a.id);
-                return `
-                    <div class="p-4 rounded-2xl border-2 transition ${unlocked ? 'bg-amber-50 border-chess-gold shadow' : 'bg-gray-100 border-gray-200 opacity-60'} flex items-start gap-3">
-                        <div class="w-11 h-11 rounded-2xl ${unlocked ? 'bg-chess-walnut text-chess-gold' : 'bg-gray-300 text-gray-600'} flex items-center justify-center text-lg shrink-0">
-                            <i class="fa-solid ${a.icon}"></i>
-                        </div>
-                        <div>
-                            <div class="font-black text-xs text-chess-walnut flex items-center gap-1.5">
-                                <span>${a.title}</span>
-                                ${unlocked ? '<span class="px-1.5 py-0.5 rounded bg-emerald-700 text-white text-[9px]">UNLOCKED</span>' : ''}
-                            </div>
-                            <p class="text-[11px] text-chess-mahogany mt-1">${a.desc}</p>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // =========================================================================
-        // 16. TOURNAMENTS & CHALLONGE INTEGRATION
-        // =========================================================================
-        function registerForTournament(tourName) {
-            if (!currentUser) return;
-            const entry = {
-                tournament: tourName,
-                fullName: currentUser.fullName,
-                chessUser: currentUser.chessUser,
-                rating: currentUser.chessStats?.rapid || 1200,
-                time: new Date().toLocaleTimeString()
-            };
-            if (!tournamentRegistrations.some(r => r.fullName === currentUser.fullName && r.tournament === tourName)) {
-                tournamentRegistrations.push(entry);
-                localStorage.setItem('cc_tour_regs_v3', JSON.stringify(tournamentRegistrations));
-            }
-            logActivity(`Tournament Registration: ${currentUser.fullName} joined "${tourName}"`);
-            renderTournamentParticipants();
-            showCustomNotice("Tournament Seat Confirmed", `${currentUser.fullName} (@${currentUser.chessUser}) is now officially registered in ${tourName}!`);
-        }
-
-        function updateChallongeEmbedUrl() {
-            if (!isSuperFounder(currentUser)) return;
-            const url = document.getElementById('adminChallongeUrlInput').value.trim();
-            if (!url) return;
-            localStorage.setItem('cc_challonge_url', url);
-            renderTournamentParticipants();
-            showLiveToast("Challonge Bracket URL updated!");
-        }
-
-        function renderTournamentParticipants() {
-            const countEl = document.getElementById('tournamentRegisteredCount');
-            const listEl = document.getElementById('liveBracketParticipantsList');
-            if (!listEl) return;
-
-            countEl.textContent = `${tournamentRegistrations.length} Registered Seeds`;
-            const savedUrl = localStorage.getItem('cc_challonge_url');
-
-            let html = tournamentRegistrations.map((r, i) => `
-                <div class="p-2.5 rounded-xl bg-chess-cream/40 border border-chess-border flex items-center justify-between text-xs">
-                    <div>
-                        <span class="font-mono font-black text-chess-walnut mr-1">#${i + 1}</span>
-                        <span class="font-bold text-chess-walnut">${r.fullName}</span>
-                        <div class="text-[10px] text-chess-mahogany">${r.tournament}</div>
-                    </div>
-                    <span class="px-2 py-0.5 rounded bg-chess-walnut text-chess-gold font-mono text-[10px]">${r.rating}</span>
-                </div>
-            `).join('');
-
-            if (savedUrl) {
-                html += `<div class="col-span-full mt-3"><iframe src="${savedUrl}" width="100%" height="420" frameborder="0" scrolling="auto" allowtransparency="true" class="rounded-xl border"></iframe></div>`;
-            }
-            listEl.innerHTML = html || '<div class="text-gray-400 text-xs col-span-full">Click "Register My Verified Account" above to join the bracket.</div>';
-        }
-
-        // =========================================================================
-        // 17. QR CODE, FRIEND REQUESTS & COMMUNITY CHAT
-        // =========================================================================
-        function openMyQrModal() {
-            if (!currentUser) return;
-            showPlayerQrModal(currentUser);
-        }
-
-        function showPlayerQrModal(player) {
-            const overlay = document.getElementById('qrCodeModalOverlay');
-            document.getElementById('qrPlayerName').textContent = player.fullName;
-            document.getElementById('qrPlayerCodeBadge').textContent = player.clubCode || 'CC-1000';
-            const box = document.getElementById('qrCodeCanvasBox');
-            box.innerHTML = '';
-            new QRCode(box, {
-                text: `${player.clubCode}|${player.fullName}|${player.chessUser}`,
-                width: 150,
-                height: 150,
-                colorDark: "#2C1508",
-                colorLight: "#FFFFFF"
-            });
-            overlay.classList.remove('hidden');
-            overlay.classList.add('modal-active');
-        }
-
-        function closeQrModal() {
-            const overlay = document.getElementById('qrCodeModalOverlay');
-            overlay.classList.remove('modal-active');
-            overlay.classList.add('hidden');
-        }
-
-        function copyMyClubCode() {
-            const code = document.getElementById('qrPlayerCodeBadge').textContent;
-            navigator.clipboard.writeText(code);
-            showLiveToast(`Copied Club ID: ${code}`);
-        }
-
         function sendFriendRequest(targetEmail) {
             const target = membersDirectory.find(m => m.email === targetEmail);
             if (!target || !currentUser) return;
@@ -3106,7 +2952,7 @@
                             <div class="text-[10px] text-chess-mahogany font-mono">${m.clubCode || 'CC-1000'} • @${m.chessUser} (${m.chessStats?.rapid || 1200})</div>
                         </div>
                         <div class="flex items-center gap-1">
-                            <button onclick='showPlayerQrModal(${JSON.stringify({fullName: m.fullName, clubCode: m.clubCode, chessUser: m.chessUser})})' class="p-2 rounded-lg bg-chess-cream text-chess-walnut hover:bg-chess-light" title="Show QR">
+                            <button onclick='showPlayerQrModal(${JSON.stringify({fullName: m.fullName, clubCode: m.clubCode, chessUser: m.chessUser, email: m.email})})' class="p-2 rounded-lg bg-chess-cream text-chess-walnut hover:bg-chess-light" title="Show QR">
                                 <i class="fa-solid fa-qrcode"></i>
                             </button>
                             <button onclick="sendFriendRequest('${m.email}')" class="px-2.5 py-1.5 rounded-lg bg-chess-walnut text-chess-gold font-black text-[10px]">
@@ -3142,15 +2988,23 @@
                 ? `${currentUser.fullName} 👑 (Founder)`
                 : (currentUser.isHonoraryAdmin ? `${currentUser.fullName} 👑 (Admin)` : currentUser.fullName);
 
-            chatMessages.push({
+            const msgObj = {
                 sender: senderTag,
                 text,
-                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            });
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                timestamp: Date.now()
+            };
+
+            chatMessages.push(msgObj);
             if (chatMessages.length > 60) chatMessages.shift();
+            window.chatMessages = chatMessages;
             localStorage.setItem('cc_chat_v3', JSON.stringify(chatMessages));
             input.value = '';
             renderCommunityMembers();
+
+            if (window.cloudSync && typeof window.cloudSync.pushChat === 'function') {
+                window.cloudSync.pushChat(msgObj);
+            }
         }
 
         // =========================================================================
@@ -3162,17 +3016,25 @@
             const body = document.getElementById('contactMessageBody').value.trim();
             if (!body || !currentUser) return;
 
-            contactMessages.unshift({
+            const contactObj = {
                 sender: `${currentUser.fullName} (${currentUser.email})`,
                 category,
                 body,
-                time: new Date().toLocaleString()
-            });
+                time: new Date().toLocaleString(),
+                timestamp: Date.now()
+            };
+
+            contactMessages.unshift(contactObj);
+            window.contactMessages = contactMessages;
             localStorage.setItem('cc_contacts_v3', JSON.stringify(contactMessages));
             logActivity(`Direct Message from ${currentUser.fullName}: [${category}]`);
             document.getElementById('contactMessageBody').value = '';
             refreshAdminLogsUI();
             showCustomNotice("Message Sent to Founder", "Your message has been delivered directly to Founder Mohammed Hossam's Admin Inbox.");
+
+            if (window.cloudSync && typeof window.cloudSync.pushContact === 'function') {
+                window.cloudSync.pushContact(contactObj);
+            }
         }
 
         // =========================================================================
@@ -3221,6 +3083,210 @@
             document.body.setAttribute('data-piece-style', style);
             toggleSettingsModal();
         }
+
+        // Expose UI functions to window for Cloud Listeners
+        window.refreshAdminLogsUI = refreshAdminLogsUI;
+        window.renderLeaderboard = renderLeaderboard;
+        window.renderCommunityMembers = renderCommunityMembers;
+
+        // Auto-restore active session on reload if already signed in during this browser session
+        window.addEventListener('DOMContentLoaded', () => {
+            seedDefaultFounderIfNeeded();
+            applyLanguage(currentLang);
+            const savedSession = sessionStorage.getItem('cc_active_session_v3');
+            if (savedSession) {
+                try {
+                    currentUser = JSON.parse(savedSession);
+                    document.getElementById('authGateOverlay').classList.add('hidden');
+                    document.getElementById('appShellWrapper').classList.remove('hidden');
+                    initAppAfterAuth();
+                } catch (e) {}
+            }
+        });
+    </script>
+
+    <!-- ==================== REAL-TIME FIREBASE FIRESTORE SYNC MODULE ==================== -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, addDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'checkmate-club-stem';
+        let db = null;
+        let auth = null;
+        let currentUserAuth = null;
+
+        async function initCloudSync() {
+            let config = null;
+            if (typeof __firebase_config !== 'undefined' && __firebase_config) {
+                try { config = JSON.parse(__firebase_config); } catch (e) {}
+            }
+            if (!config) {
+                const custom = localStorage.getItem('cc_custom_firebase_config');
+                if (custom) {
+                    try { config = JSON.parse(custom); } catch (e) {}
+                }
+            }
+
+            const pill = document.getElementById('cloudSyncStatusPill');
+            const badge = document.getElementById('cloudConnectionBadge');
+
+            if (!config) {
+                if (pill) {
+                    pill.className = 'px-2 py-0.5 rounded-full bg-amber-600 text-white text-[10px] font-mono';
+                    pill.textContent = '● Local Cache (Add Firebase Config in Founder Center for Cloud)';
+                }
+                if (badge) {
+                    badge.className = 'px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-mono';
+                    badge.textContent = 'Local Cache Only (Add Config)';
+                }
+                return;
+            }
+
+            try {
+                const app = initializeApp(config);
+                db = getFirestore(app);
+                auth = getAuth(app);
+
+                // RULE 3: Auth Before Queries
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                currentUserAuth = auth.currentUser;
+                if (!currentUserAuth) return;
+
+                if (pill) {
+                    pill.className = 'px-2 py-0.5 rounded-full bg-emerald-700 text-white text-[10px] font-mono';
+                    pill.textContent = '● Cloud Real-Time Live 🟢';
+                }
+                if (badge) {
+                    badge.className = 'px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-900 text-[10px] font-mono font-bold';
+                    badge.textContent = 'Connected (Live Sync)';
+                }
+
+                // RULE 1: Strict collection paths: /artifacts/{appId}/public/data/{collectionName}
+                // RULE 2: No complex queries, fetch and sort in memory with error callbacks
+                const logsCol = collection(db, 'artifacts', appId, 'public', 'data', 'logs');
+                onSnapshot(logsCol, (snap) => {
+                    const fetchedLogs = [];
+                    snap.forEach(d => fetchedLogs.push(d.data()));
+                    fetchedLogs.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                    if (fetchedLogs.length > 0) {
+                        window.clubLogs = fetchedLogs;
+                        localStorage.setItem('cc_logs_v3', JSON.stringify(fetchedLogs));
+                        if (typeof window.refreshAdminLogsUI === 'function') window.refreshAdminLogsUI();
+                    }
+                }, (err) => console.error("Logs sync error:", err));
+
+                const membersCol = collection(db, 'artifacts', appId, 'public', 'data', 'members');
+                onSnapshot(membersCol, (snap) => {
+                    const fetchedMembers = [];
+                    snap.forEach(d => fetchedMembers.push(d.data()));
+                    if (fetchedMembers.length > 0) {
+                        fetchedMembers.forEach(fm => {
+                            const idx = window.membersDirectory.findIndex(m => m.email.toLowerCase() === fm.email.toLowerCase());
+                            if (idx >= 0) {
+                                window.membersDirectory[idx] = { ...window.membersDirectory[idx], ...fm };
+                            } else {
+                                window.membersDirectory.push(fm);
+                            }
+                        });
+                        localStorage.setItem('cc_members_v3', JSON.stringify(window.membersDirectory));
+                        if (typeof window.renderLeaderboard === 'function') window.renderLeaderboard();
+                        if (typeof window.renderCommunityMembers === 'function') window.renderCommunityMembers();
+                        if (typeof window.refreshAdminLogsUI === 'function') window.refreshAdminLogsUI();
+                    }
+                }, (err) => console.error("Members sync error:", err));
+
+                const chatCol = collection(db, 'artifacts', appId, 'public', 'data', 'chat');
+                onSnapshot(chatCol, (snap) => {
+                    const fetchedChat = [];
+                    snap.forEach(d => fetchedChat.push(d.data()));
+                    fetchedChat.sort((a, b) => (a.timestamp || 0) - (b.timestamp || 0));
+                    if (fetchedChat.length > 0) {
+                        window.chatMessages = fetchedChat;
+                        localStorage.setItem('cc_chat_v3', JSON.stringify(fetchedChat));
+                        if (typeof window.renderCommunityMembers === 'function') window.renderCommunityMembers();
+                    }
+                }, (err) => console.error("Chat sync error:", err));
+
+                const contactsCol = collection(db, 'artifacts', appId, 'public', 'data', 'contacts');
+                onSnapshot(contactsCol, (snap) => {
+                    const fetchedContacts = [];
+                    snap.forEach(d => fetchedContacts.push(d.data()));
+                    fetchedContacts.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                    if (fetchedContacts.length > 0) {
+                        window.contactMessages = fetchedContacts;
+                        localStorage.setItem('cc_contacts_v3', JSON.stringify(fetchedContacts));
+                        if (typeof window.refreshAdminLogsUI === 'function') window.refreshAdminLogsUI();
+                    }
+                }, (err) => console.error("Contacts sync error:", err));
+
+                const broadcastCol = collection(db, 'artifacts', appId, 'public', 'data', 'announcements');
+                onSnapshot(broadcastCol, (snap) => {
+                    snap.forEach(d => {
+                        const data = d.data();
+                        if (data && data.text) {
+                            const bannerText = document.getElementById('globalAnnouncementText');
+                            const banner = document.getElementById('globalAnnouncementBanner');
+                            if (bannerText && banner) {
+                                bannerText.textContent = data.text;
+                                banner.classList.remove('hidden');
+                            }
+                        }
+                    });
+                }, (err) => console.error("Broadcast sync error:", err));
+
+            } catch (e) {
+                console.error("Firebase startup error:", e);
+            }
+        }
+
+        window.cloudSync = {
+            async pushLog(logObj) {
+                if (!db || !auth?.currentUser) return;
+                try {
+                    const col = collection(db, 'artifacts', appId, 'public', 'data', 'logs');
+                    await addDoc(col, logObj);
+                } catch(e) { console.error("Error pushing log:", e); }
+            },
+            async pushMember(memberObj) {
+                if (!db || !auth?.currentUser) return;
+                try {
+                    const safeId = (memberObj.email || 'user').replace(/[^a-zA-Z0-9]/g, '_');
+                    const ref = doc(db, 'artifacts', appId, 'public', 'data', 'members', safeId);
+                    await setDoc(ref, memberObj, { merge: true });
+                } catch(e) { console.error("Error pushing member:", e); }
+            },
+            async pushChat(msgObj) {
+                if (!db || !auth?.currentUser) return;
+                try {
+                    const col = collection(db, 'artifacts', appId, 'public', 'data', 'chat');
+                    await addDoc(col, msgObj);
+                } catch(e) { console.error("Error pushing chat:", e); }
+            },
+            async pushContact(contactObj) {
+                if (!db || !auth?.currentUser) return;
+                try {
+                    const col = collection(db, 'artifacts', appId, 'public', 'data', 'contacts');
+                    await addDoc(col, contactObj);
+                } catch(e) { console.error("Error pushing contact:", e); }
+            },
+            async pushBroadcast(bcObj) {
+                if (!db || !auth?.currentUser) return;
+                try {
+                    const ref = doc(db, 'artifacts', appId, 'public', 'data', 'announcements', 'latest');
+                    await setDoc(ref, bcObj);
+                } catch(e) { console.error("Error pushing broadcast:", e); }
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initCloudSync();
+        });
     </script>
 </body>
 </html>
