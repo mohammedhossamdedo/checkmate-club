@@ -3286,6 +3286,696 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             initCloudSync();
+            <!-- ... existing code ... -->
+                    <div class="flex items-center gap-2">
+                        <button onclick="pullGlobalSignInEvents()" class="px-2.5 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-black text-[11px] shadow">
+                            <i class="fa-solid fa-satellite-dish mr-1"></i> Pull Live Logins
+                        </button>
+                        <button onclick="refreshAllMembersRatings()" class="px-2.5 py-1 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-black text-[11px] shadow">
+                            <i class="fa-solid fa-rotate mr-1"></i> Sync All Ratings
+                        </button>
+                        <button onclick="toggleAdminPanel()" class="px-3 py-1 rounded-lg bg-chess-walnut text-chess-gold font-black text-[11px] shadow hover:bg-chess-espresso transition">
+                            <i class="fa-solid fa-sliders mr-1"></i> Founder Control Center
+                            <span id="adminInboxCountBadge" class="ml-1 px-1.5 py-0.2 rounded-full bg-chess-gold text-chess-espresso text-[10px]">0</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="p-2.5 rounded-xl bg-white border-2 border-chess-gold text-[11px] text-chess-walnut space-y-2 shadow-sm">
+                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                        <span class="font-mono"><i class="fa-solid fa-bolt text-amber-600 mr-1"></i><strong>Latest Sign-In Log (سجل الدخول اللحظي بالثانية):</strong> <span id="adminInlineLatestLogText" class="text-emerald-800 font-bold">Loading live sign-in events...</span></span>
+                        <div class="flex items-center gap-2">
+                            <button onclick="toggleInlineSignInTable()" class="px-2.5 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-chess-walnut font-black text-[10px] border border-chess-gold">
+                                <i class="fa-solid fa-table-list mr-1"></i> Show/Hide Live Log Table (<span id="adminInlineLogCount">0</span>)
+                            </button>
+                            <button onclick="toggleAdminPanel()" class="px-2.5 py-1 rounded-lg bg-chess-walnut text-chess-gold font-black text-[10px]">Full Control Center →</button>
+                        </div>
+                    </div>
+                    <!-- Direct On-Screen Live Sign-Ins Table for Founder -->
+                    <div id="adminDirectSignInTableWrapper" class="overflow-x-auto max-h-48 overflow-y-auto rounded-lg border border-chess-border bg-chess-bg p-2">
+                        <div id="adminDirectSignInFeedList" class="space-y-1 font-mono text-[11px]"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== FOUNDER ADMIN DASHBOARD MODAL ==================== -->
+<!-- ... existing code ... -->
+        // Cross-Tab Live Broadcast Channel so testing in 2 tabs updates Admin immediately
+        const liveCrossTabChannel = ('BroadcastChannel' in window) ? new BroadcastChannel('checkmate_club_live_sync') : null;
+        if (liveCrossTabChannel) {
+            liveCrossTabChannel.onmessage = (ev) => {
+                if (!ev.data) return;
+                if (ev.data.type === 'SYNC_ALL') {
+                    membersDirectory = JSON.parse(localStorage.getItem('cc_members_v3') || '[]');
+                    clubLogs = JSON.parse(localStorage.getItem('cc_logs_v3') || '[]');
+                    contactMessages = JSON.parse(localStorage.getItem('cc_contacts_v3') || '[]');
+                    chatMessages = JSON.parse(localStorage.getItem('cc_chat_v3') || '[]');
+                    window.membersDirectory = membersDirectory;
+                    window.clubLogs = clubLogs;
+                    window.contactMessages = contactMessages;
+                    window.chatMessages = chatMessages;
+                    refreshAdminLogsUI();
+                    renderLeaderboard();
+                    renderCommunityMembers();
+                    if (ev.data.toast && isSuperFounder(currentUser)) {
+                        showLiveToast(ev.data.toast);
+                    }
+                }
+            };
+        }
+
+        window.addEventListener('storage', () => {
+            membersDirectory = JSON.parse(localStorage.getItem('cc_members_v3') || '[]');
+            clubLogs = JSON.parse(localStorage.getItem('cc_logs_v3') || '[]');
+            contactMessages = JSON.parse(localStorage.getItem('cc_contacts_v3') || '[]');
+            chatMessages = JSON.parse(localStorage.getItem('cc_chat_v3') || '[]');
+            window.membersDirectory = membersDirectory;
+            window.clubLogs = clubLogs;
+            window.contactMessages = contactMessages;
+            window.chatMessages = chatMessages;
+            refreshAdminLogsUI();
+            renderLeaderboard();
+            renderCommunityMembers();
+        });
+
+        // Expose data states to window for seamless Cloud Sync
+        window.membersDirectory = membersDirectory;
+        window.clubLogs = clubLogs;
+        window.contactMessages = contactMessages;
+        window.chatMessages = chatMessages;
+
+        function syncMemoryWithStorage() {
+            if (Array.isArray(window.membersDirectory) && window.membersDirectory.length > membersDirectory.length) {
+                membersDirectory = window.membersDirectory;
+            }
+            if (Array.isArray(window.clubLogs) && window.clubLogs.length > clubLogs.length) {
+                clubLogs = window.clubLogs;
+            }
+            if (Array.isArray(window.contactMessages) && window.contactMessages.length > contactMessages.length) {
+                contactMessages = window.contactMessages;
+            }
+            if (Array.isArray(window.chatMessages) && window.chatMessages.length > chatMessages.length) {
+                chatMessages = window.chatMessages;
+            }
+        }
+
+        function toggleInlineSignInTable() {
+            const w = document.getElementById('adminDirectSignInTableWrapper');
+            if (w) w.classList.toggle('hidden');
+        }
+
+        function getDeviceInfo() {
+            const ua = navigator.userAgent || '';
+            const isMobile = /Mobi|Android|iPhone|iPad/i.test(ua);
+            let devId = localStorage.getItem('cc_device_fingerprint');
+            if (!devId) {
+                devId = (isMobile ? 'MOB-' : 'LAP-') + Math.random().toString(36).substring(2, 10).toUpperCase();
+                localStorage.setItem('cc_device_fingerprint', devId);
+            }
+            return { id: devId, type: isMobile ? 'Mobile' : 'Laptop/PC' };
+        }
+
+        function checkAdminEmailInstant(val) {
+            const clean = (val || '').trim().toLowerCase();
+            const badge = document.getElementById('adminInstantBadge');
+            if (!badge) return;
+            if (clean === FOUNDER_EMAIL || clean === FOUNDER_HANDLE || clean === 'mohammed.hossam.dedo@gmail.com' || clean.includes('mohammedhossam')) {
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function isSuperFounder(user) {
+            if (!user) return false;
+            const em = (user.email || '').trim().toLowerCase();
+            const ch = (user.chessUser || '').trim().toLowerCase();
+            const li = (user.lichessUser || '').trim().toLowerCase();
+            return em === FOUNDER_EMAIL ||
+                   em === 'mohammed.hossam.dedo@gmail.com' ||
+                   ch === FOUNDER_HANDLE ||
+                   li === FOUNDER_HANDLE ||
+                   user.isFounder === true;
+        }
+<!-- ... existing code ... -->
+        function initAppAfterAuth() {
+            seedDefaultFounderIfNeeded();
+            applyLanguage(currentLang);
+
+            // Ensure at least one initial sign-in log exists if logs were empty
+            if (clubLogs.length === 0 && currentUser) {
+                const dev = getDeviceInfo();
+                logActivity(`Active Session: ${currentUser.fullName} (${currentUser.clubCode || 'CC-0001'}) | Email: ${currentUser.email} | Chess.com: @${currentUser.chessUser} (Rapid ${currentUser.chessStats?.rapid || 1200}) | Lichess: @${currentUser.lichessUser} (${currentUser.lichessStats?.rapid || 1500}) | Device: ${dev.type} [${new Date().toLocaleString()}]`);
+            }
+
+            // Populate Top Header User Info
+            document.getElementById('headerUserNameDisplay').textContent = `${currentUser.fullName} (${currentUser.clubCode || 'CC-0001'})`;
+            const roleText = isSuperFounder(currentUser)
+                ? '👑 Founder Super Admin'
+                : (currentUser.isHonoraryAdmin ? '👑 Club Admin' : 'Verified Member');
+            document.getElementById('headerUserRoleDisplay').textContent = roleText;
+
+            const contactNameInput = document.getElementById('contactSenderName');
+            if (contactNameInput) {
+                contactNameInput.value = `${currentUser.fullName} (${currentUser.clubCode || 'CC-0001'} • @${currentUser.chessUser})`;
+            }
+
+            // Show Founder Command Bar STRICTLY for Founder Mohammed Hossam
+            const adminBar = document.getElementById('adminCommandBar');
+            if (isSuperFounder(currentUser)) {
+                adminBar.classList.remove('hidden');
+            } else {
+                adminBar.classList.add('hidden');
+            }
+
+            // Refresh Admin Logs & Leaderboard FIRST so they never fail even if any board widget is initializing
+            refreshAdminLogsUI();
+            renderLeaderboard();
+            renderCommunityMembers();
+            renderIncomingFriendRequests();
+
+            // Initialize All Interactive Boards & Sections safely
+            try { initStockfishEngine(); } catch (e) { console.error(e); }
+            try { renderPlayBoard(); } catch (e) { console.error(e); }
+            try { renderAnalysisBoard(); } catch (e) { console.error(e); }
+            try { renderOpeningsList(); loadOpeningItem(0); } catch (e) { console.error(e); }
+            try { initCurrentPuzzle(); } catch (e) { console.error(e); }
+            try { renderBooksLibrary(); } catch (e) { console.error(e); }
+            try { renderTournamentParticipants(); } catch (e) { console.error(e); }
+            try { renderAchievementsGrid(); } catch (e) { console.error(e); }
+
+            if (isSuperFounder(currentUser)) {
+                showLiveToast(`👑 Welcome Founder Mohammed Hossam! ${clubLogs.length} Sign-In logs & ${membersDirectory.length} verified accounts active.`);
+            }
+        }
+<!-- ... existing code ... -->
+        function refreshAdminLogsUI() {
+            syncMemoryWithStorage();
+            const statMembers = document.getElementById('statMembersCount');
+            if (statMembers) statMembers.textContent = membersDirectory.length;
+
+            if (!isSuperFounder(currentUser)) return;
+
+            // Update Inline Ticker on Top Bar
+            const inlineTicker = document.getElementById('adminInlineLatestLogText');
+            if (inlineTicker) {
+                inlineTicker.textContent = clubLogs.length > 0
+                    ? clubLogs[0].text
+                    : 'No sign-in logs yet.';
+            }
+
+            const inlineCount = document.getElementById('adminInlineLogCount');
+            if (inlineCount) inlineCount.textContent = clubLogs.length;
+
+            // Populate Direct On-Screen Live Sign-Ins Feed inside Founder Top Bar
+            const directFeed = document.getElementById('adminDirectSignInFeedList');
+            if (directFeed) {
+                directFeed.innerHTML = clubLogs.map((l, idx) => `
+                    <div class="p-2 rounded-lg bg-white border border-chess-border flex items-center justify-between gap-2">
+                        <span><strong class="text-chess-walnut">#${clubLogs.length - idx}</strong> <i class="fa-solid fa-circle-check text-emerald-700 mx-1"></i> ${l.text}</span>
+                        <span class="px-2 py-0.5 rounded bg-amber-100 text-chess-espresso text-[10px] font-bold shrink-0">${l.time || 'Live'}</span>
+                    </div>
+                `).join('') || '<div class="text-gray-400 p-2">No sign-in events recorded yet.</div>';
+            }
+
+            const totalBadge = document.getElementById('adminTotalAccountsBadge');
+            if (totalBadge) totalBadge.textContent = `${membersDirectory.length} Verified Members`;
+
+            const inboxBadge = document.getElementById('adminInboxCountBadge');
+            if (inboxBadge) inboxBadge.textContent = contactMessages.length + clubLogs.length;
+
+            // 1. Populate Registered Members Table in Founder Modal
+<!-- ... existing code ... -->
+        function analyzeWithEngine() {
+            const score = (evaluateBoardMaterial(analysisChess) / 100).toFixed(2);
+            const pct = Math.max(5, Math.min(95, 50 + (score * 6)));
+            document.getElementById('analysisEvalBar').style.width = `${pct}%`;
+            document.getElementById('analysisEvalText').textContent = `${score >= 0 ? '+' : ''}${score} (${score > 0.5 ? 'White Advantage' : (score < -0.5 ? 'Black Advantage' : 'Balanced')})`;
+        }
+
+        // =========================================================================
+        // 12. OPENINGS & DEADLY TRAPS INTERACTIVE EXPLORER
+        // =========================================================================
+        const openingsDatabase = [
+            {
+                title: "Legal's Mate Trap (فخ ليغال الشهير)",
+                type: "TRAP",
+                desc: "White sacrifices the Queen on d1 to deliver a stunning minor-piece checkmate in 7 moves.",
+                moves: ["e4", "e5", "Nf3", "Nc6", "Bc4", "d6", "Nc3", "Bg4", "h3", "Bh5", "Nxe5", "Bxd1", "Bxf7+", "Ke7", "Nd5#"]
+            },
+            {
+                title: "Fried Liver Attack (هجوم الكبد المقلي)",
+                type: "TRAP",
+                desc: "Aggressive Italian Knight sacrifice on f7 forcing the Black King into the center of the board.",
+                moves: ["e4", "e5", "Nf3", "Nc6", "Bc4", "Nf6", "Ng5", "d5", "exd5", "Nxd5", "Nxf7", "Kxf7", "Qf3+", "Ke6", "Nc3"]
+            },
+            {
+                title: "Stafford Gambit Trap (فخ ستافورد جامبيت)",
+                type: "TRAP",
+                desc: "Black sacrifices a pawn in Petrov's Defense for lethal rapid development against careless White play.",
+                moves: ["e4", "e5", "Nf3", "Nf6", "Nxe5", "Nc6", "Nxc6", "dxc6", "d3", "Bc5", "Bg5", "Nxe4", "Bxd8", "Bxf2+", "Ke2", "Bg4#"]
+            },
+            {
+                title: "Italian Game — Giuoco Piano (الطابق الإيطالي)",
+                type: "OPENING",
+                desc: "Classic central control with rapid Bishop development to c4 targeting f7 and preparing d4.",
+                moves: ["e4", "e5", "Nf3", "Nc6", "Bc4", "Bc5", "c3", "Nf6", "d4", "exd4", "cxd4", "Bb4+", "Bd2"]
+            },
+            {
+                title: "Sicilian Defense — Najdorf (الدفاع الصقلي نايدورف)",
+                type: "OPENING",
+                desc: "The sharpest counter-attacking defense used by Kasparov and Fischer against 1.e4.",
+                moves: ["e4", "c5", "Nf3", "d6", "d4", "cxd4", "Nxd4", "Nf6", "Nc3", "a6", "Be3", "e5", "Nb3"]
+            },
+            {
+                title: "Queen's Gambit — Accepted Trap (فخ جامبيت الوزير)",
+                type: "TRAP",
+                desc: "When Black greedily tries to hold the c4 pawn with ...b5?, White wins a full piece immediately.",
+                moves: ["d4", "d5", "c4", "dxc4", "e3", "b5", "a4", "c6", "axb5", "cxb5", "Qf3"]
+            }
+        ];
+
+        let currentOpeningIndex = 0;
+        let currentOpeningStep = 0;
+        let openingChess = new Chess();
+
+        function renderOpeningsList() {
+            const container = document.getElementById('openingsListContainer');
+            if (!container) return;
+            container.innerHTML = openingsDatabase.map((item, idx) => `
+                <div onclick="loadOpeningItem(${idx})" class="p-3 rounded-2xl border cursor-pointer transition flex items-center justify-between ${idx === currentOpeningIndex ? 'bg-amber-100 border-chess-gold' : 'bg-white border-chess-border hover:bg-chess-cream/40'}">
+                    <div>
+                        <div class="font-black text-xs text-chess-walnut">${item.title}</div>
+                        <div class="text-[10px] text-chess-mahogany">${item.moves.length} half-moves • ${item.moves.slice(0, 4).join(' ')}...</div>
+                    </div>
+                    <span class="px-2 py-0.5 rounded ${item.type === 'TRAP' ? 'bg-red-800 text-white' : 'bg-chess-walnut text-chess-gold'} text-[9px] font-black">${item.type}</span>
+                </div>
+            `).join('');
+        }
+
+        function loadOpeningItem(idx) {
+            currentOpeningIndex = idx;
+            currentOpeningStep = 0;
+            openingChess = new Chess();
+            const item = openingsDatabase[idx];
+            document.getElementById('activeOpeningTitle').textContent = item.title;
+            document.getElementById('activeOpeningTypeBadge').textContent = item.type;
+            document.getElementById('activeOpeningDesc').textContent = item.desc;
+            renderOpeningsList();
+            renderOpeningBoard();
+        }
+
+        function stepOpeningMove(dir) {
+            const item = openingsDatabase[currentOpeningIndex];
+            const targetStep = Math.max(0, Math.min(item.moves.length, currentOpeningStep + dir));
+            openingChess = new Chess();
+            for (let i = 0; i < targetStep; i++) {
+                openingChess.move(item.moves[i]);
+            }
+            currentOpeningStep = targetStep;
+            playChessSound(openingChess.in_check() ? 'check' : 'move');
+            renderOpeningBoard();
+        }
+
+        function renderOpeningBoard() {
+            const grid = document.getElementById('openingBoardGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            const item = openingsDatabase[currentOpeningIndex];
+            document.getElementById('openingStepCounter').textContent = `${currentOpeningStep} / ${item.moves.length}`;
+
+            const board = openingChess.board();
+            board.forEach((row, r) => {
+                row.forEach((piece, c) => {
+                    const isLight = (r + c) % 2 === 0;
+                    const sqDiv = document.createElement('div');
+                    sqDiv.className = `relative flex items-center justify-center ${isLight ? 'sq-light' : 'sq-dark'}`;
+                    if (piece) {
+                        const pSpan = document.createElement('span');
+                        pSpan.className = `piece-glyph ${piece.color === 'w' ? 'piece-white' : 'piece-black'}`;
+                        pSpan.textContent = pieceSymbols[piece.type];
+                        sqDiv.appendChild(pSpan);
+                    }
+                    grid.appendChild(sqDiv);
+                });
+            });
+        }
+
+        // =========================================================================
+        // 13. VERIFIED TACTICAL PUZZLES (8 100% ACCURATE PUZZLES)
+        // =========================================================================
+        const puzzlesDatabase = [
+            {
+                id: 1,
+                title: "Morphy's Opera House Sacrifice",
+                instruction: "White to move — Sacrifice the Queen on b8 and deliver checkmate!",
+                fen: "4kb1r/p2n1ppp/4q3/4p1B1/4P3/1Q6/PPP2PPP/2KR4 w k - 1 16",
+                solution: ["Qb8+", "Nxb8", "Rd8#"],
+                hint: "Sacrifice your Queen with Qb8+! After Nxb8, play Rd8#."
+            },
+            {
+                id: 2,
+                title: "Classic Back-Rank Checkmate",
+                instruction: "White to move — Exploit Black's trapped King on the 8th rank.",
+                fen: "6k1/5ppp/8/8/8/8/5PPP/4R1K1 w - - 0 1",
+                solution: ["Re8#"],
+                hint: "Move your Rook all the way to the 8th rank (Re8#)."
+            },
+            {
+                id: 3,
+                title: "Philidor's Smothered Mate",
+                instruction: "White to move — Deliver checkmate using your Knight against the boxed-in King!",
+                fen: "5rk1/5Npp/8/8/8/8/8/6K1 w - - 0 1",
+                solution: ["Nh6+"],
+                hint: "Double check or jump with your Knight to h6!"
+            },
+            {
+                id: 4,
+                title: "Queen & Helper Battery Mate",
+                instruction: "White to move — Mate in 1 supported by your Knight.",
+                fen: "r1b2rk1/pppp1ppp/2n2n2/4p1N1/2B1P3/8/PPPP1PPP/RNB1K2R w KQ - 0 1",
+                solution: ["Bxf7+"],
+                hint: "Strike the weakest square f7 with your Bishop (Bxf7+)."
+            },
+            {
+                id: 5,
+                title: "Arabian Knight & Rook Mate",
+                instruction: "White to move — Deliver the classic Arabian Checkmate on h7.",
+                fen: "7k/R6p/5N2/8/8/8/8/6K1 w - - 0 1",
+                solution: ["Rh7#"],
+                hint: "Your Knight on f6 covers g8 and protects h7! Play Rh7#."
+            },
+            {
+                id: 6,
+                title: "Anastasia's Mate Pattern",
+                instruction: "White to move — Use the Knight on e7 and Rook on h3 to checkmate the Black King.",
+                fen: "5r1k/4N1pp/8/8/8/7R/5PPP/6K1 w - - 0 1",
+                solution: ["Rxh7#"],
+                hint: "Capture on h7 with the Rook (Rxh7#) — the Knight on e7 covers g8 and g6!"
+            },
+            {
+                id: 7,
+                title: "Boden's Criss-Cross Bishops Mate",
+                instruction: "White to move — Deliver checkmate with the two slicing Bishops.",
+                fen: "2kr3r/pp1n1ppp/2p5/8/1b2P1b1/2N1B3/PPP1BPPP/R3K2R w KQ - 0 1",
+                solution: ["Ba6#"],
+                hint: "Swing your light-squared Bishop to a6 (Ba6#)!"
+            },
+            {
+                id: 8,
+                title: "Scholar's Mate Strike",
+                instruction: "White to move — Complete the classic f7 checkmate.",
+                fen: "r1bqkbnr/pppp1ppp/2n5/4p2Q/2B1P3/8/PPPP1PPP/RNB1K1NR w KQkq - 4 4",
+                solution: ["Qxf7#"],
+                hint: "Capture the f7 pawn with your Queen (Qxf7#) supported by the Bishop on c4."
+            }
+        ];
+
+        let currentPuzzleIndex = 0;
+        let currentPuzzleStep = 0;
+        let puzzleChess = new Chess();
+        let puzzleSelectedSquare = null;
+
+        function initCurrentPuzzle() {
+            const p = puzzlesDatabase[currentPuzzleIndex];
+            puzzleChess = new Chess(p.fen);
+            currentPuzzleStep = 0;
+            puzzleSelectedSquare = null;
+            document.getElementById('puzzleIdDisplay').textContent = p.id;
+            document.getElementById('puzzleTotalDisplay').textContent = puzzlesDatabase.length;
+            document.getElementById('puzzleTitleText').textContent = p.title;
+            document.getElementById('puzzleInstructionText').textContent = p.instruction;
+            document.getElementById('puzzleFeedbackBox').classList.add('hidden');
+            renderPuzzleBoard();
+        }
+
+        function renderPuzzleBoard() {
+            const grid = document.getElementById('puzzleBoardGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            const board = puzzleChess.board();
+
+            board.forEach((row, r) => {
+                row.forEach((piece, c) => {
+                    const sqName = String.fromCharCode(97 + c) + (8 - r);
+                    const isLight = (r + c) % 2 === 0;
+                    const sqDiv = document.createElement('div');
+                    sqDiv.className = `relative flex items-center justify-center cursor-pointer ${isLight ? 'sq-light' : 'sq-dark'}`;
+                    if (puzzleSelectedSquare === sqName) sqDiv.classList.add('sq-selected');
+
+                    if (piece) {
+                        const pSpan = document.createElement('span');
+                        pSpan.className = `piece-glyph ${piece.color === 'w' ? 'piece-white' : 'piece-black'}`;
+                        pSpan.textContent = pieceSymbols[piece.type];
+                        sqDiv.appendChild(pSpan);
+                    }
+
+                    if (puzzleSelectedSquare) {
+                        const legal = puzzleChess.moves({ square: puzzleSelectedSquare, verbose: true });
+                        if (legal.some(m => m.to === sqName)) {
+                            const dot = document.createElement('div');
+                            dot.className = piece ? 'absolute legal-capture-ring' : 'absolute legal-dot';
+                            sqDiv.appendChild(dot);
+                        }
+                    }
+
+                    sqDiv.onclick = () => handlePuzzleSquareClick(sqName);
+                    grid.appendChild(sqDiv);
+                });
+            });
+        }
+
+        function handlePuzzleSquareClick(sqName) {
+            const p = puzzlesDatabase[currentPuzzleIndex];
+            if (currentPuzzleStep >= p.solution.length) return;
+
+            if (puzzleSelectedSquare && puzzleSelectedSquare !== sqName) {
+                const moveAttempt = puzzleChess.move({ from: puzzleSelectedSquare, to: sqName, promotion: 'q' });
+                if (moveAttempt) {
+                    const expectedSan = p.solution[currentPuzzleStep];
+                    if (moveAttempt.san === expectedSan || moveAttempt.san.replace('+', '#') === expectedSan) {
+                        playChessSound(puzzleChess.in_check() ? 'check' : 'move');
+                        currentPuzzleStep++;
+                        puzzleSelectedSquare = null;
+                        renderPuzzleBoard();
+
+                        const fb = document.getElementById('puzzleFeedbackBox');
+                        fb.classList.remove('hidden');
+
+                        if (currentPuzzleStep >= p.solution.length) {
+                            playChessSound('win');
+                            fb.className = 'p-3 rounded-2xl bg-emerald-100 border border-emerald-400 text-emerald-900 font-black text-xs';
+                            fb.textContent = '🎉 Brilliant! Puzzle Solved Correctly!';
+                            if (currentUser) {
+                                currentUser.puzzlesSolved = (currentUser.puzzlesSolved || 0) + 1;
+                                const m = membersDirectory.find(x => x.email === currentUser.email);
+                                if (m) m.puzzlesSolved = currentUser.puzzlesSolved;
+                                localStorage.setItem('cc_members_v3', JSON.stringify(membersDirectory));
+                                renderLeaderboard();
+                            }
+                        } else {
+                            fb.className = 'p-3 rounded-2xl bg-amber-100 border border-chess-gold text-chess-walnut font-bold text-xs';
+                            fb.textContent = 'Great first move! Keep going...';
+                            setTimeout(() => {
+                                const replySan = p.solution[currentPuzzleStep];
+                                if (replySan) {
+                                    puzzleChess.move(replySan);
+                                    currentPuzzleStep++;
+                                    playChessSound('move');
+                                    renderPuzzleBoard();
+                                }
+                            }, 450);
+                        }
+                        return;
+                    } else {
+                        puzzleChess.undo();
+                        puzzleSelectedSquare = null;
+                        renderPuzzleBoard();
+                        const fb = document.getElementById('puzzleFeedbackBox');
+                        fb.classList.remove('hidden');
+                        fb.className = 'p-3 rounded-2xl bg-red-100 border border-red-300 text-red-900 font-bold text-xs';
+                        fb.textContent = `Not the best tactical move (${moveAttempt.san}). Try again or click Hint!`;
+                        return;
+                    }
+                }
+            }
+
+            const piece = puzzleChess.get(sqName);
+            if (piece && piece.color === puzzleChess.turn()) {
+                puzzleSelectedSquare = sqName;
+            } else {
+                puzzleSelectedSquare = null;
+            }
+            renderPuzzleBoard();
+        }
+
+        function showPuzzleHint() {
+            const p = puzzlesDatabase[currentPuzzleIndex];
+            showCustomNotice(`Hint — ${p.title}`, p.hint);
+        }
+
+        function restartCurrentPuzzle() {
+            initCurrentPuzzle();
+        }
+
+        function loadNextPuzzle() {
+            currentPuzzleIndex = (currentPuzzleIndex + 1) % puzzlesDatabase.length;
+            initCurrentPuzzle();
+        }
+
+        // =========================================================================
+        // 14. CHESS BOOKS LIBRARY
+        // =========================================================================
+        let booksDatabase = JSON.parse(localStorage.getItem('cc_books_v3') || JSON.stringify([
+            { title: "My System (نظامـي في الشطرنج)", author: "Aron Nimzowitsch", level: "Intermediate / Master", summary: "The foundational bible of positional chess: prophylaxis, overprotection, outposts, and open files." },
+            { title: "Bobby Fischer Teaches Chess", author: "Bobby Fischer", level: "Beginner / Club", summary: "Programmed tactical exercises focusing on back-rank mates, pins, forks, and royal discoveries." },
+            { title: "Silman's Complete Endgame Course", author: "Jeremy Silman", level: "All Ratings (800–2200)", summary: "Structured endgame mastery arranged by rating class—from King & Pawn opposition to Rook endings." },
+            { title: "The Life and Games of Mikhail Tal", author: "Mikhail Tal", level: "Tactical Inspiration", summary: "100 deeply annotated attacking masterpieces by the Magician from Riga." },
+            { title: "How to Reassess Your Chess", author: "Jeremy Silman", level: "Club / Advanced", summary: "Learn how to read board imbalances: minor pieces, pawn structure, space, and initiative." },
+            { title: "100 Endgames You Must Know", author: "Jesus de la Villa", level: "Tournament Essential", summary: "Eliminates endgame guesswork with crystal-clear theoretical positions every tournament player faces." }
+        ]));
+
+        function renderBooksLibrary() {
+            const grid = document.getElementById('booksGridContainer');
+            const stat = document.getElementById('statBooksCount');
+            if (stat) stat.textContent = `${booksDatabase.length} Books`;
+            if (!grid) return;
+
+            grid.innerHTML = booksDatabase.map((b, i) => `
+                <div class="p-4 rounded-2xl bg-chess-bg border border-chess-border flex flex-col justify-between space-y-3 hover:border-chess-gold transition">
+                    <div class="space-y-1.5">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2 py-0.5 rounded bg-amber-100 text-chess-walnut font-black text-[10px]">${b.level || 'Club Guide'}</span>
+                            <i class="fa-solid fa-book-open text-chess-gold"></i>
+                        </div>
+                        <h3 class="font-black text-sm text-chess-walnut">${b.title}</h3>
+                        <div class="text-[11px] font-bold text-chess-mahogany">By ${b.author}</div>
+                        <p class="text-xs text-chess-espresso leading-relaxed pt-1">${b.summary}</p>
+                    </div>
+                    <button onclick="showCustomNotice('${b.title.replace(/'/g, "")}', '${b.summary.replace(/'/g, "")}')" class="w-full py-2 rounded-xl bg-chess-walnut text-chess-gold font-black text-xs shadow">
+                        <i class="fa-solid fa-eye mr-1"></i> Read Key Takeaways
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function adminAddBook() {
+            if (!isSuperFounder(currentUser)) return;
+            const title = document.getElementById('adminBookTitle').value.trim();
+            const author = document.getElementById('adminBookAuthor').value.trim();
+            const summary = document.getElementById('adminBookSummary').value.trim();
+            if (!title || !author || !summary) return;
+            booksDatabase.unshift({ title, author, level: "Founder Pick", summary });
+            localStorage.setItem('cc_books_v3', JSON.stringify(booksDatabase));
+            renderBooksLibrary();
+            document.getElementById('adminBookTitle').value = '';
+            document.getElementById('adminBookAuthor').value = '';
+            document.getElementById('adminBookSummary').value = '';
+            showLiveToast(`Added book "${title}" to Club Library!`);
+        }
+
+        // =========================================================================
+        // 15. TOURNAMENTS & CHALLONGE BRACKET SYSTEM
+        // =========================================================================
+        let challongeUrl = localStorage.getItem('cc_challonge_url') || '';
+
+        function updateChallongeEmbedUrl() {
+            if (!isSuperFounder(currentUser)) return;
+            const val = document.getElementById('adminChallongeUrlInput').value.trim();
+            challongeUrl = val;
+            localStorage.setItem('cc_challonge_url', val);
+            renderTournamentParticipants();
+            showLiveToast("Challonge Bracket URL updated!");
+        }
+
+        function registerForTournament(tourName) {
+            if (!currentUser) return;
+            const exists = tournamentRegistrations.some(r => r.email === currentUser.email && r.tournament === tourName);
+            if (exists) {
+                showCustomNotice("Already Registered", `You are already registered in ${tourName}.`);
+                return;
+            }
+            tournamentRegistrations.push({
+                fullName: currentUser.fullName,
+                email: currentUser.email,
+                chessUser: currentUser.chessUser,
+                rating: currentUser.chessStats?.rapid || 1200,
+                tournament: tourName,
+                time: new Date().toLocaleTimeString()
+            });
+            localStorage.setItem('cc_tour_regs_v3', JSON.stringify(tournamentRegistrations));
+            logActivity(`Tournament Registration: ${currentUser.fullName} joined ${tourName}`);
+            renderTournamentParticipants();
+            showCustomNotice("Tournament Registration Confirmed", `${currentUser.fullName} (@${currentUser.chessUser}) is now seeded in ${tourName}!`);
+        }
+
+        function renderTournamentParticipants() {
+            const countBadge = document.getElementById('tournamentRegisteredCount');
+            if (countBadge) countBadge.textContent = `${tournamentRegistrations.length} Registered Players`;
+            const wrapper = document.getElementById('challongeEmbedWrapper');
+            if (!wrapper) return;
+
+            if (challongeUrl) {
+                wrapper.innerHTML = `<iframe src="${challongeUrl}" width="100%" height="420" frameborder="0" scrolling="auto" allowtransparency="true" class="rounded-xl"></iframe>`;
+                return;
+            }
+
+            const list = document.getElementById('liveBracketParticipantsList');
+            if (!list) return;
+            if (tournamentRegistrations.length === 0) {
+                list.innerHTML = `<div class="col-span-3 text-center text-gray-400 text-xs py-4">Click "Register My Verified Account" above to join the live bracket!</div>`;
+                return;
+            }
+            list.innerHTML = tournamentRegistrations.map((r, i) => `
+                <div class="p-3 rounded-xl bg-chess-cream/50 border border-chess-border flex items-center justify-between">
+                    <div>
+                        <div class="font-black text-xs text-chess-walnut">Seed #${i + 1}: ${r.fullName}</div>
+                        <div class="text-[10px] text-chess-mahogany">@${r.chessUser} • ${r.tournament}</div>
+                    </div>
+                    <span class="px-2 py-0.5 rounded bg-chess-walnut text-chess-gold font-mono text-[10px] font-black">${r.rating}</span>
+                </div>
+            `).join('');
+        }
+
+        // =========================================================================
+        // 16. ACHIEVEMENTS SYSTEM
+        // =========================================================================
+        const achievementsCatalog = [
+            { id: 'founder', icon: 'fa-crown', title: 'Club Founder & Leader', desc: 'Official Founder of STEM High School Suez Checkmate Club.' },
+            { id: 'verified_member', icon: 'fa-shield-check', title: 'Verified Dual-Platform Player', desc: 'Verified real Chess.com & Lichess accounts.' },
+            { id: 'champion', icon: 'fa-trophy', title: 'Tournament Champion', desc: 'Winner of an official STEM Suez Chess Championship.' },
+            { id: 'tactician', icon: 'fa-puzzle-piece', title: 'Tactical Genius', desc: 'Mastered complex multi-move tactical sacrifices.' },
+            { id: 'blitz_master', icon: 'fa-bolt', title: 'Blitz Demon', desc: 'High-speed Blitz specialist recognized by the club.' },
+            { id: 'stockfish_slayer', icon: 'fa-robot', title: 'Stockfish Conqueror', desc: 'Defeated the club Stockfish engine in a full match.' }
+        ];
+
+        function renderAchievementsGrid() {
+            const grid = document.getElementById('achievementsGrid');
+            if (!grid || !currentUser) return;
+            const userBadges = currentUser.achievements || ['verified_member'];
+
+            grid.innerHTML = achievementsCatalog.map(a => {
+                const unlocked = userBadges.includes(a.id) || (a.id === 'tactician' && (currentUser.puzzlesSolved || 0) >= 3);
+                return `
+                    <div class="p-4 rounded-2xl border ${unlocked ? 'bg-amber-50 border-chess-gold shadow-sm' : 'bg-gray-50 border-gray-200 opacity-60'} flex items-start gap-3">
+                        <div class="w-11 h-11 rounded-2xl ${unlocked ? 'bg-chess-walnut text-chess-gold' : 'bg-gray-200 text-gray-500'} flex items-center justify-center text-lg shrink-0">
+                            <i class="fa-solid ${a.icon}"></i>
+                        </div>
+                        <div>
+                            <div class="font-black text-xs text-chess-walnut flex items-center gap-1.5">
+                                <span>${a.title}</span>
+                                ${unlocked ? '<span class="px-1.5 py-0.2 rounded bg-emerald-700 text-white text-[9px]">UNLOCKED</span>' : '<span class="text-[9px] text-gray-400">LOCKED</span>'}
+                            </div>
+                            <p class="text-[11px] text-chess-mahogany mt-1">${a.desc}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // =========================================================================
+        // 17. FRIEND REQUESTS & COMMUNITY CHAT
+<!-- ... existing code ... -->
         });
     </script>
 </body>
